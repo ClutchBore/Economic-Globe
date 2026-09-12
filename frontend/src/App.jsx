@@ -123,71 +123,80 @@ function AppShell() {
         horizontalOffset={globeOffset}
       />
 
-      <div className="absolute left-8 top-7 flex flex-col items-start gap-5">
-        <button
-          onClick={() => {
-            setSelectedCountry(null)
-            setCompareCountry(null)
-            setCountrySearch('')
-            setShowRankings(false)
-            setShowTitleSlide(true)
-          }}
-          className="brand-title text-[32px] font-extrabold leading-none text-slate-950 hover:opacity-70"
-          aria-label="Return to title slide"
-        >
-          Terraconomy
-        </button>
-        <button
-          onClick={() => setShowRankings(true)}
-          className="border border-slate-900 bg-white px-3 py-1.5 text-[12.5px] font-bold tracking-wide text-slate-950 hover:bg-slate-100"
-        >
-          Rankings
-        </button>
-      </div>
-
-      <div className="absolute left-1/2 top-7 z-10 w-[280px] -translate-x-1/2">
-        <input
-          value={countrySearch}
-          onChange={(e) => setCountrySearch(e.target.value)}
-          placeholder="Search countries..."
-          className="w-full border border-slate-900 bg-white px-3 py-1.5 text-[12.5px] font-semibold text-slate-950 outline-none placeholder:text-slate-500 focus:border-slate-950"
-        />
-        {searchResults.length > 0 && (
-          <div className="mt-1 max-h-64 overflow-y-auto border border-slate-900 bg-white shadow-lg">
-            {searchResults.map((country) => (
-              <button
-                key={country.country_code}
-                onClick={() => {
-                  selectCountry(country)
-                  setCountrySearch('')
-                }}
-                className="flex w-full items-center justify-between px-3 py-1.5 text-left text-[12.5px] font-semibold text-slate-800 hover:bg-slate-100"
-              >
-                <span>{country.country_name}</span>
-                <span className="text-[11px] font-bold text-slate-500">{country.country_code}</span>
-              </button>
-            ))}
+      <div className="absolute left-8 right-8 top-7 z-10 flex flex-wrap items-start justify-between gap-4">
+        <div className="flex flex-wrap items-start gap-4">
+          <div className="flex flex-col items-start gap-5">
+            <button
+              onClick={() => {
+                setSelectedCountry(null)
+                setCompareCountry(null)
+                setCountrySearch('')
+                setShowRankings(false)
+                setShowTitleSlide(true)
+              }}
+              className="brand-title text-[32px] font-extrabold leading-none text-slate-950 hover:opacity-70"
+              aria-label="Return to title slide"
+            >
+              Terraconomy
+            </button>
+            <button
+              onClick={() => setShowRankings(true)}
+              className="border border-slate-900 bg-white px-3 py-1.5 text-[12.5px] font-bold tracking-wide text-slate-950 hover:bg-slate-100"
+            >
+              Rankings
+            </button>
           </div>
-        )}
-      </div>
 
-      <div className="absolute right-8 top-7 flex items-center gap-3">
-        <span className="text-[12px] font-bold uppercase tracking-wide text-slate-950">
-          {theme === 'light' ? 'Light mode' : 'Dark mode'}
-        </span>
-        <button
-          onClick={() => setTheme((current) => (current === 'light' ? 'dark' : 'light'))}
-          className="h-5 w-11 bg-slate-200 p-0.5 hover:bg-slate-300"
-          aria-label="Toggle dark mode"
-          title="Toggle dark mode"
-        >
-          <span
-            className={
-              'block h-4 w-4 bg-slate-950 transition-transform ' +
-              (theme === 'dark' ? 'translate-x-6' : 'translate-x-0')
-            }
-          />
-        </button>
+          {/* Grouped with the title (rather than centered independently across the whole
+              viewport) so it wraps below instead of overlapping the title or a right-docked
+              country/comparison panel at narrower widths. */}
+          {!selectedCountry && (
+            <div className="w-[280px]">
+              <input
+                value={countrySearch}
+                onChange={(e) => setCountrySearch(e.target.value)}
+                placeholder="Search countries..."
+                className="w-full border border-slate-900 bg-white px-3 py-1.5 text-[12.5px] font-semibold text-slate-950 outline-none placeholder:text-slate-500 focus:border-slate-950"
+              />
+              {searchResults.length > 0 && (
+                <div className="mt-1 max-h-64 overflow-y-auto border border-slate-900 bg-white shadow-lg">
+                  {searchResults.map((country) => (
+                    <button
+                      key={country.country_code}
+                      onClick={() => {
+                        selectCountry(country)
+                        setCountrySearch('')
+                      }}
+                      className="flex w-full items-center justify-between px-3 py-1.5 text-left text-[12.5px] font-semibold text-slate-800 hover:bg-slate-100"
+                    >
+                      <span>{country.country_name}</span>
+                      <span className="text-[11px] font-bold text-slate-500">{country.country_code}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-3">
+          <span className="text-[12px] font-bold uppercase tracking-wide text-slate-950">
+            {theme === 'light' ? 'Light mode' : 'Dark mode'}
+          </span>
+          <button
+            onClick={() => setTheme((current) => (current === 'light' ? 'dark' : 'light'))}
+            className="h-5 w-11 bg-slate-200 p-0.5 hover:bg-slate-300"
+            aria-label="Toggle dark mode"
+            title="Toggle dark mode"
+          >
+            <span
+              className={
+                'block h-4 w-4 bg-slate-950 transition-transform ' +
+                (theme === 'dark' ? 'translate-x-6' : 'translate-x-0')
+              }
+            />
+          </button>
+        </div>
       </div>
       {showRankings && (
         <RankingsPanel

@@ -23,6 +23,14 @@ function AppShell() {
   function selectCountry(country) {
     setSelectedCountry(country)
     setCompareCountry(null)
+    setCountrySearch('')
+  }
+
+  // The search bar is hidden whenever a country's selected, so a half-typed query would
+  // otherwise sit stale and reappear pre-filled once the user backs out to the globe.
+  function compareWith(country) {
+    setCompareCountry(country)
+    if (country) setCountrySearch('')
   }
 
   const searchResults = useMemo(() => {
@@ -221,14 +229,14 @@ function AppShell() {
               countryA={selectedCountry}
               countryB={compareCountry}
               onClose={() => setCompareCountry(null)}
-              onChangeCountryB={setCompareCountry}
+              onChangeCountryB={compareWith}
             />
           ) : (
             <CountryPanel
               key={selectedCountry.country_code}
               country={selectedCountry}
               onClose={() => setSelectedCountry(null)}
-              onCompare={setCompareCountry}
+              onCompare={compareWith}
             />
           )}
         </div>

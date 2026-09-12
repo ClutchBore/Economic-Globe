@@ -17,7 +17,7 @@ Exits `0` if everything passes, `1` on the first failure, so it can go straight 
 Expected output ends with:
 
 ```
-15 passed, 0 failed
+14 passed, 0 failed
 Smoke test OK
 ```
 
@@ -34,7 +34,7 @@ It does not need a running server — it drives the app in-process through FastA
 ### When it fails
 
 - **Import errors** — you're not in `backend/`. The packages resolve relative to it.
-- **`0 countries`** — KV is empty, or `KV_REST_API_URL`/`KV_REST_API_TOKEN` are missing from `backend/.env`. Run `python scripts/fetch_data.py`.
+- **`0 countries`** — `cache/countries/` is empty. Run `python scripts/fetch_data.py`.
 - **Missing keys / empty history** — the cache predates a schema change. Re-run the fetch.
 - **Bond yield value/history mismatch** — a non-null value with an empty history array (or vice versa) means `services/fred.py` or the cache is inconsistent; every metric should have both or neither.
 
@@ -44,11 +44,9 @@ It does not need a running server — it drives the app in-process through FastA
 python scripts/fetch_data.py
 ```
 
-Re-fetches all 31 countries from the World Bank (`wbgapi`), Yahoo Finance (`yfinance`, FX only), and FRED (`bond_yield_10y`), writing each payload to Upstash KV under `country:<CODE>`. Takes a few minutes. Safe to re-run: a country whose fetch raises is skipped and keeps its last good entry.
+Re-fetches all 31 countries from the World Bank (`wbgapi`), Yahoo Finance (`yfinance`, FX only), and FRED (`bond_yield_10y`), writing `cache/countries/<CODE>.json`. Takes a few minutes. Safe to re-run: a country whose fetch raises is skipped and keeps its last good file.
 
-Requests never hit these sources — reads come from KV, loaded into memory once at import, so refreshing is always a deliberate step. Because KV lives outside the deployment, a refresh reaches the deployed API without a redeploy; running instances pick it up on their next cold start.
-
-This also runs daily via `.github/workflows/refresh-data.yml`, which can be triggered by hand from the repo's Actions tab. Note that GitHub only fires scheduled workflows from the default branch, so the cron stays dormant until this work merges into `main`.
+Requests never hit these sources — reads come from the cached JSON, so refreshing is always a deliberate step.
 
 **Bond yields need `FRED_API_KEY`** in `backend/.env` (free, instant: https://fred.stlouisfed.org/docs/api/api_key.html). Without it, every country's `bond_yield_10y` comes back null — the fetch doesn't fail, it just has nothing to report. Coverage is `config.countries.FRED_BOND_SERIES`: confirmed for 18 OECD members, best-effort for 6 more (China, India, Indonesia, South Africa, Brazil, Russia — unverified series IDs, null out cleanly if wrong), no known free source for the remaining 7 (Singapore, Thailand, Vietnam, Argentina, Nigeria, Egypt, Saudi Arabia).
 

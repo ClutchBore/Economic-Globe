@@ -1,12 +1,3 @@
-import os
-from pathlib import Path
-
-from dotenv import load_dotenv
-
-# Must precede the routes import: it pulls in data_store, which reads the KV
-# credentials out of the environment at import time.
-load_dotenv(Path(__file__).resolve().parent / ".env")
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -16,15 +7,11 @@ from routes.ai import router as ai_router
 
 app = FastAPI(title="Economic Globe API")
 
-# The local Vite dev server, plus whatever FRONTEND_ORIGINS holds (comma-separated)
-# so the deployed frontend can be added in Vercel without a code change. Not "*":
-# Starlette refuses to echo a wildcard alongside allow_credentials.
-_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
-_origins += [o.strip() for o in os.getenv("FRONTEND_ORIGINS", "").split(",") if o.strip()]
-
+# Allow the local Vite dev server to call this API.
+# Add your deployed frontend's URL here too once you're on Vercel.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_origins,
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -1,0 +1,193 @@
+{
+  "country_code": "VNM",
+  "country_name": "Vietnam",
+  "region": "Asia",
+  "data_as_of": "2026-09-12",
+  "gdp": 514697215165.065,
+  "gdp_per_capita": 5065.9909,
+  "inflation": 3.31,
+  "bond_yield_10y": null,
+  "fx_rate": 3.9e-05,
+  "fx_pair": "VND / USD",
+  "fx_change_pct": 0.004,
+  "units": {
+    "gdp": "USD",
+    "gdp_per_capita": "USD",
+    "inflation": "%",
+    "bond_yield_10y": "%",
+    "fx_rate": "USD per 1 unit of local currency"
+  },
+  "sources": {
+    "gdp": "World Bank NY.GDP.MKTP.CD",
+    "gdp_per_capita": "World Bank NY.GDP.PCAP.CD",
+    "inflation": "World Bank FP.CPI.TOTL.ZG",
+    "bond_yield_10y": "FRED (OECD IRLTLT01)",
+    "fx_rate": "Yahoo Finance"
+  },
+  "dates": {
+    "gdp": "2025",
+    "gdp_per_capita": "2025",
+    "inflation": "2025",
+    "bond_yield_10y": null,
+    "fx_rate": "2026-09-12"
+  },
+  "history": {
+    "gdp": [
+      {
+        "year": "2016",
+        "value": 257096001177.982
+      },
+      {
+        "year": "2017",
+        "value": 281353605986.903
+      },
+      {
+        "year": "2018",
+        "value": 310106478394.659
+      },
+      {
+        "year": "2019",
+        "value": 334365270496.667
+      },
+      {
+        "year": "2020",
+        "value": 346615738537.796
+      },
+      {
+        "year": "2021",
+        "value": 366474752771.009
+      },
+      {
+        "year": "2022",
+        "value": 413445230668.578
+      },
+      {
+        "year": "2023",
+        "value": 433805036898.465
+      },
+      {
+        "year": "2024",
+        "value": 476324572783.807
+      },
+      {
+        "year": "2025",
+        "value": 514697215165.065
+      }
+    ],
+    "gdp_per_capita": [
+      {
+        "year": "2016",
+        "value": 2735.0604
+      },
+      {
+        "year": "2017",
+        "value": 2956.1099
+      },
+      {
+        "year": "2018",
+        "value": 3222.31
+      },
+      {
+        "year": "2019",
+        "value": 3440.9003
+      },
+      {
+        "year": "2020",
+        "value": 3534.0395
+      },
+      {
+        "year": "2021",
+        "value": 3704.1936
+      },
+      {
+        "year": "2022",
+        "value": 4147.6978
+      },
+      {
+        "year": "2023",
+        "value": 4322.8257
+      },
+      {
+        "year": "2024",
+        "value": 4716.6599
+      },
+      {
+        "year": "2025",
+        "value": 5065.9909
+      }
+    ],
+    "inflation": [
+      {
+        "year": "2016",
+        "value": 2.6682
+      },
+      {
+        "year": "2017",
+        "value": 3.5203
+      },
+      {
+        "year": "2018",
+        "value": 3.5396
+      },
+      {
+        "year": "2019",
+        "value": 2.7958
+      },
+      {
+        "year": "2020",
+        "value": 3.2209
+      },
+      {
+        "year": "2021",
+        "value": 1.8347
+      },
+      {
+        "year": "2022",
+        "value": 3.1565
+      },
+      {
+        "year": "2023",
+        "value": 3.2529
+      },
+      {
+        "year": "2024",
+        "value": 3.6211
+      },
+      {
+        "year": "2025",
+        "value": 3.31
+      }
+    ],
+    "bond_yield_10y": [],
+    "fx_rate": [
+      {
+        "year": "2020",
+        "value": 4.3e-05
+      },
+      {
+        "year": "2021",
+        "value": 4.4e-05
+      },
+      {
+        "year": "2022",
+        "value": 4.3e-05
+      },
+      {
+        "year": "2023",
+        "value": 4.2e-05
+      },
+      {
+        "year": "2024",
+        "value": 4e-05
+      },
+      {
+        "year": "2025",
+        "value": 3.8e-05
+      },
+      {
+        "year": "2026",
+        "value": 3.8e-05
+      }
+    ]
+  }
+}

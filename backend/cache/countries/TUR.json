@@ -1,0 +1,193 @@
+{
+  "country_code": "TUR",
+  "country_name": "Turkey",
+  "region": "Europe",
+  "data_as_of": "2026-09-12",
+  "gdp": 1597293229287.0,
+  "gdp_per_capita": 18599.4421,
+  "inflation": 34.8812,
+  "bond_yield_10y": null,
+  "fx_rate": 0.020595,
+  "fx_pair": "TRY / USD",
+  "fx_change_pct": 0.077,
+  "units": {
+    "gdp": "USD",
+    "gdp_per_capita": "USD",
+    "inflation": "%",
+    "bond_yield_10y": "%",
+    "fx_rate": "USD per 1 unit of local currency"
+  },
+  "sources": {
+    "gdp": "World Bank NY.GDP.MKTP.CD",
+    "gdp_per_capita": "World Bank NY.GDP.PCAP.CD",
+    "inflation": "World Bank FP.CPI.TOTL.ZG",
+    "bond_yield_10y": "FRED (OECD IRLTLT01)",
+    "fx_rate": "Yahoo Finance"
+  },
+  "dates": {
+    "gdp": "2025",
+    "gdp_per_capita": "2025",
+    "inflation": "2025",
+    "bond_yield_10y": null,
+    "fx_rate": "2026-09-12"
+  },
+  "history": {
+    "gdp": [
+      {
+        "year": "2016",
+        "value": 870818016909.84
+      },
+      {
+        "year": "2017",
+        "value": 863874522365.276
+      },
+      {
+        "year": "2018",
+        "value": 788356985773.667
+      },
+      {
+        "year": "2019",
+        "value": 775853144222.613
+      },
+      {
+        "year": "2020",
+        "value": 733628247119.077
+      },
+      {
+        "year": "2021",
+        "value": 839938668172.134
+      },
+      {
+        "year": "2022",
+        "value": 926097476913.818
+      },
+      {
+        "year": "2023",
+        "value": 1141242864657.45
+      },
+      {
+        "year": "2024",
+        "value": 1359123768774.12
+      },
+      {
+        "year": "2025",
+        "value": 1597293229287.0
+      }
+    ],
+    "gdp_per_capita": [
+      {
+        "year": "2016",
+        "value": 10984.3643
+      },
+      {
+        "year": "2017",
+        "value": 10756.3878
+      },
+      {
+        "year": "2018",
+        "value": 9684.1182
+      },
+      {
+        "year": "2019",
+        "value": 9395.2338
+      },
+      {
+        "year": "2020",
+        "value": 8798.1179
+      },
+      {
+        "year": "2021",
+        "value": 9981.764
+      },
+      {
+        "year": "2022",
+        "value": 10897.8398
+      },
+      {
+        "year": "2023",
+        "value": 13375.0947
+      },
+      {
+        "year": "2024",
+        "value": 15892.7157
+      },
+      {
+        "year": "2025",
+        "value": 18599.4421
+      }
+    ],
+    "inflation": [
+      {
+        "year": "2016",
+        "value": 7.7751
+      },
+      {
+        "year": "2017",
+        "value": 11.1443
+      },
+      {
+        "year": "2018",
+        "value": 16.3325
+      },
+      {
+        "year": "2019",
+        "value": 15.1768
+      },
+      {
+        "year": "2020",
+        "value": 12.279
+      },
+      {
+        "year": "2021",
+        "value": 19.5965
+      },
+      {
+        "year": "2022",
+        "value": 72.3088
+      },
+      {
+        "year": "2023",
+        "value": 53.8594
+      },
+      {
+        "year": "2024",
+        "value": 58.5065
+      },
+      {
+        "year": "2025",
+        "value": 34.8812
+      }
+    ],
+    "bond_yield_10y": [],
+    "fx_rate": [
+      {
+        "year": "2020",
+        "value": 0.128028
+      },
+      {
+        "year": "2021",
+        "value": 0.115973
+      },
+      {
+        "year": "2022",
+        "value": 0.061268
+      },
+      {
+        "year": "2023",
+        "value": 0.043431
+      },
+      {
+        "year": "2024",
+        "value": 0.030504
+      },
+      {
+        "year": "2025",
+        "value": 0.025364
+      },
+      {
+        "year": "2026",
+        "value": 0.022
+      }
+    ]
+  }
+}

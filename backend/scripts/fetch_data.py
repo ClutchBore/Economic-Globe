@@ -1,15 +1,15 @@
-"""Refresh the country payloads in Upstash KV from World Bank, Yahoo Finance, and FRED.
+"""Refresh backend/cache/countries/*.json from World Bank, Yahoo Finance, and FRED.
 
 Run from backend/: `python -m scripts.fetch_data` (or `python scripts/fetch_data.py`
 with backend/ on PYTHONPATH). Safe to re-run; a country whose fetch raises is
-skipped and its last-known-good KV entry is left untouched.
+skipped and its last-known-good cache file is left untouched.
 
-Requires KV_REST_API_URL and KV_REST_API_TOKEN in the environment, plus
-FRED_API_KEY for bond yields — without the latter, every country's
-bond_yield_10y comes back null (not an error, not a stale value).
+Requires FRED_API_KEY in the environment for bond yields — without it, every
+country's bond_yield_10y comes back null (not an error, not a stale value).
 """
 
 import datetime
+import json
 import os
 import sys
 import time
@@ -21,7 +21,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 from config.countries import FRED_BOND_SERIES, list_country_configs
-from services import fred, kv_client, market_data, world_bank
+from services import fred, market_data, world_bank
+
+CACHE_DIR = Path(__file__).resolve().parent.parent / "cache" / "countries"
 
 UNITS = {
     "gdp": "USD",
@@ -80,6 +82,7 @@ def build_country_payload(country: dict) -> dict:
 
 
 def main():
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
     countries = list_country_configs()
 
     ok, failed = 0, []
@@ -87,7 +90,8 @@ def main():
         code = country["code"]
         try:
             payload = build_country_payload(country)
-            kv_client.set_json(kv_client.country_key(code), payload)
+            with open(CACHE_DIR / f"{code}.json", "w") as f:
+                json.dump(payload, f, indent=2)
             ok += 1
             print(f"[{i + 1}/{len(countries)}] {code} cached")
         except Exception as e:

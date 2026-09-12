@@ -101,6 +101,18 @@ class ChatRouteTests(unittest.TestCase):
         self.client = TestClient(app)
         self.body = {"country": COUNTRY, "message": "Explain inflation", "history": []}
 
+        # The route builds dashboard context via rank_countries(), which reads the
+        # whole dataset even when the country arrives in the request body. Serve it
+        # from the fixture so these stay the offline contract checks they claim to be.
+        code = COUNTRY["country_code"]
+        for target, replacement in (
+            ("list_countries", lambda: [{"country_code": code, "country_name": COUNTRY.get("country_name"), "region": COUNTRY.get("region")}]),
+            ("get_country", lambda c: COUNTRY if c.upper() == code else None),
+        ):
+            p = patch(f"services.analysis.data_store.{target}", replacement)
+            p.start()
+            self.addCleanup(p.stop)
+
     def test_event_order_and_json_escaping(self):
         async def fake(*args, **kwargs):
             yield 'Test\n"answer"'

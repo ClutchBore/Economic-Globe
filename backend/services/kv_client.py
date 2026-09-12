@@ -19,6 +19,10 @@ def country_key(code: str) -> str:
     return f"country:{code.upper()}"
 
 
+def summary_key(code: str) -> str:
+    return f"ai_summary:{code.upper()}"
+
+
 def _command(*args: str):
     try:
         url = os.environ["KV_REST_API_URL"].rstrip("/")

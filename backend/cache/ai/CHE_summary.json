@@ -1,8 +1,0 @@
-{
-  "country_code": "CHE",
-  "country_name": "Switzerland",
-  "summary": "Switzerland (CHE) reported a 2025 GDP of USD 1,043,529,899,250.92 and GDP per capita of USD 114,769.0123, with 2025 inflation at 0.1544%. As of 2026-09-11, the CHF/USD exchange rate was 1.22534 USD per 1 CHF with an fx_change_pct of -0.747, while the 10-year bond yield is null (unavailable). Historical data are available for GDP, GDP per capita, and inflation from 2016 to 2025, and for the exchange rate from 2020 to 2026, but no 10-year bond yield history is provided.",
-  "is_mock": false,
-  "generated_at": "2026-09-12T04:41:22.636757+00:00",
-  "data_as_of": "2026-09-11"
-}

@@ -1,28 +1,34 @@
 """Offline checks for saved AI summary fallbacks."""
 
 import unittest
-from pathlib import Path
 from unittest.mock import patch
 
 from services import ai_cache
 
-TEMP_CACHE = Path(__file__).parent / ".tmp_ai_cache"
+
+class FakeKV:
+    """In-memory stand-in for services.kv_client, so tests touch no network."""
+
+    def __init__(self):
+        self.store = {}
+
+    def summary_key(self, code: str) -> str:
+        return f"ai_summary:{code.upper()}"
+
+    def get_json(self, key):
+        return self.store.get(key)
+
+    def set_json(self, key, value):
+        self.store[key] = value
 
 
 class AISummaryCacheTests(unittest.TestCase):
     def setUp(self):
-        TEMP_CACHE.mkdir(exist_ok=True)
-        for path in TEMP_CACHE.glob("*"):
-            path.unlink()
-
-    def tearDown(self):
-        for path in TEMP_CACHE.glob("*"):
-            path.unlink()
-        TEMP_CACHE.rmdir()
+        self.kv = FakeKV()
 
     def test_save_and_read_summary(self):
         country = {"country_code": "IND", "country_name": "India", "is_mock": False, "data_as_of": "2026-09-11"}
-        with patch.object(ai_cache, "AI_CACHE_DIR", TEMP_CACHE):
+        with patch.object(ai_cache, "kv_client", self.kv):
             saved = ai_cache.save_summary(country, "A saved summary.")
             loaded = ai_cache.get_summary("ind")
         self.assertEqual(saved["country_code"], "IND")
@@ -31,9 +37,15 @@ class AISummaryCacheTests(unittest.TestCase):
         self.assertEqual(loaded["data_as_of"], "2026-09-11")
 
     def test_missing_or_invalid_cache_returns_none(self):
-        with patch.object(ai_cache, "AI_CACHE_DIR", TEMP_CACHE):
+        with patch.object(ai_cache, "kv_client", self.kv):
             self.assertIsNone(ai_cache.get_summary("USA"))
-            (TEMP_CACHE / "USA_summary.json").write_text("not-json", encoding="utf-8")
+            self.kv.store["ai_summary:USA"] = "not-a-record"
+            self.assertIsNone(ai_cache.get_summary("USA"))
+
+    def test_unreachable_kv_returns_none(self):
+        boom = FakeKV()
+        boom.get_json = lambda key: (_ for _ in ()).throw(RuntimeError("KV down"))
+        with patch.object(ai_cache, "kv_client", boom):
             self.assertIsNone(ai_cache.get_summary("USA"))
 
 

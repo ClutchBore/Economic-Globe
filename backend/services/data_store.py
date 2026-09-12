@@ -33,7 +33,20 @@ def _load_all() -> dict[str, dict]:
     return data
 
 
-_COUNTRY_DATA = _load_all()
+_COUNTRY_DATA: dict[str, dict] | None = None
+
+
+def _data() -> dict[str, dict]:
+    """Load once, on first access rather than at import.
+
+    Deferring it keeps importing this module free of network I/O, so tests that
+    patch the accessors below never reach KV, and a missing credential surfaces
+    on the first request instead of crashing the whole app at boot.
+    """
+    global _COUNTRY_DATA
+    if _COUNTRY_DATA is None:
+        _COUNTRY_DATA = _load_all()
+    return _COUNTRY_DATA
 
 
 def list_countries() -> list[dict]:
@@ -46,4 +59,4 @@ def list_countries() -> list[dict]:
 
 def get_country(code: str) -> dict | None:
     """Full country payload, or None if the code is unknown/has no cached data."""
-    return _COUNTRY_DATA.get(code.upper())
+    return _data().get(code.upper())

@@ -1,26 +1,21 @@
-"""Small JSON cache for AI-generated demo summaries."""
+"""Cache of AI-generated demo summaries, stored in Upstash KV.
 
-import json
+Not local files: `save_summary` is called from inside a request handler, and on
+serverless a file written there lives on one ephemeral instance and is lost.
+"""
+
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any
 
-
-AI_CACHE_DIR = Path(__file__).resolve().parent.parent / "cache" / "ai"
-
-
-def _summary_path(country_code: str) -> Path:
-    return AI_CACHE_DIR / f"{country_code.upper()}_summary.json"
+from services import kv_client
 
 
 def get_summary(country_code: str) -> dict[str, Any] | None:
-    path = _summary_path(country_code)
-    if not path.exists():
-        return None
+    # This is the fallback path, reached when the live AI call already failed,
+    # so it must never raise — an unreachable KV degrades to "no cached summary".
     try:
-        with open(path, encoding="utf-8") as f:
-            record = json.load(f)
-    except (OSError, json.JSONDecodeError):
+        record = kv_client.get_json(kv_client.summary_key(country_code))
+    except Exception:
         return None
     if not isinstance(record, dict) or not isinstance(record.get("summary"), str):
         return None
@@ -28,7 +23,6 @@ def get_summary(country_code: str) -> dict[str, Any] | None:
 
 
 def save_summary(country: dict[str, Any], summary: str) -> dict[str, Any]:
-    AI_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     record = {
         "country_code": country["country_code"],
         "country_name": country["country_name"],
@@ -37,8 +31,5 @@ def save_summary(country: dict[str, Any], summary: str) -> dict[str, Any]:
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "data_as_of": country.get("data_as_of"),
     }
-    path = _summary_path(country["country_code"])
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(record, f, indent=2, ensure_ascii=False)
-        f.write("\n")
+    kv_client.set_json(kv_client.summary_key(country["country_code"]), record)
     return record

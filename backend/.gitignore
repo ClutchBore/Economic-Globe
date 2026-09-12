@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 .env
 
-# keep cache folder in git, but not the fetched data itself
-cache/*.json
-!cache/.gitkeep
+# Country payloads and AI summaries live in Upstash KV now; these are local
+# leftovers. cache/mock/ stays tracked as the demo fallback.
+cache/countries/
+cache/ai/

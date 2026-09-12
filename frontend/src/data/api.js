@@ -1,6 +1,9 @@
 // Vite only exposes env vars prefixed VITE_ to client code. Falls back to local dev's backend
-// when unset, so nothing changes for anyone running this locally without a .env file.
-export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+// when unset, so nothing changes for anyone running this locally without a .env file. `??`
+// (not `||`) so an explicitly empty string — same-origin deployments, where the backend is
+// mounted on the same domain as the frontend — resolves to relative `/api/...` calls instead
+// of being treated as falsy and silently falling back to localhost.
+export const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
 
 export async function fetchCountryList() {
   const res = await fetch(`${API_BASE}/api/countries`)

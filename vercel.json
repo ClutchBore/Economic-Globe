@@ -1,0 +1,33 @@
+{
+  "services": {
+    "frontend": {
+      "root": "frontend",
+      "framework": "vite"
+    },
+    "backend": {
+      "root": "backend",
+      "functions": {
+        "main.py": {
+          "maxDuration": 30,
+          "excludeFiles": "{venv/**,tests/**,scripts/**,**/__pycache__/**}"
+        }
+      }
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api(/.*)?",
+      "destination": {
+        "type": "service",
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "type": "service",
+        "service": "frontend"
+      }
+    }
+  ]
+}

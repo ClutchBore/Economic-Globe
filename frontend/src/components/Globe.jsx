@@ -4,30 +4,75 @@ import * as THREE from 'three'
 import { mockCountries } from '../data/mockCountries'
 
 const BY_CODE = Object.fromEntries(mockCountries.map((c) => [c.country_code, c]))
-const GDP_VALUES = mockCountries.map((c) => Math.log10(c.gdp))
-const GDP_MIN = Math.min(...GDP_VALUES)
-const GDP_MAX = Math.max(...GDP_VALUES)
-
-const RAMP_LOW = [158, 197, 244] // #9ec5f4
-const RAMP_HIGH = [16, 66, 129] // #104281
 const UNCOVERED_COLOR = '#1e293b'
 
-function rampColor(t) {
-  const clamped = Math.max(0, Math.min(1, t))
-  const [r1, g1, b1] = RAMP_LOW
-  const [r2, g2, b2] = RAMP_HIGH
-  const r = Math.round(r1 + (r2 - r1) * clamped)
-  const g = Math.round(g1 + (g2 - g1) * clamped)
-  const b = Math.round(b1 + (b2 - b1) * clamped)
-  return `rgb(${r}, ${g}, ${b})`
+const SEQ_LOW = [158, 197, 244] // #9ec5f4
+const SEQ_HIGH = [16, 66, 129] // #104281
+const DIV_NEGATIVE = [208, 59, 59] // #d03b3b
+const DIV_NEUTRAL = [71, 85, 105] // slate-600
+const DIV_POSITIVE = [57, 135, 229] // #3987e5
+
+const METRICS = [
+  {
+    key: 'gdp',
+    label: 'GDP',
+    scale: 'sequential',
+    getValue: (c) => Math.log10(c.gdp),
+    format: (c) => `$${(c.gdp / 1e12).toFixed(2)}T`,
+  },
+  {
+    key: 'inflation',
+    label: 'Inflation',
+    scale: 'sequential',
+    getValue: (c) => c.inflation,
+    format: (c) => `${c.inflation.toFixed(1)}%`,
+  },
+  {
+    key: 'bond_yield_10y',
+    label: 'Bond yield',
+    scale: 'sequential',
+    getValue: (c) => c.bond_yield_10y,
+    format: (c) => `${c.bond_yield_10y.toFixed(2)}%`,
+  },
+  {
+    key: 'fx_rate',
+    label: 'Currency',
+    scale: 'diverging',
+    getValue: (c) => c.fx_change_pct,
+    format: (c) => `${c.fx_change_pct > 0 ? '+' : ''}${c.fx_change_pct.toFixed(1)}% today`,
+  },
+]
+
+const RANGES = Object.fromEntries(
+  METRICS.map((m) => {
+    const values = mockCountries.map(m.getValue)
+    return [
+      m.key,
+      m.scale === 'diverging'
+        ? { maxAbs: Math.max(...values.map(Math.abs)) || 1 }
+        : { min: Math.min(...values), max: Math.max(...values) },
+    ]
+  })
+)
+
+function mix(a, b, t) {
+  const r = Math.round(a[0] + (b[0] - a[0]) * t)
+  const g = Math.round(a[1] + (b[1] - a[1]) * t)
+  const bl = Math.round(a[2] + (b[2] - a[2]) * t)
+  return `rgb(${r}, ${g}, ${bl})`
 }
 
-function capColorFor(feature) {
-  const country = BY_CODE[feature.properties.ISO_A3]
-  if (!country) return UNCOVERED_COLOR
-  const t = (Math.log10(country.gdp) - GDP_MIN) / (GDP_MAX - GDP_MIN)
-  return rampColor(t)
+function colorForMetric(metric, country) {
+  const range = RANGES[metric.key]
+  if (metric.scale === 'diverging') {
+    const t = colorForMetric.clamp(country ? metric.getValue(country) / range.maxAbs : 0, -1, 1)
+    return t >= 0 ? mix(DIV_NEUTRAL, DIV_POSITIVE, t) : mix(DIV_NEUTRAL, DIV_NEGATIVE, -t)
+  }
+  const { min, max } = range
+  const t = max === min ? 0.5 : colorForMetric.clamp((metric.getValue(country) - min) / (max - min), 0, 1)
+  return mix(SEQ_LOW, SEQ_HIGH, t)
 }
+colorForMetric.clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v))
 
 export default function Globe({ onSelectCountry, spinning }) {
   const globeRef = useRef()
@@ -38,6 +83,8 @@ export default function Globe({ onSelectCountry, spinning }) {
   const hoveredCountryRef = useRef(null)
   const [countries, setCountries] = useState([])
   const [size, setSize] = useState({ width: window.innerWidth, height: window.innerHeight })
+  const [activeMetricKey, setActiveMetricKey] = useState('gdp')
+  const activeMetric = METRICS.find((m) => m.key === activeMetricKey)
 
   useEffect(() => {
     fetch('/data/countries-110m.geojson')
@@ -89,7 +136,10 @@ export default function Globe({ onSelectCountry, spinning }) {
         atmosphereAltitude={0.2}
         showGraticules
         polygonsData={countries}
-        polygonCapColor={capColorFor}
+        polygonCapColor={(feature) => {
+          const country = BY_CODE[feature.properties.ISO_A3]
+          return country ? colorForMetric(activeMetric, country) : UNCOVERED_COLOR
+        }}
         polygonSideColor={() => 'rgba(15,23,42,0.6)'}
         polygonStrokeColor={() => 'rgba(255,255,255,0.15)'}
         polygonAltitude={(feature) => (BY_CODE[feature.properties.ISO_A3] ? 0.02 : 0.006)}
@@ -98,7 +148,7 @@ export default function Globe({ onSelectCountry, spinning }) {
           if (!country) return `<div style="font-size:12px;">${feature.properties.NAME}</div>`
           return `<div style="font:600 13px system-ui; background:#1e293b; color:#fff; padding:6px 9px; border-radius:6px; border:1px solid rgba(255,255,255,0.12);">
             ${country.country_name}<br/>
-            <span style="color:#94a3b8; font-weight:400;">GDP $${(country.gdp / 1e12).toFixed(2)}T · Score ${country.health_score}</span>
+            <span style="color:#94a3b8; font-weight:400;">${activeMetric.label}: ${activeMetric.format(country)}</span>
           </div>`
         }}
         onPolygonHover={(feature) => {
@@ -107,6 +157,58 @@ export default function Globe({ onSelectCountry, spinning }) {
           document.body.style.cursor = country ? 'pointer' : 'default'
         }}
       />
+
+      {countries.length === 0 && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <span className="text-sm text-slate-500">Loading globe…</span>
+        </div>
+      )}
+
+      <div className="pointer-events-none absolute left-1/2 top-7 flex -translate-x-1/2 gap-1.5">
+        {METRICS.map((metric) => (
+          <button
+            key={metric.key}
+            onClick={(e) => {
+              e.stopPropagation()
+              setActiveMetricKey(metric.key)
+            }}
+            className={
+              'pointer-events-auto whitespace-nowrap rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ' +
+              (metric.key === activeMetricKey
+                ? 'border border-[#3987e5]/45 bg-[#3987e5]/[0.16] text-[#7db3f2]'
+                : 'border border-white/10 text-slate-400 hover:bg-white/[0.06]')
+            }
+          >
+            {metric.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="pointer-events-none absolute bottom-7 left-8 flex flex-col gap-1.5">
+        <span className="text-xs text-slate-500">{activeMetric.label}</span>
+        <div
+          className="h-1.5 w-40 rounded-full"
+          style={{
+            background:
+              activeMetric.scale === 'diverging'
+                ? `linear-gradient(to right, rgb(${DIV_NEGATIVE.join(',')}), rgb(${DIV_NEUTRAL.join(',')}), rgb(${DIV_POSITIVE.join(',')}))`
+                : `linear-gradient(to right, rgb(${SEQ_LOW.join(',')}), rgb(${SEQ_HIGH.join(',')}))`,
+          }}
+        />
+        <div className="flex justify-between text-[11px] text-slate-600">
+          {activeMetric.scale === 'diverging' ? (
+            <>
+              <span>-{RANGES[activeMetric.key].maxAbs.toFixed(1)}%</span>
+              <span>+{RANGES[activeMetric.key].maxAbs.toFixed(1)}%</span>
+            </>
+          ) : (
+            <>
+              <span>{activeMetric.format(mockCountries.find((c) => activeMetric.getValue(c) === RANGES[activeMetric.key].min))}</span>
+              <span>{activeMetric.format(mockCountries.find((c) => activeMetric.getValue(c) === RANGES[activeMetric.key].max))}</span>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

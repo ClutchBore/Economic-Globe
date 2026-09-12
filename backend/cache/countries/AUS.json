@@ -2,11 +2,11 @@
   "country_code": "AUS",
   "country_name": "Australia",
   "region": "Oceania",
-  "data_as_of": "2026-09-11",
+  "data_as_of": "2026-09-12",
   "gdp": 1798518933689.21,
   "gdp_per_capita": 65129.7228,
   "inflation": 2.874,
-  "bond_yield_10y": null,
+  "bond_yield_10y": 4.831,
   "fx_rate": 0.717257,
   "fx_pair": "AUD / USD",
   "fx_change_pct": 0.232,
@@ -21,15 +21,15 @@
     "gdp": "World Bank NY.GDP.MKTP.CD",
     "gdp_per_capita": "World Bank NY.GDP.PCAP.CD",
     "inflation": "World Bank FP.CPI.TOTL.ZG",
-    "bond_yield_10y": "Yahoo Finance",
+    "bond_yield_10y": "FRED (OECD IRLTLT01)",
     "fx_rate": "Yahoo Finance"
   },
   "dates": {
     "gdp": "2025",
     "gdp_per_capita": "2025",
     "inflation": "2025",
-    "bond_yield_10y": null,
-    "fx_rate": "2026-09-11"
+    "bond_yield_10y": "2026-06-01",
+    "fx_rate": "2026-09-12"
   },
   "history": {
     "gdp": [
@@ -158,7 +158,52 @@
         "value": 2.874
       }
     ],
-    "bond_yield_10y": [],
+    "bond_yield_10y": [
+      {
+        "year": "2016",
+        "value": 2.3408
+      },
+      {
+        "year": "2017",
+        "value": 2.6412
+      },
+      {
+        "year": "2018",
+        "value": 2.6817
+      },
+      {
+        "year": "2019",
+        "value": 1.4971
+      },
+      {
+        "year": "2020",
+        "value": 0.9202
+      },
+      {
+        "year": "2021",
+        "value": 1.4798
+      },
+      {
+        "year": "2022",
+        "value": 3.1965
+      },
+      {
+        "year": "2023",
+        "value": 3.9422
+      },
+      {
+        "year": "2024",
+        "value": 4.2097
+      },
+      {
+        "year": "2025",
+        "value": 4.3653
+      },
+      {
+        "year": "2026",
+        "value": 4.8693
+      }
+    ],
     "fx_rate": [
       {
         "year": "2020",

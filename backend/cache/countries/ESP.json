@@ -2,11 +2,11 @@
   "country_code": "ESP",
   "country_name": "Spain",
   "region": "Europe",
-  "data_as_of": "2026-09-11",
+  "data_as_of": "2026-09-12",
   "gdp": 1906453309985.88,
   "gdp_per_capita": 38627.2472,
   "inflation": 2.6999,
-  "bond_yield_10y": null,
+  "bond_yield_10y": 3.4212,
   "fx_rate": 1.160227,
   "fx_pair": "EUR / USD",
   "fx_change_pct": -0.271,
@@ -21,15 +21,15 @@
     "gdp": "World Bank NY.GDP.MKTP.CD",
     "gdp_per_capita": "World Bank NY.GDP.PCAP.CD",
     "inflation": "World Bank FP.CPI.TOTL.ZG",
-    "bond_yield_10y": "Yahoo Finance",
+    "bond_yield_10y": "FRED (OECD IRLTLT01)",
     "fx_rate": "Yahoo Finance"
   },
   "dates": {
     "gdp": "2025",
     "gdp_per_capita": "2025",
     "inflation": "2025",
-    "bond_yield_10y": null,
-    "fx_rate": "2026-09-11"
+    "bond_yield_10y": "2026-06-01",
+    "fx_rate": "2026-09-12"
   },
   "history": {
     "gdp": [
@@ -158,7 +158,52 @@
         "value": 2.6999
       }
     ],
-    "bond_yield_10y": [],
+    "bond_yield_10y": [
+      {
+        "year": "2016",
+        "value": 1.3933
+      },
+      {
+        "year": "2017",
+        "value": 1.5579
+      },
+      {
+        "year": "2018",
+        "value": 1.4194
+      },
+      {
+        "year": "2019",
+        "value": 0.661
+      },
+      {
+        "year": "2020",
+        "value": 0.3795
+      },
+      {
+        "year": "2021",
+        "value": 0.3488
+      },
+      {
+        "year": "2022",
+        "value": 2.1986
+      },
+      {
+        "year": "2023",
+        "value": 3.4865
+      },
+      {
+        "year": "2024",
+        "value": 3.1538
+      },
+      {
+        "year": "2025",
+        "value": 3.2196
+      },
+      {
+        "year": "2026",
+        "value": 3.365
+      }
+    ],
     "fx_rate": [
       {
         "year": "2020",

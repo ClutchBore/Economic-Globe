@@ -2,11 +2,11 @@
   "country_code": "NOR",
   "country_name": "Norway",
   "region": "Europe",
-  "data_as_of": "2026-09-11",
+  "data_as_of": "2026-09-12",
   "gdp": 530755719438.879,
   "gdp_per_capita": 94594.193,
   "inflation": 3.0556,
-  "bond_yield_10y": null,
+  "bond_yield_10y": 4.2027,
   "fx_rate": 0.107797,
   "fx_pair": "NOK / USD",
   "fx_change_pct": -0.049,
@@ -21,15 +21,15 @@
     "gdp": "World Bank NY.GDP.MKTP.CD",
     "gdp_per_capita": "World Bank NY.GDP.PCAP.CD",
     "inflation": "World Bank FP.CPI.TOTL.ZG",
-    "bond_yield_10y": "Yahoo Finance",
+    "bond_yield_10y": "FRED (OECD IRLTLT01)",
     "fx_rate": "Yahoo Finance"
   },
   "dates": {
     "gdp": "2025",
     "gdp_per_capita": "2025",
     "inflation": "2025",
-    "bond_yield_10y": null,
-    "fx_rate": "2026-09-11"
+    "bond_yield_10y": "2026-06-01",
+    "fx_rate": "2026-09-12"
   },
   "history": {
     "gdp": [
@@ -158,7 +158,52 @@
         "value": 3.0556
       }
     ],
-    "bond_yield_10y": [],
+    "bond_yield_10y": [
+      {
+        "year": "2016",
+        "value": 1.3317
+      },
+      {
+        "year": "2017",
+        "value": 1.6375
+      },
+      {
+        "year": "2018",
+        "value": 1.8792
+      },
+      {
+        "year": "2019",
+        "value": 1.4942
+      },
+      {
+        "year": "2020",
+        "value": 0.8175
+      },
+      {
+        "year": "2021",
+        "value": 1.4159
+      },
+      {
+        "year": "2022",
+        "value": 2.8784
+      },
+      {
+        "year": "2023",
+        "value": 3.4356
+      },
+      {
+        "year": "2024",
+        "value": 3.5805
+      },
+      {
+        "year": "2025",
+        "value": 3.9451
+      },
+      {
+        "year": "2026",
+        "value": 4.2269
+      }
+    ],
     "fx_rate": [
       {
         "year": "2020",

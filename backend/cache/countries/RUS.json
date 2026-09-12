@@ -2,14 +2,14 @@
   "country_code": "RUS",
   "country_name": "Russia",
   "region": "Europe",
-  "data_as_of": "2026-09-11",
+  "data_as_of": "2026-09-12",
   "gdp": 2561310169358.74,
   "gdp_per_capita": 17546.6094,
   "inflation": 8.7199,
   "bond_yield_10y": null,
-  "fx_rate": 0.011898,
+  "fx_rate": 0.011854,
   "fx_pair": "RUB / USD",
-  "fx_change_pct": -0.12,
+  "fx_change_pct": -0.487,
   "units": {
     "gdp": "USD",
     "gdp_per_capita": "USD",
@@ -21,7 +21,7 @@
     "gdp": "World Bank NY.GDP.MKTP.CD",
     "gdp_per_capita": "World Bank NY.GDP.PCAP.CD",
     "inflation": "World Bank FP.CPI.TOTL.ZG",
-    "bond_yield_10y": "Yahoo Finance",
+    "bond_yield_10y": "FRED (OECD IRLTLT01)",
     "fx_rate": "Yahoo Finance"
   },
   "dates": {
@@ -29,7 +29,7 @@
     "gdp_per_capita": "2025",
     "inflation": "2025",
     "bond_yield_10y": null,
-    "fx_rate": "2026-09-11"
+    "fx_rate": "2026-09-12"
   },
   "history": {
     "gdp": [

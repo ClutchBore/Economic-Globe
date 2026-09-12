@@ -34,26 +34,3 @@ def fetch_fx_data(ticker: str | None) -> dict:
     history = [{"year": str(year), "value": round(float(value), 6)} for year, value in yearly.items()]
 
     return {"latest": latest, "change_pct": change_pct, "history": history}
-
-
-def fetch_bond_yield(ticker: str | None) -> dict:
-    """Latest 10y bond yield (%) and yearly-averaged history, if a ticker exists."""
-    if ticker is None:
-        return {"latest": None, "date": None, "history": []}
-
-    try:
-        hist = yf.Ticker(ticker).history(period=f"{FX_HISTORY_YEARS}y", interval="1d")
-    except Exception:
-        return {"latest": None, "date": None, "history": []}
-
-    if hist.empty:
-        return {"latest": None, "date": None, "history": []}
-
-    closes = hist["Close"].dropna()
-    latest = round(float(closes.iloc[-1]), 4) if len(closes) else None
-    latest_date = str(hist.index[-1].date()) if len(hist.index) else None
-
-    yearly = closes.groupby(closes.index.year).mean()
-    history = [{"year": str(year), "value": round(float(value), 4)} for year, value in yearly.items()]
-
-    return {"latest": latest, "date": latest_date, "history": history}

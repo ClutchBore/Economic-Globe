@@ -2,14 +2,14 @@
   "country_code": "IDN",
   "country_name": "Indonesia",
   "region": "Asia",
-  "data_as_of": "2026-09-11",
+  "data_as_of": "2026-09-12",
   "gdp": 1445642584163.81,
   "gdp_per_capita": 5059.626,
   "inflation": 1.9133,
   "bond_yield_10y": null,
   "fx_rate": 5.7e-05,
   "fx_pair": "IDR / USD",
-  "fx_change_pct": -0.596,
+  "fx_change_pct": -0.102,
   "units": {
     "gdp": "USD",
     "gdp_per_capita": "USD",
@@ -21,7 +21,7 @@
     "gdp": "World Bank NY.GDP.MKTP.CD",
     "gdp_per_capita": "World Bank NY.GDP.PCAP.CD",
     "inflation": "World Bank FP.CPI.TOTL.ZG",
-    "bond_yield_10y": "Yahoo Finance",
+    "bond_yield_10y": "FRED (OECD IRLTLT01)",
     "fx_rate": "Yahoo Finance"
   },
   "dates": {
@@ -29,7 +29,7 @@
     "gdp_per_capita": "2025",
     "inflation": "2025",
     "bond_yield_10y": null,
-    "fx_rate": "2026-09-11"
+    "fx_rate": "2026-09-12"
   },
   "history": {
     "gdp": [

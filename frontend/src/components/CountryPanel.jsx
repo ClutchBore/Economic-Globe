@@ -63,7 +63,10 @@ export default function CountryPanel({ country, onClose, onCompare }) {
     const trimmed = question.trim()
     if (!trimmed || isStreaming) return
 
-    const history = messages.slice(-20).map((m) => ({ role: m.role, content: m.text }))
+    const history = messages
+      .filter((m) => m.text?.trim())
+      .slice(-20)
+      .map((m) => ({ role: m.role, content: m.text.trim() }))
     setMessages((prev) => [...prev, { role: 'user', text: trimmed }, { role: 'assistant', text: '' }])
     setDraft('')
     setIsStreaming(true)
@@ -74,6 +77,7 @@ export default function CountryPanel({ country, onClose, onCompare }) {
     try {
       await streamChat(country.country_code, trimmed, history, {
         signal: controller.signal,
+        selectedMetric: activeMetric,
         onDelta: appendToLastMessage,
       })
     } catch (err) {

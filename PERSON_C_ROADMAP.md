@@ -70,7 +70,9 @@ Generate one country summary grounded in supplied sample data.
 - [x] Test cache-backed live summary and comparison routes using country codes.
 - [x] Test cache-backed live chat route using a country code, message, and history only.
 - [x] Improve chat with dashboard context, rankings/anomaly awareness, safer answer rules, and suggested questions for B.
-- [x] Add a smaller-prompt chat retry so follow-up questions do not fail if IFM rejects the full context request.
+- [x] Remove IFM high-reasoning chat params so multi-turn history works without hidden thinking fields.
+- [x] Send chat history to IFM as a transcript instead of assistant-role messages to avoid multi-turn provider rejection.
+- [x] Send completed chat history from the frontend so follow-up questions remember previous turns.
 - [ ] Confirm the streaming format with B and verify it in the frontend.
 - [x] Use A's real cache through the same reader interface.
 - [x] Implement cached summary fallback in your AI cache folder.

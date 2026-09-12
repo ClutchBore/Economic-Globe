@@ -42,7 +42,8 @@ class ChatServiceTests(unittest.IsolatedAsyncioTestCase):
         def handle(request):
             body = json.loads(request.content)
             self.assertTrue(body['stream'])
-            self.assertEqual(body['messages'][-2], {"role": "assistant", "content": "Earlier"})
+            self.assertTrue(all(message["role"] != "assistant" for message in body["messages"]))
+            self.assertIn("Assistant: Earlier", body['messages'][-2]['content'])
             self.assertEqual(body['messages'][-1]['content'], 'Explain')
             return httpx.Response(200, stream=stream)
         async with httpx.AsyncClient(transport=httpx.MockTransport(handle)) as client:
@@ -68,23 +69,21 @@ class ChatServiceTests(unittest.IsolatedAsyncioTestCase):
             with self.assertRaises(AIServiceError):
                 _ = [text async for text in chat_about_country(COUNTRY, 'Explain', client=client)]
 
-    async def test_retries_without_dashboard_context_when_full_chat_is_rejected(self):
-        requests = []
+    async def test_chat_omits_reasoning_effort_and_keeps_history(self):
         def handle(request):
             body = json.loads(request.content)
-            requests.append(body)
-            if len(requests) == 1:
-                return httpx.Response(400)
-            return httpx.Response(200, stream=FragmentedStream(frame('Fallback answer') + 'data: [DONE]\n\n'))
+            self.assertNotIn("chat_template_kwargs", body)
+            self.assertTrue(body["stream"])
+            self.assertTrue(all(message["role"] != "assistant" for message in body["messages"]))
+            self.assertTrue(any('Assistant: Earlier' in message['content'] for message in body['messages']))
+            self.assertTrue(any('Dashboard context:' in message['content'] for message in body['messages']))
+            self.assertEqual(body['messages'][-1]['content'], 'Explain')
+            return httpx.Response(200, stream=FragmentedStream(frame('Remembered answer') + 'data: [DONE]\n\n'))
         async with httpx.AsyncClient(transport=httpx.MockTransport(handle)) as client:
             result = [text async for text in chat_about_country(
                 COUNTRY, 'Explain', [{"role": "assistant", "content": "Earlier"}],
                 dashboard_context={"rankings": [{"rank": 1}]}, client=client)]
-        self.assertEqual(result, ['Fallback answer'])
-        self.assertEqual(len(requests), 2)
-        self.assertTrue(any('Dashboard context:' in message['content'] for message in requests[0]['messages']))
-        self.assertFalse(any('Dashboard context:' in message['content'] for message in requests[1]['messages']))
-        self.assertEqual(requests[1]['messages'][-1]['content'], 'Explain')
+        self.assertEqual(result, ['Remembered answer'])
 
     async def test_consumer_closes_upstream(self):
         stream = FragmentedStream(frame('First') + frame('Second') + 'data: [DONE]\n\n')

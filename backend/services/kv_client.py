@@ -25,8 +25,11 @@ def summary_key(code: str) -> str:
 
 def _command(*args: str):
     try:
-        url = os.environ["KV_REST_API_URL"].rstrip("/")
-        token = os.environ["KV_REST_API_TOKEN"]
+        # .strip() before .rstrip("/"): a pasted secret (GitHub Actions, dashboard
+        # UIs) can carry a trailing newline that "/"-only stripping leaves intact,
+        # which httpx then rejects as a non-printable character in the URL.
+        url = os.environ["KV_REST_API_URL"].strip().rstrip("/")
+        token = os.environ["KV_REST_API_TOKEN"].strip()
     except KeyError as e:
         raise RuntimeError(
             f"{e.args[0]} is not set — copy the Upstash credentials into backend/.env"

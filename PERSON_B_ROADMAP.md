@@ -1,68 +1,55 @@
-# Person B Roadmap — Frontend, Visualization & UI
+# Person B Roadmap — Frontend & Visualization
 
 **Branch:** `feature/frontend-viz`
-**Scope:** Map, charts, country panel, chat UI
+**Scope:** Map, country panels, charts, comparison, chat interface, and frontend deployment.
+**Team contacts:** A supplies country data; C (Shrav) supplies AI first and analysis afterward.
+**File ownership:** `frontend/` and frontend deployment configuration. Coordinate shared root configuration through A.
 
----
+## Before Hour 0
 
-## Before Hour 0 (Prep)
+- [ ] Settle map versus globe and sketch the core screens.
+- [ ] Verify the existing React/Vite/Tailwind scaffold.
+- [ ] Agree on data shapes with A and AI payloads/streaming events/errors with C.
 
-- [ ] **Lock the globe vs. map decision** before starting — this is yours to settle:
-  - 3D globe.gl → higher visual impact, higher build cost/risk
-  - 2D react-simple-maps → faster, more predictable
-- [ ] Wireframe the core screens: map view, country detail panel, comparison view, chat UI
-- [ ] Confirm the per-country schema with A (`{country_code, country_name, gdp, gdp_per_capita, inflation, bond_yield_10y, fx_rate, ...}`)
-- [ ] Scaffold React + Vite project, install Tailwind, react-simple-maps (or globe.gl), Recharts
+## Hours 0–4: Map with sample data
 
-## Hours 0–4: Map on Mock Data
+- [ ] Begin layout while A prepares the hour 0–1 sample fixture.
+- [ ] Render one metric, such as GDP, with country coloring.
+- [ ] Add country selection, basic details, legend, and missing-data styling.
+- [ ] At hour 4, connect available real data and review C's AI response examples.
 
-- [ ] Wait for A's mock data fixture (should land early) — do **not** wait on the real pipeline
-- [ ] Build the map/globe component rendering against the mock fixture
-- [ ] Get **one metric live** on the map (e.g. GDP) with country coloring
-- [ ] Basic layout shell: map area + placeholder panel region
+## Hours 4–8: Data and core AI UI
 
-## Hours 4–8: Metric Switcher + Styling
+- [ ] Add metric switching, units, and observation dates.
+- [ ] Connect real country data from A.
+- [ ] Build summary, comparison, and streaming chat components against C's agreed interfaces.
+- [ ] Connect C's endpoints as they arrive; include loading and error behavior.
+- [ ] At hour 8, verify the core AI flow with A/C so C can move to analysis.
 
-- [ ] Build the metric switcher (GDP / inflation / bond yields / currency)
-- [ ] Wire remaining data layers/metrics into the map coloring logic
-- [ ] Apply Tailwind styling pass — color scales, legend, responsive layout
-- [ ] **Hour 4 sync**: swap mock fixture for A's real data-serving routes (by country / by metric / by comparison pair)
-- [ ] Handle basic loading states while data loads
+## Hours 8–14: Complete the core experience
 
-## Hours 8–14: AI-Powered UI
+- [ ] Polish comparisons and chat; prevent stale responses after switching countries.
+- [ ] Add historical charts and unavailable-history states.
+- [ ] Improve responsive layout and formatting.
+- [ ] Prepare ranking/anomaly panels using C's early sample outputs.
+- [ ] At hour 14, connect C's working analysis endpoints.
 
-- [ ] Build the country detail panel: click a country → show its data
-- [ ] Add AI summary display in the panel, calling `POST /api/summarize/{country_code}`
-- [ ] Add a "compare to..." action from the panel
-- [ ] Build the comparison view/UI, calling `POST /api/compare`
-- [ ] Build the chat interface for the country chatbot, calling `POST /api/chat/{country_code}` — support streaming responses
-- [ ] Add charts (Recharts) for time-series/comparison views
-- [ ] **Hour 8 sync**: confirm AI route contracts and response shapes with A
+## Hours 14–18: Insights and integration
 
-## Hours 14–18: Rankings + Anomaly UI
+- [ ] Show metric rankings with dates, units, and clear sort direction.
+- [ ] Show anomaly flags and C's explanations beside the relevant metric.
+- [ ] Treat insufficient history as unavailable analysis, not evidence that nothing unusual happened.
+- [ ] Try frontend deployment and verify the full flow with A/C.
+- [ ] Freeze features at hour 18.
 
-- [ ] Surface C's rankings/leaderboard output (top N by Market Health Score, biggest movers, most anomalies) as a UI panel beyond the map
-- [ ] Display anomaly flags on the map/panel, with A+C's AI narration (`/api/anomaly/explain`) shown in context
-- [ ] Polish comparison and chat UX with real data end-to-end
+## Hours 18–22: Deploy and polish
 
-## Hours 18–22: Robustness + Deploy
-
-- [ ] Handle loading/error states gracefully:
-  - [ ] Cache misses
-  - [ ] Slow AI responses (spinners/skeletons for summarize/compare/chat)
-  - [ ] Rate limits (friendly fallback messaging)
-- [ ] Deploy frontend to Vercel alongside A's backend
-- [ ] Cross-browser / responsive sanity check
-- [ ] Rehearse the demo flow: map → click country → summary → compare → chat → rankings
+- [ ] Finalize deployment using the deployed backend URL.
+- [ ] Check desktop/mobile layouts, slow AI calls, errors, and cached summary labels.
+- [ ] Rehearse map → country → summary → compare → chat → available insights.
 
 ## Hours 22–24: Buffer
 
-- [ ] Kept empty on purpose — use for last visual polish if everything else landed
+- [ ] Fix blockers only.
 
----
-
-## Cross-cutting reminders
-
-- Build against the mock fixture first — never block on A's real pipeline early on.
-- The chat UI must support streaming from the start; retrofitting streaming late is painful.
-- Loading/error states aren't optional polish — AI calls and rate limits are demo-day failure modes.
+**Done:** Users can explore real data and use summaries, comparisons, and chat. Integrate basic insights as delivered; optional analysis does not block the core website.

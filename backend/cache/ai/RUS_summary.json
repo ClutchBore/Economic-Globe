@@ -1,14 +1,8 @@
 {
   "country_code": "RUS",
   "country_name": "Russia",
-<<<<<<< Updated upstream
-  "summary": "In 2025, Russia's GDP was 2561310169358.74 USD, GDP per capita was 17546.6094 USD, and inflation was 8.7199%. As of 2026-09-11, the RUB/USD exchange rate was 0.011898 USD per 1 RUB, with an fx_change_pct of -0.12. The 10-year bond yield is unavailable (null), and no historical bond yield data is provided.",
+  "summary": "Russia's 2025 GDP was 2,561,310,169,358.74 USD, with GDP per capita of 17,546.6094 USD and 2025 inflation of 8.7199%. As of 2026-09-12, the RUB/USD exchange rate was 0.011854 USD per 1 unit of local currency, with a change of -0.487%. The 10-year bond yield is null, meaning it is unavailable rather than zero, so no value or observation year can be reported.",
   "is_mock": false,
-  "generated_at": "2026-09-12T04:52:24.003443+00:00",
-=======
-  "summary": "For Russia in 2025, GDP was USD 2,561,310,169,358.74, GDP per capita was USD 17,546.6094, and inflation was 8.7199%. As of 2026-09-11, the RUB/USD exchange rate was 0.011898 USD per 1 RUB, with a change of -0.12%. The 10-year bond yield was unavailable, shown as null rather than zero.",
-  "is_mock": false,
-  "generated_at": "2026-09-12T04:41:16.686746+00:00",
->>>>>>> Stashed changes
-  "data_as_of": "2026-09-11"
+  "generated_at": "2026-09-12T05:44:38.070380+00:00",
+  "data_as_of": "2026-09-12"
 }

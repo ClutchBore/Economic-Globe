@@ -1,14 +1,8 @@
 {
   "country_code": "CHN",
   "country_name": "China",
-<<<<<<< Updated upstream
-  "summary": "China's GDP was 19,498,039,388,042.6 USD in 2025, up from 11,456,024,084,962 USD in 2016, with GDP per capita rising from 8,254.8686 USD to 13,861.9702 USD over the same period. Inflation was 0.0596% in 2025, down from 2.0% in 2016 and having peaked at 2.8992% in 2019. The 10-year bond yield is null (unavailable), while the FX rate was 0.149312 USD per CNY on 2026-09-11, a 0.196% change, versus 0.150272 USD per CNY in 2020.",
+  "summary": "China’s 2025 GDP was 19,498,039,388,042.6 USD, GDP per capita was 13,861.9702 USD, and inflation was 0.0596%. As of 2026-09-11, the CNY/USD FX rate was 0.149312 USD per 1 CNY with a 0.196 change. The 10-year bond yield is null, meaning unavailable rather than zero.",
   "is_mock": false,
-  "generated_at": "2026-09-12T04:50:28.413070+00:00",
-=======
-  "summary": "China's GDP in 2025 was USD 19,498,039,388,042.6, and GDP per capita for 2025 was USD 13,861.9702. Inflation in 2025 was 0.0596%, while the CNY/USD exchange rate on 2026-09-11 was 0.149312 USD per 1 CNY, with a change of 0.196%. The 10-year bond yield is unavailable (null), indicating no reported figure rather than zero.",
-  "is_mock": false,
-  "generated_at": "2026-09-12T04:40:41.384256+00:00",
->>>>>>> Stashed changes
+  "generated_at": "2026-09-12T05:05:42.231938+00:00",
   "data_as_of": "2026-09-11"
 }

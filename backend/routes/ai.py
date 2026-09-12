@@ -10,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from services import ai_cache, data_store
 from services.ai import AIServiceError, chat_about_country, compare_countries, summarize_country
+from services.analysis import AnalysisError, detect_anomalies, rank_countries
 
 
 router = APIRouter(prefix="/api", tags=["AI"])
@@ -45,6 +46,16 @@ class ChatRequest(BaseModel):
     country: CountrySummaryRequest | None = None
     message: str = Field(min_length=1, max_length=4000)
     history: list[ChatTurn] = Field(default_factory=list, max_length=20)
+    selected_metric: str | None = Field(default=None, max_length=50)
+    comparison_country_code: str | None = Field(default=None, pattern=r"^[A-Z]{3}$")
+
+
+SUGGESTED_QUESTIONS = [
+    "What stands out in this country's data?",
+    "What data is missing or limited?",
+    "Explain the latest inflation reading.",
+    "Are any metrics statistically unusual?",
+]
 
 
 def _identity(country: dict[str, Any]) -> dict[str, Any]:
@@ -77,6 +88,52 @@ def _validate_json_country(country: dict[str, Any]) -> None:
         raise HTTPException(status_code=422, detail="Country data must contain valid JSON values.") from None
 
 
+def _ranking_position(metric: str, country_code: str) -> dict[str, Any] | None:
+    try:
+        rankings = rank_countries(metric)
+    except AnalysisError:
+        return None
+    for row in rankings["rankings"]:
+        if row["country_code"] == country_code:
+            return {
+                "metric": metric,
+                "rank": row["rank"],
+                "total_ranked": len(rankings["rankings"]),
+                "value": row["value"],
+                "unit": row.get("unit"),
+                "date": row.get("date"),
+                "note": rankings["note"],
+            }
+    return None
+
+
+def _chat_dashboard_context(country: dict[str, Any], request: ChatRequest) -> dict[str, Any]:
+    code = country["country_code"]
+    metrics = [request.selected_metric] if request.selected_metric else ["gdp", "gdp_per_capita", "inflation"]
+    rankings = [item for metric in metrics if (item := _ranking_position(metric, code)) is not None]
+    anomaly_context = []
+    for metric in ("inflation", "gdp", "gdp_per_capita"):
+        try:
+            anomalies = detect_anomalies(metric)
+        except AnalysisError:
+            continue
+        for anomaly in anomalies["anomalies"]:
+            if anomaly["country_code"] == code:
+                anomaly_context.append({
+                    **anomaly,
+                    "threshold": anomalies["threshold"],
+                    "method": anomalies["method"],
+                })
+    context = {
+        "selected_metric": request.selected_metric,
+        "comparison_country_code": request.comparison_country_code,
+        "rankings": rankings,
+        "anomalies": anomaly_context,
+        "suggested_questions": SUGGESTED_QUESTIONS,
+    }
+    return context
+
+
 @router.post("/chat/{country_code}")
 async def chat(country_code: str, request: ChatRequest):
     country = _country_from_body_or_cache(country_code, request.country)
@@ -87,10 +144,12 @@ async def chat(country_code: str, request: ChatRequest):
 
     async def events():
         yield event("meta", {"country_code": country["country_code"],
-                             "is_mock": bool(country.get("is_mock", False))})
+                             "is_mock": bool(country.get("is_mock", False)),
+                             "suggested_questions": SUGGESTED_QUESTIONS})
         try:
             async with aclosing(chat_about_country(country, request.message,
-                    [turn.model_dump() for turn in request.history])) as chunks:
+                    [turn.model_dump() for turn in request.history],
+                    dashboard_context=_chat_dashboard_context(country, request))) as chunks:
                 async for text in chunks:
                     yield event("delta", {"text": text})
         except (AIServiceError, ValueError):

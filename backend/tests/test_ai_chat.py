@@ -68,6 +68,24 @@ class ChatServiceTests(unittest.IsolatedAsyncioTestCase):
             with self.assertRaises(AIServiceError):
                 _ = [text async for text in chat_about_country(COUNTRY, 'Explain', client=client)]
 
+    async def test_retries_without_dashboard_context_when_full_chat_is_rejected(self):
+        requests = []
+        def handle(request):
+            body = json.loads(request.content)
+            requests.append(body)
+            if len(requests) == 1:
+                return httpx.Response(400)
+            return httpx.Response(200, stream=FragmentedStream(frame('Fallback answer') + 'data: [DONE]\n\n'))
+        async with httpx.AsyncClient(transport=httpx.MockTransport(handle)) as client:
+            result = [text async for text in chat_about_country(
+                COUNTRY, 'Explain', [{"role": "assistant", "content": "Earlier"}],
+                dashboard_context={"rankings": [{"rank": 1}]}, client=client)]
+        self.assertEqual(result, ['Fallback answer'])
+        self.assertEqual(len(requests), 2)
+        self.assertTrue(any('Dashboard context:' in message['content'] for message in requests[0]['messages']))
+        self.assertFalse(any('Dashboard context:' in message['content'] for message in requests[1]['messages']))
+        self.assertEqual(requests[1]['messages'][-1]['content'], 'Explain')
+
     async def test_consumer_closes_upstream(self):
         stream = FragmentedStream(frame('First') + frame('Second') + 'data: [DONE]\n\n')
         async with httpx.AsyncClient(transport=httpx.MockTransport(lambda req: httpx.Response(200, stream=stream))) as client:
@@ -85,7 +103,7 @@ class ChatRouteTests(unittest.TestCase):
         self.body = {"country": COUNTRY, "message": "Explain inflation", "history": []}
 
     def test_event_order_and_json_escaping(self):
-        async def fake(*args):
+        async def fake(*args, **kwargs):
             yield 'Test\n"answer"'
         with patch('routes.ai.chat_about_country', fake):
             response = self.client.post('/api/chat/IND', json=self.body)
@@ -97,7 +115,7 @@ class ChatRouteTests(unittest.TestCase):
         self.assertEqual(json.loads(frames[1].split('data: ')[1])['text'], 'Test\n"answer"')
 
     def test_midstream_error_has_no_done(self):
-        async def fake(*args):
+        async def fake(*args, **kwargs):
             yield 'partial'
             raise AIServiceError('private provider information')
         with patch('routes.ai.chat_about_country', fake):
@@ -107,7 +125,7 @@ class ChatRouteTests(unittest.TestCase):
         self.assertNotIn('private', response.text)
 
     def test_chat_can_load_country_from_cache(self):
-        async def fake(*args):
+        async def fake(*args, **kwargs):
             yield 'Cached answer'
         body = {"message": "Explain inflation", "history": []}
         with patch("routes.ai.data_store.get_country", return_value=COUNTRY), \
@@ -117,6 +135,42 @@ class ChatRouteTests(unittest.TestCase):
         self.assertIn('event: meta', response.text)
         self.assertIn('event: delta', response.text)
         self.assertIn('Cached answer', response.text)
+
+    def test_chat_includes_dashboard_context_and_suggestions(self):
+        calls = {}
+        async def fake(*args, **kwargs):
+            calls["context"] = kwargs["dashboard_context"]
+            yield 'Context answer'
+        body = {"message": "Explain inflation", "history": [], "selected_metric": "inflation"}
+        with patch("routes.ai.data_store.get_country", return_value={**COUNTRY, "is_mock": False}), \
+                patch("routes.ai.rank_countries", return_value={
+                    "rankings": [{
+                        "country_code": "IND",
+                        "rank": 3,
+                        "value": 5.0,
+                        "unit": "%",
+                        "date": "2024",
+                    }],
+                    "note": "Higher values are listed first; higher is not always better.",
+                }), \
+                patch("routes.ai.detect_anomalies", return_value={
+                    "threshold": 2.0,
+                    "method": "test method",
+                    "anomalies": [{
+                        "country_code": "IND",
+                        "country_name": "India",
+                        "metric": "inflation",
+                        "z_score": 2.5,
+                    }],
+                }), \
+                patch("routes.ai.chat_about_country", fake):
+            response = self.client.post("/api/chat/IND", json=body)
+        frames = response.text.strip().split('\n\n')
+        meta = json.loads(frames[0].split('data: ')[1])
+        self.assertIn("suggested_questions", meta)
+        self.assertEqual(calls["context"]["selected_metric"], "inflation")
+        self.assertEqual(calls["context"]["rankings"][0]["rank"], 3)
+        self.assertEqual(calls["context"]["anomalies"][0]["z_score"], 2.5)
 
     def test_chat_unknown_cached_country(self):
         body = {"message": "Explain inflation", "history": []}

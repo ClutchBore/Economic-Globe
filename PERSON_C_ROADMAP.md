@@ -20,11 +20,7 @@ A owns `main.py`, shared dependencies/configuration, data fetchers, the data rea
 
 ## Progress note
 
-<<<<<<< Updated upstream
-Summary, comparison, and streaming chat are implemented, connected to A's cached country reader, and verified by offline tests. The AI router is registered locally in `backend/main.py` on this branch. Live IFM summary, comparison, and streaming chat requests succeeded using `IFM/K2-Horizon-375B-A23B`, including cache-backed summary, comparison, and chat requests. Summary fallback caching is implemented. Basic metric rankings, standard-deviation anomaly detection, and anomaly explanations are implemented through `/api/rankings/{metric}`, `/api/anomalies/{metric}`, and `/api/anomaly/explain`. A/B contract confirmation and frontend validation remain pending. See [AI_HANDOFF.md](backend/AI_HANDOFF.md) for provisional contracts and examples.
-=======
-Summary, comparison, and streaming chat are implemented, connected to A's cached country reader, and verified by offline tests. The AI router is registered locally in `backend/main.py` on this branch. Live IFM summary, comparison, and streaming chat requests succeeded using `IFM/K2-Horizon-375B-A23B`, including cache-backed summary, comparison, and chat requests. Summary fallback caching is implemented, with saved demo summaries for `IND` and `USA`. Frontend validation with B remains pending. See [AI_HANDOFF.md](backend/AI_HANDOFF.md) for provisional contracts and examples.
->>>>>>> Stashed changes
+Summary, comparison, and streaming chat are implemented, connected to A's cached country reader, and verified by offline tests. The AI router is registered locally in `backend/main.py` on this branch. Live IFM summary, comparison, and streaming chat requests succeeded using `IFM/K2-Horizon-375B-A23B`, including cache-backed summary, comparison, and chat requests. Summary fallback caching is implemented with saved demo summaries. Basic metric rankings, standard-deviation anomaly detection, and anomaly explanations are implemented through `/api/rankings/{metric}`, `/api/anomalies/{metric}`, and `/api/anomaly/explain`. Chat now receives dashboard context with rankings, anomaly flags, and suggested questions. A/B contract confirmation and frontend validation remain pending. See [AI_HANDOFF.md](backend/AI_HANDOFF.md) for provisional contracts and examples.
 
 ## Before Hour 0
 
@@ -73,6 +69,8 @@ Generate one country summary grounded in supplied sample data.
 - [x] Test live comparisons and chat after configuring the IFM key/model.
 - [x] Test cache-backed live summary and comparison routes using country codes.
 - [x] Test cache-backed live chat route using a country code, message, and history only.
+- [x] Improve chat with dashboard context, rankings/anomaly awareness, safer answer rules, and suggested questions for B.
+- [x] Add a smaller-prompt chat retry so follow-up questions do not fail if IFM rejects the full context request.
 - [ ] Confirm the streaming format with B and verify it in the frontend.
 - [x] Use A's real cache through the same reader interface.
 - [x] Implement cached summary fallback in your AI cache folder.
@@ -127,4 +125,3 @@ If AI takes longer, finish core AI first and reduce analysis scope. The original
 The original/custom Market Health Score, correlations, rolling trends, biggest movers, and time-slider preparation remain optional. Add them only after the core demo works and if A/B can integrate them before hour 18. Document and validate score weights; use comparable historical periods for movers.
 
 **Done:** Core AI works reliably, followed by metric rankings and basic anomalies where the history supports them.
-

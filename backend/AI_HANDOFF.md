@@ -75,17 +75,19 @@ Request body:
 ```json
 {
   "message": "What does inflation mean here?",
-  "history": []
+  "history": [],
+  "selected_metric": "inflation",
+  "comparison_country_code": "USA"
 }
 ```
 
-Use `fetch`, not `EventSource`, because this is a POST request. Read `response.body` as a stream. Append each `delta.text` to the displayed answer, stop loading on `done`, and show a friendly message on `error`.
+Use `fetch`, not `EventSource`, because this is a POST request. Read `response.body` as a stream. Append each `delta.text` to the displayed answer, stop loading on `done`, and show a friendly message on `error`. `selected_metric` and `comparison_country_code` are optional. If B sends them, the backend gives the chatbot extra dashboard context; if B omits them, chat still works.
 
 Stream events:
 
 ```text
 event: meta
-data: {"country_code":"IND","is_mock":false}
+data: {"country_code":"IND","is_mock":false,"suggested_questions":["What stands out in this country's data?","What data is missing or limited?","Explain the latest inflation reading.","Are any metrics statistically unusual?"]}
 
 event: delta
 data: {"text":"..."}
@@ -239,7 +241,7 @@ POST /api/chat/IND with JSON containing message (the current question) and optio
 {"message":"What does inflation mean here?","history":[]}
 ```
 
-The backend loads `IND` from A's cached country data. The older body format with a full country object still works for fixture testing. Messages must be nonblank and at most 4000 characters. Clear history when changing countries; history is client-managed and not stored on the backend.
+The backend loads `IND` from A's cached country data. The older body format with a full country object still works for fixture testing. Messages must be nonblank and at most 4000 characters. `selected_metric` and `comparison_country_code` are optional dashboard hints. The chatbot automatically receives ranking positions, anomaly flags, and suggested questions when those calculations are available. Clear history when changing countries; history is client-managed and not stored on the backend.
 
 The same router registration enables chat. Use fetch with POST and read response.body as a stream; browser EventSource does not support this POST body. Buffer decoded text across network chunks, split complete SSE frames on blank lines, and JSON-parse each data field. Network chunks are not event boundaries.
 
@@ -247,7 +249,7 @@ Example events (fictional illustration, not live output):
 
 ```text
 event: meta
-data: {"country_code":"IND","is_mock":true}
+data: {"country_code":"IND","is_mock":true,"suggested_questions":["What stands out in this country's data?","What data is missing or limited?","Explain the latest inflation reading.","Are any metrics statistically unusual?"]}
 
 event: delta
 data: {"text":"Using fictional test data, "}
@@ -260,6 +262,6 @@ data: {}
 
 ```
 
-Append delta.text to the displayed answer and label mock data from meta. Stop loading on done. Validation errors return HTTP 422 before streaming. Once streaming starts HTTP status is 200; provider/configuration failures produce an error event with {"detail":"Country chat is temporarily unavailable. Please retry."} and no done event. Keep any partial text visibly incomplete. Treat connection closure without done/error as interruption. Use AbortController when cancelling or switching countries; upstream connections are closed when the generator is cancelled/closed. Do not automatically retry a partial response.
+Append delta.text to the displayed answer, label mock data from meta, and optionally render meta.suggested_questions as clickable follow-up prompts. Stop loading on done. Validation errors return HTTP 422 before streaming. Once streaming starts HTTP status is 200; provider/configuration failures produce an error event with {"detail":"Country chat is temporarily unavailable. Please retry."} and no done event. Keep any partial text visibly incomplete. Treat connection closure without done/error as interruption. Use AbortController when cancelling or switching countries; upstream connections are closed when the generator is cancelled/closed. Do not automatically retry a partial response.
 
-The provider read timeout is 30 seconds and total generation limit is 90 seconds. Truncated, malformed, empty, or prematurely closed provider streams fail explicitly. B's acceptance and frontend streaming still require validation.
+The provider read timeout is 30 seconds and total generation limit is 90 seconds. If IFM rejects the full chat request before any text is returned, the backend retries once with a smaller prompt using only country data and the current question. Truncated, malformed, empty, or prematurely closed provider streams fail explicitly. B's acceptance and frontend streaming still require validation.

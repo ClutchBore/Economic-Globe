@@ -1,8 +1,8 @@
 {
   "country_code": "USA",
   "country_name": "United States",
-  "summary": "For the United States, GDP was 30,769,700,000,000 USD in 2025 and GDP per capita was 90,026.5163 USD in 2025. Inflation was 2.9495% in 2024, and the 10-year bond yield was 4.975% as of 2026-09-11. Foreign exchange data (fx_rate, fx_pair, fx_change_pct) are null/unavailable, while historical records cover GDP from 2016–2025, GDP per capita from 2016–2025, inflation from 2016–2024, and bond yields from 2020–2026.",
+  "summary": "United States data as of 2026-09-11 show GDP of USD 30,769,700,000,000 and GDP per capita of USD 90,026.5163 in 2025, inflation of 2.9495% in 2024, and a 10-year bond yield of 4.975%. GDP per capita was USD 57,976.6282 in 2016 and USD 90,026.5163 in 2025, while inflation was 8.0028% in 2022 and 2.9495% in 2024. Foreign exchange information is unavailable (fx_rate null), so no USD per local currency rate or change percentage can be provided.",
   "is_mock": false,
-  "generated_at": "2026-09-12T04:45:07.103495+00:00",
+  "generated_at": "2026-09-12T05:06:04.881214+00:00",
   "data_as_of": "2026-09-11"
 }

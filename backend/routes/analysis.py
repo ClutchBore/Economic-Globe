@@ -2,7 +2,16 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
 from services.ai import AIServiceError, explain_anomaly
-from services.analysis import AnalysisError, detect_anomalies, rank_countries
+from services.analysis import (
+    AnalysisError,
+    biggest_movers,
+    detect_anomalies,
+    market_health_scores,
+    metric_correlation,
+    rank_countries,
+    rolling_trends,
+    timeline,
+)
 
 
 router = APIRouter(prefix="/api", tags=["analysis"])
@@ -53,6 +62,46 @@ def rankings(metric: str):
 def anomalies(metric: str, threshold: float = 2.0, min_prior: int = 5):
     try:
         return detect_anomalies(metric, threshold=threshold, min_prior=min_prior)
+    except AnalysisError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from None
+
+
+@router.get("/market-health")
+def market_health():
+    try:
+        return market_health_scores()
+    except AnalysisError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from None
+
+
+@router.get("/correlations")
+def correlations(metric_x: str, metric_y: str):
+    try:
+        return metric_correlation(metric_x, metric_y)
+    except AnalysisError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from None
+
+
+@router.get("/trends/{metric}")
+def trends(metric: str, window: int = 3):
+    try:
+        return rolling_trends(metric, window=window)
+    except AnalysisError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from None
+
+
+@router.get("/movers/{metric}")
+def movers(metric: str, limit: int = 5):
+    try:
+        return biggest_movers(metric, limit=limit)
+    except AnalysisError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from None
+
+
+@router.get("/timeline/{metric}")
+def metric_timeline(metric: str):
+    try:
+        return timeline(metric)
     except AnalysisError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from None
 

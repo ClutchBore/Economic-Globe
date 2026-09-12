@@ -124,6 +124,12 @@ If AI takes longer, finish core AI first and reduce analysis scope. The original
 
 ## Stretch goals
 
-The original/custom Market Health Score, correlations, rolling trends, biggest movers, and time-slider preparation remain optional. Add them only after the core demo works and if A/B can integrate them before hour 18. Document and validate score weights; use comparable historical periods for movers.
+- [x] Add a Market Health Score endpoint with documented weights and component breakdowns.
+- [x] Expose `GET /api/market-health` and cover it with offline tests.
+- [x] Add correlations through `GET /api/correlations?metric_x=...&metric_y=...`.
+- [x] Add rolling trends through `GET /api/trends/{metric}`.
+- [x] Add biggest movers through `GET /api/movers/{metric}`.
+- [x] Add time-slider data through `GET /api/timeline/{metric}`.
+- [ ] Ask B which stretch endpoints they can actually fit into the UI.
 
-**Done:** Core AI works reliably, followed by metric rankings and basic anomalies where the history supports them.
+**Done:** Core AI works reliably, followed by metric rankings, basic anomalies, anomaly explanations, Market Health Score, correlations, rolling trends, biggest movers, and time-slider data where the data supports them.

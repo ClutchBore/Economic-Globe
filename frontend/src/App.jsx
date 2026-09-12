@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import CountryPanel from './components/CountryPanel'
-import { sampleCountry } from './data/sampleCountry'
+import Globe from './components/Globe'
 
 function App() {
   const [status, setStatus] = useState('checking...')
-  const [selectedCountry, setSelectedCountry] = useState(sampleCountry)
+  const [selectedCountry, setSelectedCountry] = useState(null)
 
   useEffect(() => {
     fetch('http://localhost:8000/api/health')
@@ -14,13 +14,12 @@ function App() {
   }, [])
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-white">
-      {/* Map placeholder — swap for the react-simple-maps globe/map component */}
-      <div className="flex h-screen items-center justify-center text-slate-600">
-        <div className="text-center">
-          <p className="text-sm">Interactive map goes here</p>
-          <p className="mt-1 text-xs text-slate-700">Backend status: {status}</p>
-        </div>
+    <div className="relative h-screen w-screen overflow-hidden bg-slate-950 text-white">
+      <Globe onSelectCountry={setSelectedCountry} spinning={!selectedCountry} />
+
+      <div className="pointer-events-none absolute left-8 top-7 flex flex-col gap-1">
+        <span className="text-[15px] font-semibold tracking-wide text-slate-100">Economic Globe</span>
+        <span className="text-xs text-slate-600">Backend status: {status}</span>
       </div>
 
       {selectedCountry && (

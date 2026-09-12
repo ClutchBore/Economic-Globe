@@ -1,4 +1,4 @@
-"""Offline comparison API and shared OpenRouter client checks."""
+"""Offline comparison API and shared IFM client checks."""
 
 import json
 import os
@@ -58,12 +58,31 @@ class ComparisonRoutes(unittest.TestCase):
             self.assertEqual(response.status_code, 503)
             self.assertNotIn("private", response.text)
 
+    def test_can_compare_cached_country_codes(self):
+        india = fixture("sample_country.json")
+        usa = fixture("sample_country_usa.json")
+        expected = fixture("sample_comparison_response.json")
+        with patch("routes.ai.data_store.get_country", side_effect=[india, usa]), \
+                patch("routes.ai.compare_countries", new_callable=AsyncMock) as service:
+            service.return_value = expected["comparison"]
+            response = self.client.post("/api/compare", json={"country_a": "IND", "country_b": "USA"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), expected)
+        self.assertEqual(service.call_args.args, (india, usa))
+
+    def test_unknown_cached_country_does_not_call_ai(self):
+        with patch("routes.ai.data_store.get_country", side_effect=[fixture("sample_country.json"), None]), \
+                patch("routes.ai.compare_countries", new_callable=AsyncMock) as service:
+            response = self.client.post("/api/compare", json={"country_a": "IND", "country_b": "ZZZ"})
+        self.assertEqual(response.status_code, 404)
+        service.assert_not_called()
+
 
 class ComparisonService(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         self.a = fixture("sample_country.json")
         self.b = fixture("sample_country_usa.json")
-        env = patch.dict(os.environ, {"OPENROUTER_API_KEY": "offline-test", "OPENROUTER_MODEL": "test/model"})
+        env = patch.dict(os.environ, {"IFM_API_KEY": "offline-test", "IFM_MODEL": "test/model"})
         env.start()
         self.addCleanup(env.stop)
 
@@ -76,8 +95,11 @@ class ComparisonService(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(await compare_countries(self.a, self.b, client=client), "Example")
             self.assertEqual(await summarize_country(self.a, client=client), "Example")
         self.assertEqual(json.loads(requests[0]["messages"][1]["content"]), {"country_a": self.a, "country_b": self.b})
-        self.assertEqual(requests[0]["max_tokens"], 500)
-        self.assertEqual(requests[1]["max_tokens"], 300)
+        self.assertNotIn("max_tokens", requests[0])
+        self.assertNotIn("max_tokens", requests[1])
+        self.assertEqual(requests[0]["temperature"], 1.0)
+        self.assertEqual(requests[0]["top_p"], 0.95)
+        self.assertEqual(requests[0]["chat_template_kwargs"]["reasoning_effort"], "high")
         self.assertIn("different dates or units", requests[0]["messages"][0]["content"])
 
     async def test_failures_and_truncation(self):

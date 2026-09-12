@@ -33,7 +33,7 @@ These are planned paths. Separate ownership lets A and C work concurrently witho
 - Frontend: React + Vite, Tailwind, react-simple-maps, Recharts. B settles map versus globe before starting; the scaffold uses a 2D map library.
 - Backend: Python + FastAPI; pandas for analysis.
 - Data: World Bank via wbgapi and yfinance, saved as JSON. Verify actual coverage; IMF is optional.
-- AI: OpenRouter; C selects the model, manages the backend key, and monitors the budget.
+- AI: IFM; C selects the model, manages the backend key, and monitors the budget.
 - Deployment target: Vercel frontend/backend. A/B verify the deployment setup early.
 - Aim for 25–30 countries, starting with a reliable subset and agreed demo countries.
 

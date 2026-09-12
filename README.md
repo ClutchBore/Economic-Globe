@@ -20,7 +20,7 @@ Build the map/data and core AI first, then basic rankings and anomalies. The cus
 **Frontend:** React + Vite, react-simple-maps, Recharts, Tailwind
 **Backend:** Python + FastAPI
 **Data sources:** World Bank API (`wbgapi`), yfinance
-**AI:** OpenRouter
+**AI:** IFM
 **Analysis:** pandas
 **Deployment:** Vercel (frontend + backend)
 
@@ -52,7 +52,7 @@ cd backend
 python -m venv venv
 source venv/bin/activate      # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env          # then fill in your OpenRouter key
+cp .env.example .env          # then fill in your IFM key
 uvicorn main:app --reload --port 8000
 ```
 Visit http://localhost:8000/api/health — you should see `{"status": "healthy"}`.

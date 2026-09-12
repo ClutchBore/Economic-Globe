@@ -1,0 +1,26 @@
+{
+  "is_mock": true,
+  "notice": "Invented values for development only. This is a temporary format pending agreement with Person A.",
+  "country_code": "IND",
+  "country_name": "India",
+  "metrics": {
+    "inflation": {
+      "value": 5.0,
+      "unit": "percent",
+      "year": 2024,
+      "source": "synthetic test fixture"
+    },
+    "gdp_growth": {
+      "value": 6.0,
+      "unit": "percent",
+      "year": 2024,
+      "source": "synthetic test fixture"
+    },
+    "bond_yield_10y": {
+      "value": null,
+      "unit": "percent",
+      "year": 2024,
+      "source": "unavailable in test fixture"
+    }
+  }
+}

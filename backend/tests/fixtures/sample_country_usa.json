@@ -1,0 +1,11 @@
+{
+  "is_mock": true,
+  "notice": "Invented values for development only; temporary format pending agreement with Person A.",
+  "country_code": "USA",
+  "country_name": "United States",
+  "metrics": {
+    "inflation": {"value": 3.0, "unit": "percent", "year": 2024, "source": "synthetic test fixture"},
+    "gdp_growth": {"value": 2.0, "unit": "percent", "year": 2024, "source": "synthetic test fixture"},
+    "bond_yield_10y": {"value": null, "unit": "percent", "year": 2024, "source": "unavailable in test fixture"}
+  }
+}

@@ -40,7 +40,7 @@ export default function ComparisonPanel({ countryA, countryB, onClose, onChangeC
     : []
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden rounded-none border-0 bg-slate-900 shadow-2xl lg:w-[820px] lg:rounded-2xl lg:border lg:border-white/[0.08]">
+    <div className="flex h-full w-full flex-col overflow-hidden rounded-none border-0 bg-slate-900 shadow-2xl lg:w-[820px] lg:rounded-none lg:border lg:border-white/[0.08]">
       {/* header */}
       <div className="flex flex-none items-center justify-between border-b border-white/[0.07] px-5 py-[18px]">
         <div className="flex flex-col gap-0.5">
@@ -51,7 +51,7 @@ export default function ComparisonPanel({ countryA, countryB, onClose, onChangeC
         </div>
         <button
           onClick={onClose}
-          className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-slate-400 hover:bg-white/[0.08]"
+          className="flex h-[30px] w-[30px] items-center justify-center rounded-none text-slate-400 hover:bg-white/[0.08]"
           aria-label="Close comparison"
         >
           <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
@@ -95,7 +95,7 @@ export default function ComparisonPanel({ countryA, countryB, onClose, onChangeC
                 key={tab.key}
                 onClick={() => setActiveMetric(tab.key)}
                 className={
-                  'rounded-md px-3 py-1.5 text-[12.5px] font-semibold transition-colors ' +
+                  'rounded-none px-3 py-1.5 text-[12.5px] font-semibold transition-colors ' +
                   (tab.key === activeMetric
                     ? 'border border-slate-500 bg-slate-700 text-slate-100'
                     : 'border border-transparent text-slate-400 hover:bg-white/[0.06]')

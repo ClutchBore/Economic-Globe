@@ -8,3 +8,27 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
+
+
+.metric-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 #020617;
+}
+
+.metric-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.metric-scrollbar::-webkit-scrollbar-track {
+  background: #020617;
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.metric-scrollbar::-webkit-scrollbar-thumb {
+  background: #334155;
+  border: 1px solid #020617;
+}
+
+.metric-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}

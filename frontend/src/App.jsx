@@ -26,7 +26,7 @@ function AppShell() {
 
   if (loading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-slate-950 text-slate-500">
+      <div className="flex h-screen w-screen items-center justify-center bg-black text-slate-500">
         Loading country data…
       </div>
     )
@@ -34,35 +34,33 @@ function AppShell() {
 
   if (error) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-slate-950 text-center text-slate-500">
+      <div className="flex h-screen w-screen items-center justify-center bg-black text-center text-slate-500">
         Couldn't load country data ({error}). Is the backend running at {API_BASE}?
       </div>
     )
   }
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-slate-950 text-white">
+    <div className="relative h-screen w-screen overflow-hidden bg-black text-white">
       <Globe
         countries={countries}
         geojsonFeatures={geojsonFeatures}
         onSelectCountry={selectCountry}
-        spinning={!selectedCountry}
         rightInset={rightInset}
         arcCountries={compareCountry ? [selectedCountry, compareCountry] : null}
       />
 
-      <div className="absolute left-8 top-7 flex flex-col items-start gap-2">
+      <div className="absolute left-8 top-7 flex flex-col items-start gap-5">
         <div className="pointer-events-none flex flex-col gap-1">
-          <span className="brand-title text-[21px] font-extrabold leading-none text-slate-100">Terraconomic</span>
+          <span className="brand-title text-[32px] font-extrabold leading-none text-white">Terraconomy</span>
         </div>
         <button
           onClick={() => setShowRankings(true)}
-          className="rounded-md border border-white/10 bg-slate-900/60 px-3.5 py-1.5 text-[12.5px] font-semibold text-slate-300 hover:bg-white/[0.06]"
+          className="border border-slate-500 bg-black/80 px-4 py-2 text-[13px] font-bold tracking-wide text-white hover:border-slate-300 hover:bg-slate-800"
         >
           Rankings
         </button>
       </div>
-
       {showRankings && (
         <RankingsPanel
           onClose={() => setShowRankings(false)}

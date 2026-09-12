@@ -24,10 +24,10 @@ export default function AIComparison({ countryCodeA, countryCodeB }) {
   }, [countryCodeA, countryCodeB])
 
   return (
-    <div className="flex flex-col gap-2.5 rounded-xl border border-white/[0.07] bg-white/[0.035] px-4 py-[15px]">
+    <div className="flex flex-col gap-2.5 rounded-none border border-white/[0.07] bg-white/[0.035] px-4 py-[15px]">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full bg-[#3987e5]/[0.18]">
+          <div className="flex h-[22px] w-[22px] flex-none items-center justify-center rounded-none bg-[#3987e5]/[0.18]">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
               <path d="M6 0.5l1.2 3.3L10.5 5l-3.3 1.2L6 9.5l-1.2-3.3L1.5 5l3.3-1.2z" fill="#7db3f2" />
             </svg>

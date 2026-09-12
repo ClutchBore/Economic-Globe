@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import GlobeGL from 'react-globe.gl'
 import * as THREE from 'three'
-import { mockCountries } from '../data/mockCountries'
 
-const BY_CODE = Object.fromEntries(mockCountries.map((c) => [c.country_code, c]))
 const UNCOVERED_COLOR = '#1e293b'
 
 const DIV_NEGATIVE = [208, 59, 59] // #d03b3b
@@ -17,7 +15,7 @@ const METRICS = [
     scale: 'sequential',
     ramp: [[153, 246, 228], [17, 94, 89]], // teal: #99f6e4 -> #115e59
     accent: [45, 212, 191], // teal-400
-    getValue: (c) => Math.log10(c.gdp),
+    getValue: (c) => (c.gdp == null ? null : Math.log10(c.gdp)),
     format: (c) => `$${(c.gdp / 1e12).toFixed(2)}T`,
   },
   {
@@ -48,18 +46,6 @@ const METRICS = [
   },
 ]
 
-const RANGES = Object.fromEntries(
-  METRICS.map((m) => {
-    const values = mockCountries.map(m.getValue)
-    return [
-      m.key,
-      m.scale === 'diverging'
-        ? { maxAbs: Math.max(...values.map(Math.abs)) || 1 }
-        : { min: Math.min(...values), max: Math.max(...values) },
-    ]
-  })
-)
-
 function mix(a, b, t) {
   const r = Math.round(a[0] + (b[0] - a[0]) * t)
   const g = Math.round(a[1] + (b[1] - a[1]) * t)
@@ -67,18 +53,26 @@ function mix(a, b, t) {
   return `rgb(${r}, ${g}, ${bl})`
 }
 
-function colorForMetric(metric, country) {
-  const range = RANGES[metric.key]
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v))
+
+// Some metrics are only meaningful for a subset of countries (bond_yield_10y is US-only in
+// the real dataset; fx_rate/fx_change_pct are null for the US, the FX base currency) — a null
+// value means "not covered by this metric", not zero, so it's treated the same as an
+// uncovered country rather than plotted at the low end of the scale.
+function colorForMetric(metric, ranges, country) {
+  const value = country ? metric.getValue(country) : null
+  if (value == null) return UNCOVERED_COLOR
+
+  const range = ranges[metric.key]
   if (metric.scale === 'diverging') {
-    const t = colorForMetric.clamp(country ? metric.getValue(country) / range.maxAbs : 0, -1, 1)
+    const t = clamp(value / range.maxAbs, -1, 1)
     return t >= 0 ? mix(DIV_NEUTRAL, DIV_POSITIVE, t) : mix(DIV_NEUTRAL, DIV_NEGATIVE, -t)
   }
   const { min, max } = range
-  const t = max === min ? 0.5 : colorForMetric.clamp((metric.getValue(country) - min) / (max - min), 0, 1)
+  const t = max === min ? 0.5 : clamp((value - min) / (max - min), 0, 1)
   const [low, high] = metric.ramp
   return mix(low, high, t)
 }
-colorForMetric.clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v))
 
 function angularDistanceDeg(a, b) {
   const toRad = (d) => (d * Math.PI) / 180
@@ -89,33 +83,38 @@ function angularDistanceDeg(a, b) {
   return (Math.acos(Math.max(-1, Math.min(1, cosD))) * 180) / Math.PI
 }
 
-export default function Globe({ onSelectCountry, spinning, rightInset = 0, arcCountries = null }) {
+export default function Globe({ countries, geojsonFeatures, onSelectCountry, spinning, rightInset = 0, arcCountries = null }) {
   const globeRef = useRef()
   const containerRef = useRef()
-  // react-globe.gl's own onPolygonClick can silently miss the first click on a given polygon
-  // (the raycasted click and its internal hover cache can land a frame apart). onPolygonHover
-  // fires reliably and immediately, so we track the hovered country ourselves and select it on
-  // a plain native click instead of trusting the built-in click handler.
   const hoveredCountryRef = useRef(null)
-  const [countries, setCountries] = useState([])
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight })
   const [activeMetricKey, setActiveMetricKey] = useState('gdp')
   const activeMetric = METRICS.find((m) => m.key === activeMetricKey)
 
-  // Shrink the globe's render width to the space left of an open panel, rather than always
-  // filling the screen — otherwise a selected country can end up hidden behind its own panel.
+  const byCode = useMemo(() => Object.fromEntries(countries.map((c) => [c.country_code, c])), [countries])
+
+  // Per metric, the range of its non-null values across all loaded countries — computed live
+  // since the country set now comes from the backend rather than a fixed mock list.
+  const ranges = useMemo(
+    () =>
+      Object.fromEntries(
+        METRICS.map((m) => {
+          const values = countries.map(m.getValue).filter((v) => v != null)
+          return [
+            m.key,
+            m.scale === 'diverging'
+              ? { maxAbs: Math.max(...values.map(Math.abs)) || 1 }
+              : { min: Math.min(...values), max: Math.max(...values) },
+          ]
+        })
+      ),
+    [countries]
+  )
+
   const size = {
     width: Math.max(320, windowSize.width - rightInset),
     height: windowSize.height,
   }
-
-  useEffect(() => {
-    fetch('/data/countries-110m.geojson')
-      .then((res) => res.json())
-      .then((geojson) => {
-        setCountries(geojson.features.filter((f) => f.properties.ISO_A3 !== 'ATA'))
-      })
-  }, [])
 
   // ResizeObserver rather than a window 'resize' listener — the container's actual box size can
   // change (devtools device toolbar, orientation change, viewport emulation) without the browser
@@ -137,6 +136,13 @@ export default function Globe({ onSelectCountry, spinning, rightInset = 0, arcCo
     if (controls) controls.autoRotate = spinning
   }, [spinning])
 
+  useEffect(() => {
+    const globe = globeRef.current
+    if (!globe) return
+    globe.pointOfView({ lat: 25, lng: 15, altitude: 2.1 }, 0)
+    globe.controls().autoRotateSpeed = 0.35
+  }, [])
+
   // Frame both compared countries so the connecting arc is actually visible, rather than
   // leaving it undiscoverable behind whatever rotation the globe happened to stop at.
   useEffect(() => {
@@ -154,13 +160,6 @@ export default function Globe({ onSelectCountry, spinning, rightInset = 0, arcCo
     )
   }, [arcCountries])
 
-  useEffect(() => {
-    const globe = globeRef.current
-    if (!globe) return
-    globe.pointOfView({ lat: 25, lng: 15, altitude: 2.1 }, 0)
-    globe.controls().autoRotateSpeed = 0.35
-  }, [])
-
   const globeMaterial = useMemo(() => new THREE.MeshPhongMaterial({ color: '#0f172a' }), [])
 
   const arcsData = useMemo(() => {
@@ -175,10 +174,10 @@ export default function Globe({ onSelectCountry, spinning, rightInset = 0, arcCo
     onSelectCountry(country)
   }
 
-  // Mouse clicks go through the hover-primed ref (see the note on hoveredCountryRef above).
-  // Touch devices never fire a hover, so we also handle react-globe.gl's own onPolygonClick
-  // below, which does its own fresh raycast at tap time — the two paths just call the same
-  // helper, so a mouse click that happens to trigger both is harmless (same country twice).
+  // react-globe.gl's own onPolygonClick can silently miss the first click on a given polygon
+  // (the raycasted click and its internal hover cache can land a frame apart). onPolygonHover
+  // fires reliably and immediately, so we track the hovered country ourselves and select it on
+  // a plain native click instead of trusting the built-in click handler.
   function handleClick() {
     selectCountry(hoveredCountryRef.current)
   }
@@ -202,35 +201,28 @@ export default function Globe({ onSelectCountry, spinning, rightInset = 0, arcCo
         arcDashLength={0.4}
         arcDashGap={0.2}
         arcDashAnimateTime={1500}
-        polygonsData={countries}
-        polygonCapColor={(feature) => {
-          const country = BY_CODE[feature.properties.ISO_A3]
-          return country ? colorForMetric(activeMetric, country) : UNCOVERED_COLOR
-        }}
+        polygonsData={geojsonFeatures}
+        polygonCapColor={(feature) => colorForMetric(activeMetric, ranges, byCode[feature.properties.ISO_A3])}
         polygonSideColor={() => 'rgba(15,23,42,0.6)'}
         polygonStrokeColor={() => 'rgba(255,255,255,0.15)'}
-        polygonAltitude={(feature) => (BY_CODE[feature.properties.ISO_A3] ? 0.02 : 0.006)}
+        polygonAltitude={(feature) => (byCode[feature.properties.ISO_A3] ? 0.02 : 0.006)}
         polygonLabel={(feature) => {
-          const country = BY_CODE[feature.properties.ISO_A3]
+          const country = byCode[feature.properties.ISO_A3]
           if (!country) return `<div style="font-size:12px;">${feature.properties.NAME}</div>`
+          const value = activeMetric.getValue(country)
+          const valueText = value == null ? 'No data' : activeMetric.format(country)
           return `<div style="font:600 13px system-ui; background:#1e293b; color:#fff; padding:6px 9px; border-radius:6px; border:1px solid rgba(255,255,255,0.12);">
             ${country.country_name}<br/>
-            <span style="color:#94a3b8; font-weight:400;">${activeMetric.label}: ${activeMetric.format(country)}</span>
+            <span style="color:#94a3b8; font-weight:400;">${activeMetric.label}: ${valueText}</span>
           </div>`
         }}
         onPolygonHover={(feature) => {
-          const country = feature ? BY_CODE[feature.properties.ISO_A3] : null
+          const country = feature ? byCode[feature.properties.ISO_A3] : null
           hoveredCountryRef.current = country
           document.body.style.cursor = country ? 'pointer' : 'default'
         }}
-        onPolygonClick={(feature) => selectCountry(BY_CODE[feature.properties.ISO_A3])}
+        onPolygonClick={(feature) => selectCountry(byCode[feature.properties.ISO_A3])}
       />
-
-      {countries.length === 0 && (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <span className="text-sm text-slate-500">Loading globe…</span>
-        </div>
-      )}
 
       <div
         className="pointer-events-none absolute top-24 flex max-w-[92%] flex-wrap justify-center gap-1.5 sm:top-7"
@@ -281,13 +273,13 @@ export default function Globe({ onSelectCountry, spinning, rightInset = 0, arcCo
         <div className="flex justify-between text-[11px] text-slate-600">
           {activeMetric.scale === 'diverging' ? (
             <>
-              <span>-{RANGES[activeMetric.key].maxAbs.toFixed(1)}%</span>
-              <span>+{RANGES[activeMetric.key].maxAbs.toFixed(1)}%</span>
+              <span>-{ranges[activeMetric.key].maxAbs.toFixed(1)}%</span>
+              <span>+{ranges[activeMetric.key].maxAbs.toFixed(1)}%</span>
             </>
           ) : (
             <>
-              <span>{activeMetric.format(mockCountries.find((c) => activeMetric.getValue(c) === RANGES[activeMetric.key].min))}</span>
-              <span>{activeMetric.format(mockCountries.find((c) => activeMetric.getValue(c) === RANGES[activeMetric.key].max))}</span>
+              <span>{activeMetric.format(countries.find((c) => activeMetric.getValue(c) === ranges[activeMetric.key].min))}</span>
+              <span>{activeMetric.format(countries.find((c) => activeMetric.getValue(c) === ranges[activeMetric.key].max))}</span>
             </>
           )}
         </div>

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import HealthScoreGauge from './HealthScoreGauge'
 import ComparisonChart from './ComparisonChart'
 import CountryPickerList from './CountryPickerList'
-import { metricTabs } from '../data/mockCountries'
+import { metricTabs } from '../data/metricTabs'
 
 function GaugeColumn({ country }) {
   return (
@@ -23,18 +23,20 @@ function StatRow({ label, valueA, valueB }) {
   )
 }
 
+const fxFmt = (c) => (c.fx_change_pct == null ? '—' : `${c.fx_change_pct > 0 ? '+' : ''}${c.fx_change_pct.toFixed(1)}%`)
+const bondFmt = (c) => (c.bond_yield_10y == null ? '—' : `${c.bond_yield_10y.toFixed(2)}%`)
+
 export default function ComparisonPanel({ countryA, countryB, onClose, onChangeCountryB }) {
   const [activeMetric, setActiveMetric] = useState(metricTabs[0].key)
   const [showPicker, setShowPicker] = useState(false)
 
   const activeTab = metricTabs.find((t) => t.key === activeMetric)
-  const chartData = countryA.history[activeMetric].map((point, i) => ({
-    year: point.year,
-    a: point.value,
-    b: countryB.history[activeMetric][i]?.value,
-  }))
-
-  const fxFmt = (c) => `${c.fx_change_pct > 0 ? '+' : ''}${c.fx_change_pct.toFixed(1)}%`
+  const historyA = countryA.history?.[activeMetric] ?? []
+  const historyB = countryB.history?.[activeMetric] ?? []
+  const hasChartData = historyA.length > 0 && historyB.length > 0
+  const chartData = hasChartData
+    ? historyA.map((point, i) => ({ year: point.year, a: point.value, b: historyB[i]?.value }))
+    : []
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden rounded-none border-0 bg-slate-900 shadow-2xl lg:w-[820px] lg:rounded-2xl lg:border lg:border-white/[0.08]">
@@ -77,11 +79,11 @@ export default function ComparisonPanel({ countryA, countryB, onClose, onChangeC
           <StatRow label="GDP" valueA={`$${(countryA.gdp / 1e12).toFixed(2)}T`} valueB={`$${(countryB.gdp / 1e12).toFixed(2)}T`} />
           <StatRow
             label="GDP per capita"
-            valueA={`$${countryA.gdp_per_capita.toLocaleString()}`}
-            valueB={`$${countryB.gdp_per_capita.toLocaleString()}`}
+            valueA={`$${Math.round(countryA.gdp_per_capita).toLocaleString()}`}
+            valueB={`$${Math.round(countryB.gdp_per_capita).toLocaleString()}`}
           />
-          <StatRow label="Inflation (YoY)" valueA={`${countryA.inflation}%`} valueB={`${countryB.inflation}%`} />
-          <StatRow label="10Y bond yield" valueA={`${countryA.bond_yield_10y}%`} valueB={`${countryB.bond_yield_10y}%`} />
+          <StatRow label="Inflation (YoY)" valueA={`${countryA.inflation.toFixed(1)}%`} valueB={`${countryB.inflation.toFixed(1)}%`} />
+          <StatRow label="10Y bond yield" valueA={bondFmt(countryA)} valueB={bondFmt(countryB)} />
           <StatRow label="Currency Δ today" valueA={fxFmt(countryA)} valueB={fxFmt(countryB)} />
         </div>
 
@@ -102,12 +104,18 @@ export default function ComparisonPanel({ countryA, countryB, onClose, onChangeC
               </button>
             ))}
           </div>
-          <ComparisonChart
-            data={chartData}
-            formatValue={activeTab.format}
-            nameA={countryA.country_name}
-            nameB={countryB.country_name}
-          />
+          {hasChartData ? (
+            <ComparisonChart
+              data={chartData}
+              formatValue={activeTab.format}
+              nameA={countryA.country_name}
+              nameB={countryB.country_name}
+            />
+          ) : (
+            <div className="flex h-[150px] items-center justify-center text-sm text-slate-600">
+              {activeTab.label} history isn't available for both countries
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-2.5 rounded-xl border border-white/[0.07] bg-white/[0.035] px-4 py-[15px]">

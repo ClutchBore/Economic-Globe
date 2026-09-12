@@ -18,12 +18,13 @@ from dotenv import load_dotenv
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 API_URL = "https://api.ifm.ai/v1/chat/completions"
-IFM_DEFAULT_PARAMS = {
-    "temperature": 1.0,
-    "top_p": 0.95,
-    "chat_template_kwargs": {"reasoning_effort": "high"},
-}
-IFM_CHAT_PARAMS = {
+# No reasoning_effort: these are grounded retrieval/formatting tasks (state the
+# supplied facts, note what's incomparable), not problems that benefit from
+# extended chain-of-thought — and with the country payload now carrying 14+
+# indicators per country, "high" reasoning pushed compare requests past
+# Vercel's function duration limit (FUNCTION_INVOCATION_TIMEOUT, a plain-text
+# platform error the frontend can't parse as JSON).
+IFM_FAST_PARAMS = {
     "temperature": 1.0,
     "top_p": 0.95,
 }
@@ -144,7 +145,7 @@ async def chat_about_country(country_data, message, history=None, *, dashboard_c
                             "model": model,
                             "messages": messages,
                             "stream": True,
-                            **IFM_CHAT_PARAMS,
+                            **IFM_FAST_PARAMS,
                         },
                         timeout=30.0) as response:
                     response.raise_for_status()
@@ -245,7 +246,7 @@ async def _generate_text(
             {"role": "user", "content": serialized},
         ],
         "stream": False,
-        **IFM_DEFAULT_PARAMS,
+        **IFM_FAST_PARAMS,
     }
 
     async def request_summary(http: httpx.AsyncClient) -> str:
@@ -254,7 +255,7 @@ async def _generate_text(
                 API_URL,
                 headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
                 json=payload,
-                timeout=30.0,
+                timeout=55.0,
             )
             response.raise_for_status()
         except httpx.TimeoutException:

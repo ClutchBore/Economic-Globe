@@ -9,7 +9,7 @@
       "entrypoint": "main:app",
       "functions": {
         "main.py": {
-          "maxDuration": 30,
+          "maxDuration": 60,
           "excludeFiles": "{venv/**,tests/**,scripts/**,**/__pycache__/**}"
         }
       }

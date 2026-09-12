@@ -2,22 +2,32 @@
 
 **Person:** Shrav
 **Branch:** `shrav-branch` — keep using this branch.
+**Role:** The AI half of the original Person A job initially. Once core AI works, move to basic analysis. This is a three-person plan: A handles data/backend, B handles frontend, and you handle AI then analysis.
 **Scope:** Build the OpenRouter connection, country summaries, comparisons, and chat first. Then build basic rankings and anomaly detection/explanations.
 **Team:** A collects/serves data; B builds the website; you own AI and later analysis.
 
-## Your files — avoid overlapping edits
+## File ownership — avoid overlapping edits
+
+You own these planned files and areas:
 
 - `backend/services/ai.py`: reusable OpenRouter client and summary/comparison/chat functions.
 - `backend/routes/ai.py`: AI endpoint handlers.
-- `backend/services/analysis.py`: later ranking/anomaly calculations and explanations.
-- `backend/routes/analysis.py`: later analysis endpoint handlers.
-- `backend/cache/ai/`: saved summaries and AI fallbacks.
+- `backend/services/analysis.py`: ranking/anomaly calculations and explanation logic.
+- `backend/routes/analysis.py`: analysis endpoint handlers.
+- `backend/cache/ai/`: saved AI summaries and related fallbacks.
 
-A owns the app entry point, data fetchers, shared reader, economic cache, and shared backend dependencies/configuration. Give A your routers to register in `backend/main.py`; send dependency/configuration requests to A. These are planned files, not claims they already exist.
+A owns `main.py`, shared dependencies/configuration, data fetchers, the data reader, and economic cache files. Give A your routers to register and dependency requests; avoid editing those shared files yourself.
 
 ## Progress note
 
 Summary, comparison, and streaming chat are implemented with fictional fixtures and verified by 19 offline tests. Checked implementation tasks do not imply live-model or frontend verification. A/B agreement, router registration, real data, API settings, and cached fallbacks remain pending. See [AI_HANDOFF.md](backend/AI_HANDOFF.md) for provisional contracts and examples.
+
+## Before Hour 0
+
+- [ ] Agree with A on `get_country(code)` and `list_countries()`, return shapes, history, and missing-data behavior.
+- [ ] Agree with B on summary/comparison/chat payloads, streaming events, and errors.
+- [ ] Choose an OpenRouter model and spending budget; store the key in an ignored backend environment file, never frontend code or Git.
+- [ ] Begin AI module stubs while A prepares sample data.
 
 ## Start here: Your first milestone
 
@@ -43,7 +53,7 @@ Generate one country summary grounded in supplied sample data.
 - [x] Prepare hand-written summary/comparison response examples and streaming event documentation for B.
 - [ ] Share the examples with B and confirm the provisional API contracts.
 
-## Hours 4–8: Comparison and streaming chat
+## Hours 4–8: Finish core AI
 
 - [x] Implement and offline-test `POST /api/summarize/{country_code}`.
 - [x] Implement and offline-test `POST /api/compare` for two countries.
@@ -98,6 +108,7 @@ If AI takes longer, finish core AI first and reduce analysis scope. The original
 
 ## Stretch goals
 
-Custom Market Health Score, correlations, rolling trends, biggest movers, and time-slider preparation are optional. Add them only after the core demo works and if A/B can integrate them before hour 18. Document and validate score weights and use comparable periods for movers.
+The original/custom Market Health Score, correlations, rolling trends, biggest movers, and time-slider preparation remain optional. Add them only after the core demo works and if A/B can integrate them before hour 18. Document and validate score weights; use comparable historical periods for movers.
 
-**Done:** Core AI works reliably, followed by basic rankings and anomalies where sufficient history exists.
+**Done:** Core AI works reliably, followed by metric rankings and basic anomalies where the history supports them.
+

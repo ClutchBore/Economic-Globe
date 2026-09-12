@@ -5,7 +5,12 @@
   "data_as_of": "2026-09-12",
   "gdp": 2319899772425.92,
   "gdp_per_capita": 55697.664,
+  "gdp_per_capita_ppp": 66745.8249,
+  "gdp_growth": 1.7427,
   "inflation": 2.0723,
+  "unemployment": 6.907,
+  "population": 41651653.0,
+  "life_expectancy": 82.108,
   "bond_yield_10y": 3.42,
   "fx_rate": 0.721033,
   "fx_pair": "CAD / USD",
@@ -13,21 +18,36 @@
   "units": {
     "gdp": "USD",
     "gdp_per_capita": "USD",
+    "gdp_per_capita_ppp": "international $ (PPP)",
+    "gdp_growth": "% per year",
     "inflation": "%",
+    "unemployment": "% of labor force",
+    "population": "people",
+    "life_expectancy": "years",
     "bond_yield_10y": "%",
     "fx_rate": "USD per 1 unit of local currency"
   },
   "sources": {
     "gdp": "World Bank NY.GDP.MKTP.CD",
     "gdp_per_capita": "World Bank NY.GDP.PCAP.CD",
+    "gdp_per_capita_ppp": "World Bank NY.GDP.PCAP.PP.CD",
+    "gdp_growth": "World Bank NY.GDP.MKTP.KD.ZG",
     "inflation": "World Bank FP.CPI.TOTL.ZG",
+    "unemployment": "World Bank SL.UEM.TOTL.ZS",
+    "population": "World Bank SP.POP.TOTL",
+    "life_expectancy": "World Bank SP.DYN.LE00.IN",
     "bond_yield_10y": "FRED (OECD IRLTLT01)",
     "fx_rate": "Yahoo Finance"
   },
   "dates": {
     "gdp": "2025",
     "gdp_per_capita": "2025",
+    "gdp_per_capita_ppp": "2025",
+    "gdp_growth": "2025",
     "inflation": "2025",
+    "unemployment": "2025",
+    "population": "2025",
+    "life_expectancy": "2024",
     "bond_yield_10y": "2026-06-01",
     "fx_rate": "2026-09-12"
   },
@@ -116,6 +136,90 @@
         "value": 55697.664
       }
     ],
+    "gdp_per_capita_ppp": [
+      {
+        "year": "2016",
+        "value": 46470.6925
+      },
+      {
+        "year": "2017",
+        "value": 48317.5003
+      },
+      {
+        "year": "2018",
+        "value": 49982.6446
+      },
+      {
+        "year": "2019",
+        "value": 50499.0822
+      },
+      {
+        "year": "2020",
+        "value": 48590.7489
+      },
+      {
+        "year": "2021",
+        "value": 56995.0952
+      },
+      {
+        "year": "2022",
+        "value": 64217.0443
+      },
+      {
+        "year": "2023",
+        "value": 64962.1919
+      },
+      {
+        "year": "2024",
+        "value": 65482.9455
+      },
+      {
+        "year": "2025",
+        "value": 66745.8249
+      }
+    ],
+    "gdp_growth": [
+      {
+        "year": "2016",
+        "value": 1.0386
+      },
+      {
+        "year": "2017",
+        "value": 3.0338
+      },
+      {
+        "year": "2018",
+        "value": 2.743
+      },
+      {
+        "year": "2019",
+        "value": 1.9084
+      },
+      {
+        "year": "2020",
+        "value": -5.0382
+      },
+      {
+        "year": "2021",
+        "value": 5.9505
+      },
+      {
+        "year": "2022",
+        "value": 4.6954
+      },
+      {
+        "year": "2023",
+        "value": 1.9531
+      },
+      {
+        "year": "2024",
+        "value": 2.0463
+      },
+      {
+        "year": "2025",
+        "value": 1.7427
+      }
+    ],
     "inflation": [
       {
         "year": "2016",
@@ -156,6 +260,128 @@
       {
         "year": "2025",
         "value": 2.0723
+      }
+    ],
+    "unemployment": [
+      {
+        "year": "2016",
+        "value": 7.038
+      },
+      {
+        "year": "2017",
+        "value": 6.426
+      },
+      {
+        "year": "2018",
+        "value": 5.837
+      },
+      {
+        "year": "2019",
+        "value": 5.69
+      },
+      {
+        "year": "2020",
+        "value": 9.657
+      },
+      {
+        "year": "2021",
+        "value": 7.527
+      },
+      {
+        "year": "2022",
+        "value": 5.279
+      },
+      {
+        "year": "2023",
+        "value": 5.415
+      },
+      {
+        "year": "2024",
+        "value": 6.351
+      },
+      {
+        "year": "2025",
+        "value": 6.907
+      }
+    ],
+    "population": [
+      {
+        "year": "2016",
+        "value": 36110803.0
+      },
+      {
+        "year": "2017",
+        "value": 36545075.0
+      },
+      {
+        "year": "2018",
+        "value": 37072620.0
+      },
+      {
+        "year": "2019",
+        "value": 37618495.0
+      },
+      {
+        "year": "2020",
+        "value": 38028638.0
+      },
+      {
+        "year": "2021",
+        "value": 38239864.0
+      },
+      {
+        "year": "2022",
+        "value": 38950132.0
+      },
+      {
+        "year": "2023",
+        "value": 40049088.0
+      },
+      {
+        "year": "2024",
+        "value": 41262329.0
+      },
+      {
+        "year": "2025",
+        "value": 41651653.0
+      }
+    ],
+    "life_expectancy": [
+      {
+        "year": "2016",
+        "value": 81.94
+      },
+      {
+        "year": "2017",
+        "value": 81.8078
+      },
+      {
+        "year": "2018",
+        "value": 81.8037
+      },
+      {
+        "year": "2019",
+        "value": 82.1585
+      },
+      {
+        "year": "2020",
+        "value": 81.53
+      },
+      {
+        "year": "2021",
+        "value": 81.4515
+      },
+      {
+        "year": "2022",
+        "value": 81.0949
+      },
+      {
+        "year": "2023",
+        "value": 81.6263
+      },
+      {
+        "year": "2024",
+        "value": 82.108
       }
     ],
     "bond_yield_10y": [

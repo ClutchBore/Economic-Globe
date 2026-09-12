@@ -1,11 +1,21 @@
-"""Fetch and normalize GDP, GDP per capita, and inflation from the World Bank API."""
+"""Fetch and normalize the World Bank indicators behind each country payload.
+
+Every indicator here is populated for all 31 configured countries. Check
+coverage before adding more — a half-populated indicator leaves holes on the
+map (central government debt, GC.DOD.TOTL.GD.ZS, covers only 16 of 31).
+"""
 
 import wbgapi as wb
 
 INDICATORS = {
     "gdp": "NY.GDP.MKTP.CD",
     "gdp_per_capita": "NY.GDP.PCAP.CD",
+    "gdp_per_capita_ppp": "NY.GDP.PCAP.PP.CD",
+    "gdp_growth": "NY.GDP.MKTP.KD.ZG",
     "inflation": "FP.CPI.TOTL.ZG",
+    "unemployment": "SL.UEM.TOTL.ZS",
+    "population": "SP.POP.TOTL",
+    "life_expectancy": "SP.DYN.LE00.IN",
 }
 
 HISTORY_YEARS = 10

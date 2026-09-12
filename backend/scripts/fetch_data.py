@@ -28,15 +28,18 @@ CACHE_DIR = Path(__file__).resolve().parent.parent / "cache" / "countries"
 UNITS = {
     "gdp": "USD",
     "gdp_per_capita": "USD",
+    "gdp_per_capita_ppp": "international $ (PPP)",
+    "gdp_growth": "% per year",
     "inflation": "%",
+    "unemployment": "% of labor force",
+    "population": "people",
+    "life_expectancy": "years",
     "bond_yield_10y": "%",
     "fx_rate": "USD per 1 unit of local currency",
 }
 
 SOURCES = {
-    "gdp": "World Bank NY.GDP.MKTP.CD",
-    "gdp_per_capita": "World Bank NY.GDP.PCAP.CD",
-    "inflation": "World Bank FP.CPI.TOTL.ZG",
+    **{metric: f"World Bank {code}" for metric, code in world_bank.INDICATORS.items()},
     "bond_yield_10y": "FRED (OECD IRLTLT01)",
     "fx_rate": "Yahoo Finance",
 }
@@ -55,9 +58,7 @@ def build_country_payload(country: dict) -> dict:
         "country_name": country["name"],
         "region": country["region"],
         "data_as_of": today,
-        "gdp": wb_data["gdp"]["latest"],
-        "gdp_per_capita": wb_data["gdp_per_capita"]["latest"],
-        "inflation": wb_data["inflation"]["latest"],
+        **{metric: wb_data[metric]["latest"] for metric in world_bank.INDICATORS},
         "bond_yield_10y": bond["latest"],
         "fx_rate": fx["latest"],
         "fx_pair": country["fx_pair"],
@@ -65,16 +66,12 @@ def build_country_payload(country: dict) -> dict:
         "units": UNITS,
         "sources": SOURCES,
         "dates": {
-            "gdp": wb_data["gdp"]["date"],
-            "gdp_per_capita": wb_data["gdp_per_capita"]["date"],
-            "inflation": wb_data["inflation"]["date"],
+            **{metric: wb_data[metric]["date"] for metric in world_bank.INDICATORS},
             "bond_yield_10y": bond["date"],
             "fx_rate": today if fx["latest"] is not None else None,
         },
         "history": {
-            "gdp": wb_data["gdp"]["history"],
-            "gdp_per_capita": wb_data["gdp_per_capita"]["history"],
-            "inflation": wb_data["inflation"]["history"],
+            **{metric: wb_data[metric]["history"] for metric in world_bank.INDICATORS},
             "bond_yield_10y": bond["history"],
             "fx_rate": fx["history"],
         },

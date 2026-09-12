@@ -131,7 +131,15 @@ function AppShell() {
         horizontalOffset={globeOffset}
       />
 
-      <div className="absolute left-8 right-8 top-7 z-10 flex flex-wrap items-start justify-between gap-4">
+      {/* Hidden below the same breakpoint each panel goes fullscreen at (sm: for a single
+          country, lg: for comparison, matching the panel wrapper below) — otherwise this
+          header sits underneath and collides with that panel's own title. */}
+      <div
+        className={
+          'absolute left-8 right-8 top-7 z-10 flex flex-wrap items-start justify-between gap-4 ' +
+          (selectedCountry ? (compareCountry ? 'hidden lg:flex' : 'hidden sm:flex') : '')
+        }
+      >
         <div className="flex flex-wrap items-start gap-4">
           <div className="flex flex-col items-start gap-5">
             <button
@@ -157,7 +165,9 @@ function AppShell() {
 
           {/* Grouped with the title (rather than centered independently across the whole
               viewport) so it wraps below instead of overlapping the title or a right-docked
-              country/comparison panel at narrower widths. */}
+              country/comparison panel at narrower widths. Hidden once a country's selected —
+              redundant next to that panel's own header, and it's what caused the header to
+              collide with the panel's title in the first place. */}
           {!selectedCountry && (
             <div className="w-[280px]">
               <input

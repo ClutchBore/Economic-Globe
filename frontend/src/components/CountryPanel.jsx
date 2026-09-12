@@ -2,6 +2,7 @@ import { useState } from 'react'
 import HealthScoreGauge from './HealthScoreGauge'
 import MetricChart from './MetricChart'
 import CountryPickerList from './CountryPickerList'
+import AISummary from './AISummary'
 import { metricTabs } from '../data/metricTabs'
 
 function StatTile({ label, value }) {
@@ -170,17 +171,7 @@ export default function CountryPanel({ country, onClose, onCompare }) {
           )}
         </div>
 
-        <div className="flex flex-col gap-2.5 rounded-xl border border-white/[0.07] bg-white/[0.035] px-4 py-[15px]">
-          <div className="flex items-center gap-2">
-            <div className="flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full bg-[#3987e5]/[0.18]">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M6 0.5l1.2 3.3L10.5 5l-3.3 1.2L6 9.5l-1.2-3.3L1.5 5l3.3-1.2z" fill="#7db3f2" />
-              </svg>
-            </div>
-            <span className="text-[11.5px] font-bold tracking-wider text-slate-400">AI SUMMARY</span>
-          </div>
-          <p className="text-[13.5px] leading-[1.55] text-slate-300">{country.ai_summary}</p>
-        </div>
+        <AISummary countryCode={country.country_code} />
       </div>
 
       {/* sticky chat footer */}

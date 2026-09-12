@@ -19,10 +19,6 @@ function placeholderHealthScore(country) {
   return Math.max(15, Math.min(92, Math.round(score)))
 }
 
-function placeholderSummary(country) {
-  return `Placeholder summary — wire this up to POST /api/summarize/${country.country_code}.`
-}
-
 function placeholderQuestions(country) {
   return [`What's driving ${country.country_name}'s inflation?`, 'Compare to another country']
 }
@@ -53,7 +49,6 @@ export function CountriesProvider({ children }) {
               lng: centroid.lng,
               health_score: placeholderHealthScore(d),
               health_label: null, // omit so HealthScoreGauge derives a label from the score itself
-              ai_summary: placeholderSummary(d),
               suggested_questions: placeholderQuestions(d),
             }
           })

@@ -1,8 +1,8 @@
 {
   "country_code": "USA",
   "country_name": "United States",
-  "summary": "The United States (North America) reported GDP of USD 30,769,700,000,000 and GDP per capita of USD 90,026.5163 for 2025, as of data date 2026-09-12. Inflation was 2.9495% in 2024, and the 10-year bond yield was 4.47% as of 2026-06-01. The FX rate is unavailable (null), so no currency rate can be reported.",
+  "summary": "The United States (North America) had a GDP of USD 30,769,700,000,000 and GDP per capita of USD 90,026.5163 in 2025, with data as of 2026-09-12. Inflation was 2.9495% in 2024, while the 10-year bond yield was 4.47% as of 2026-06-01. Foreign exchange rate data is unavailable, as fx_rate, fx_pair, and fx_change_pct are all null.",
   "is_mock": false,
-  "generated_at": "2026-09-12T06:07:51.883658+00:00",
+  "generated_at": "2026-09-12T06:33:11.044748+00:00",
   "data_as_of": "2026-09-12"
 }

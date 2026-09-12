@@ -1,8 +1,8 @@
 {
   "country_code": "NGA",
   "country_name": "Nigeria",
-  "summary": "In 2025, Nigeria's GDP was $290,794,361,542.112 USD, GDP per capita was $1224.2541 USD, and inflation was 23.0101%. The 10-year bond yield is unavailable (null), and the NGN/USD exchange rate was 0.000755 USD per unit of local currency as of 2026-09-11, a -0.165% change. Historical data from 2016 to 2025 shows GDP of $668,219,992,686.575 USD in 2019 and $252,261,880,140.271 USD in 2024, with inflation reaching 33.2417% in 2024.",
+  "summary": "Nigeria's 2025 GDP was USD 290,794,361,542.112 with GDP per capita of USD 1,224.2541, and 2025 inflation was 23.0101%. As of 2026-09-12, the NGN/USD exchange rate was 0.000755 USD per 1 unit of local currency with a -0.178% change, while the 10-year bond yield is null (unavailable). GDP per capita was USD 2,138.7638 in 2023, USD 1,084.1604 in 2024, and USD 1,224.2541 in 2025; inflation was 24.6596% in 2023, 33.2417% in 2024, and 23.0101% in 2025.",
   "is_mock": false,
-  "generated_at": "2026-09-12T05:06:11.900494+00:00",
-  "data_as_of": "2026-09-11"
+  "generated_at": "2026-09-12T06:23:46.422567+00:00",
+  "data_as_of": "2026-09-12"
 }

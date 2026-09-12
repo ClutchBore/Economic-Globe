@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import HealthScoreGauge from './HealthScoreGauge'
 import MetricChart from './MetricChart'
-import { metricTabs } from '../data/sampleCountry'
+import { metricTabs } from '../data/mockCountries'
 
 function StatTile({ label, value }) {
   return (

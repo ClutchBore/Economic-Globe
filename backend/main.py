@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from routes import countries
+
 app = FastAPI(title="Economic Globe API")
 
 # Allow the local Vite dev server to call this API.
@@ -24,8 +26,9 @@ def health_check():
     return {"status": "healthy"}
 
 
-# --- Routes go here as the hackathon progresses ---
-# from routes import countries, ai, analysis
-# app.include_router(countries.router)
+app.include_router(countries.router)
+
+# --- C's routers go here once ready ---
+# from routes import ai, analysis
 # app.include_router(ai.router)
 # app.include_router(analysis.router)

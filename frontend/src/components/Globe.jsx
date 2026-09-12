@@ -29,8 +29,13 @@ function capColorFor(feature) {
   return rampColor(t)
 }
 
-export default function Globe({ onSelectCountry }) {
+export default function Globe({ onSelectCountry, spinning }) {
   const globeRef = useRef()
+  // react-globe.gl's own onPolygonClick can silently miss the first click on a given polygon
+  // (the raycasted click and its internal hover cache can land a frame apart). onPolygonHover
+  // fires reliably and immediately, so we track the hovered country ourselves and select it on
+  // a plain native click instead of trusting the built-in click handler.
+  const hoveredCountryRef = useRef(null)
   const [countries, setCountries] = useState([])
   const [size, setSize] = useState({ width: window.innerWidth, height: window.innerHeight })
 
@@ -51,46 +56,57 @@ export default function Globe({ onSelectCountry }) {
   }, [])
 
   useEffect(() => {
+    const controls = globeRef.current?.controls()
+    if (controls) controls.autoRotate = spinning
+  }, [spinning])
+
+  useEffect(() => {
     const globe = globeRef.current
     if (!globe) return
     globe.pointOfView({ lat: 25, lng: 15, altitude: 2.1 }, 0)
-    globe.controls().autoRotate = true
     globe.controls().autoRotateSpeed = 0.35
   }, [])
 
   const globeMaterial = useMemo(() => new THREE.MeshPhongMaterial({ color: '#0f172a' }), [])
 
+  function handleClick() {
+    const country = hoveredCountryRef.current
+    if (!country) return
+    globeRef.current.controls().autoRotate = false
+    onSelectCountry(country)
+  }
+
   return (
-    <GlobeGL
-      ref={globeRef}
-      width={size.width}
-      height={size.height}
-      backgroundColor="rgba(0,0,0,0)"
-      globeMaterial={globeMaterial}
-      showAtmosphere
-      atmosphereColor="#3987e5"
-      atmosphereAltitude={0.2}
-      showGraticules
-      polygonsData={countries}
-      polygonCapColor={capColorFor}
-      polygonSideColor={() => 'rgba(15,23,42,0.6)'}
-      polygonStrokeColor={() => 'rgba(255,255,255,0.15)'}
-      polygonAltitude={(feature) => (BY_CODE[feature.properties.ISO_A3] ? 0.02 : 0.006)}
-      polygonLabel={(feature) => {
-        const country = BY_CODE[feature.properties.ISO_A3]
-        if (!country) return `<div style="font-size:12px;">${feature.properties.NAME}</div>`
-        return `<div style="font:600 13px system-ui; background:#1e293b; color:#fff; padding:6px 9px; border-radius:6px; border:1px solid rgba(255,255,255,0.12);">
-          ${country.country_name}<br/>
-          <span style="color:#94a3b8; font-weight:400;">GDP $${(country.gdp / 1e12).toFixed(2)}T · Score ${country.health_score}</span>
-        </div>`
-      }}
-      onPolygonClick={(feature) => {
-        const country = BY_CODE[feature.properties.ISO_A3]
-        if (country) onSelectCountry(country)
-      }}
-      onPolygonHover={(feature) => {
-        document.body.style.cursor = feature && BY_CODE[feature.properties.ISO_A3] ? 'pointer' : 'default'
-      }}
-    />
+    <div className="h-screen w-screen" onClick={handleClick}>
+      <GlobeGL
+        ref={globeRef}
+        width={size.width}
+        height={size.height}
+        backgroundColor="rgba(0,0,0,0)"
+        globeMaterial={globeMaterial}
+        showAtmosphere
+        atmosphereColor="#3987e5"
+        atmosphereAltitude={0.2}
+        showGraticules
+        polygonsData={countries}
+        polygonCapColor={capColorFor}
+        polygonSideColor={() => 'rgba(15,23,42,0.6)'}
+        polygonStrokeColor={() => 'rgba(255,255,255,0.15)'}
+        polygonAltitude={(feature) => (BY_CODE[feature.properties.ISO_A3] ? 0.02 : 0.006)}
+        polygonLabel={(feature) => {
+          const country = BY_CODE[feature.properties.ISO_A3]
+          if (!country) return `<div style="font-size:12px;">${feature.properties.NAME}</div>`
+          return `<div style="font:600 13px system-ui; background:#1e293b; color:#fff; padding:6px 9px; border-radius:6px; border:1px solid rgba(255,255,255,0.12);">
+            ${country.country_name}<br/>
+            <span style="color:#94a3b8; font-weight:400;">GDP $${(country.gdp / 1e12).toFixed(2)}T · Score ${country.health_score}</span>
+          </div>`
+        }}
+        onPolygonHover={(feature) => {
+          const country = feature ? BY_CODE[feature.properties.ISO_A3] : null
+          hoveredCountryRef.current = country
+          document.body.style.cursor = country ? 'pointer' : 'default'
+        }}
+      />
+    </div>
   )
 }

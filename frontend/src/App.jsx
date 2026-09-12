@@ -15,7 +15,7 @@ function App() {
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-slate-950 text-white">
-      <Globe onSelectCountry={setSelectedCountry} />
+      <Globe onSelectCountry={setSelectedCountry} spinning={!selectedCountry} />
 
       <div className="pointer-events-none absolute left-8 top-7 flex flex-col gap-1">
         <span className="text-[15px] font-semibold tracking-wide text-slate-100">Economic Globe</span>

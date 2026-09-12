@@ -293,33 +293,56 @@ COUNTRIES = [
     for code, name, region in _ECONOMIES
 ]
 
-# FRED's mirror of OECD's long-term (10y) government bond yield series,
-# `IRLTLT01<ISO2>M156N`. Only these economies have a known free source; the rest
-# report a null bond_yield_10y with an empty history.
+# FRED's mirror of OECD's long-term (10y) government bond yield series. FRED carries
+# these under two different id shapes, and a country may exist under one but not the
+# other — probe both before concluding a country has no series:
+#   `IRLTLT01<ISO2>M156N`  the long-standing OECD form
+#   `<ISO3>IRLTLT01STM`    a later form, carrying India, Colombia and the Baltics
+#
+# Every entry below was probed against FRED and returns a current value; economies
+# absent here report a null bond_yield_10y with an empty history. Coverage tops out
+# near the OECD membership because most economies have no liquid 10-year
+# local-currency sovereign bond to quote — the limit is the instrument, not the API.
+#
+# Probed under both forms and genuinely unavailable, so nobody re-guesses them:
+# BRA, CHN, IDN, EST and ISL have no usable series; RUS and TUR have real ones that
+# stopped updating and are rejected by the staleness guard in services/fred.py.
 FRED_BOND_SERIES = {
     "AUS": "IRLTLT01AUM156N",
-    # Unverified — OECD "key partner" coverage varies by series family.
-    "BRA": "IRLTLT01BRM156N",
+    "AUT": "IRLTLT01ATM156N",
+    "BEL": "IRLTLT01BEM156N",
     "CAN": "IRLTLT01CAM156N",
     "CHE": "IRLTLT01CHM156N",
-    "CHN": "IRLTLT01CNM156N",
+    "CHL": "IRLTLT01CLM156N",
+    "COL": "COLIRLTLT01STM",
+    "CRI": "CRIIRLTLT01STM",
+    "CZE": "IRLTLT01CZM156N",
     "DEU": "IRLTLT01DEM156N",
+    "DNK": "IRLTLT01DKM156N",
     "ESP": "IRLTLT01ESM156N",
+    "FIN": "IRLTLT01FIM156N",
     "FRA": "IRLTLT01FRM156N",
     "GBR": "IRLTLT01GBM156N",
-    "IDN": "IRLTLT01IDM156N",
-    "IND": "IRLTLT01INM156N",
+    "GRC": "IRLTLT01GRM156N",
+    "HUN": "IRLTLT01HUM156N",
+    "IND": "INDIRLTLT01STM",
+    "IRL": "IRLTLT01IEM156N",
+    "ISR": "IRLTLT01ILM156N",
     "ITA": "IRLTLT01ITM156N",
     "JPN": "IRLTLT01JPM156N",
     "KOR": "IRLTLT01KRM156N",
+    "LTU": "LTUIRLTLT01STM",
+    "LUX": "IRLTLT01LUM156N",
+    "LVA": "LVAIRLTLT01STM",
     "MEX": "IRLTLT01MXM156N",
     "NLD": "IRLTLT01NLM156N",
     "NOR": "IRLTLT01NOM156N",
     "NZL": "IRLTLT01NZM156N",
     "POL": "IRLTLT01PLM156N",
-    "RUS": "IRLTLT01RUM156N",
+    "PRT": "IRLTLT01PTM156N",
+    "SVK": "IRLTLT01SKM156N",
+    "SVN": "IRLTLT01SIM156N",
     "SWE": "IRLTLT01SEM156N",
-    "TUR": "IRLTLT01TRM156N",
     "USA": "IRLTLT01USM156N",
     "ZAF": "IRLTLT01ZAM156N",
 }

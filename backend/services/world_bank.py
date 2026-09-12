@@ -29,6 +29,11 @@ INDICATORS = {
     "co2_per_capita": "EN.GHG.CO2.PC.CE.AR5",
 }
 
+# Official exchange rate, local currency units per US$. Fetched alongside the
+# metrics above but not exposed as one: scripts/fetch_data.py inverts it and folds
+# it into the payload's fx_rate, as the broad fallback behind Yahoo's live quotes.
+FX_FALLBACK = {"fx_rate_lcu_per_usd": "PA.NUS.FCRF"}
+
 HISTORY_YEARS = 10
 
 
@@ -55,7 +60,7 @@ def fetch_all_metrics(codes: list[str]) -> dict[str, dict]:
     time_range = range(current_year - HISTORY_YEARS, current_year + 1)
     result: dict[str, dict] = {code: {} for code in codes}
 
-    for metric, indicator in INDICATORS.items():
+    for metric, indicator in {**INDICATORS, **FX_FALLBACK}.items():
         try:
             df = wb.data.DataFrame(
                 indicator, economy=codes, time=time_range, numericTimeKeys=True

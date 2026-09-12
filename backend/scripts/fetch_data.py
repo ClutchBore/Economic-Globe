@@ -47,9 +47,41 @@ SOURCES = {
 }
 
 
-def build_country_payload(country: dict, wb_data: dict, fx: dict) -> dict:
+def _resolve_fx(yahoo: dict, wb_series: dict, today: str) -> tuple[dict, str]:
+    """Pick an FX rate, preferring Yahoo's live quote over the World Bank's.
+
+    Yahoo covers ~45 economies with a daily quote and a day-over-day change; the
+    World Bank covers ~212 but only as an annual average, so it fills the gap
+    rather than replacing it. Its figures are local-currency-per-USD, inverted
+    here into this payload's USD-per-local-currency convention.
+    """
+    if yahoo["latest"] is not None:
+        return {**yahoo, "date": today}, "Yahoo Finance"
+
+    def invert(value):
+        # A rate of exactly 1 means the economy uses the US dollar (Ecuador, Guam)
+        # or pegs to it at par (Bermuda), so there is no exchange rate to report —
+        # the same reason the US itself carries no FX ticker.
+        if not value or value == 1:
+            return None
+        return round(1 / value, 6)
+
+    return {
+        "latest": invert(wb_series["latest"]),
+        "change_pct": None,  # an annual average has no day-over-day change
+        "history": [
+            {"year": point["year"], "value": invert(point["value"])}
+            for point in wb_series["history"]
+            if point["value"]
+        ],
+        "date": wb_series["date"],
+    }, "World Bank PA.NUS.FCRF"
+
+
+def build_country_payload(country: dict, wb_data: dict, yahoo_fx: dict) -> dict:
     bond = fred.fetch_bond_yield(FRED_BOND_SERIES.get(country["code"]))
     today = str(datetime.date.today())
+    fx, fx_source = _resolve_fx(yahoo_fx, wb_data["fx_rate_lcu_per_usd"], today)
 
     return {
         "country_code": country["code"],
@@ -62,11 +94,12 @@ def build_country_payload(country: dict, wb_data: dict, fx: dict) -> dict:
         "fx_pair": country["fx_pair"],
         "fx_change_pct": fx["change_pct"],
         "units": UNITS,
-        "sources": SOURCES,
+        # fx_rate's source varies by country, so it can't live in the shared constant.
+        "sources": {**SOURCES, "fx_rate": fx_source},
         "dates": {
             **{metric: wb_data[metric]["date"] for metric in world_bank.INDICATORS},
             "bond_yield_10y": bond["date"],
-            "fx_rate": today if fx["latest"] is not None else None,
+            "fx_rate": fx["date"] if fx["latest"] is not None else None,
         },
         "history": {
             **{metric: wb_data[metric]["history"] for metric in world_bank.INDICATORS},

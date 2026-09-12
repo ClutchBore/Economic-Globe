@@ -5,7 +5,7 @@ name: Refresh country data
 on:
   schedule:
     - cron: "0 6 * * *"
-  workflow_dispatch:
+  workflow_dispatch: # manual "Run workflow" trigger from the Actions tab
 
 jobs:
   refresh:

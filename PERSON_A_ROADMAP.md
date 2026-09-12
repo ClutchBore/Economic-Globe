@@ -1,80 +1,71 @@
-# Person A Roadmap — Backend, Data Pipeline & AI Layer
+# Person A Roadmap — Data & Backend
 
-**Branch:** `feature/backend-data-ai`
-**Scope:** Data pipeline, FastAPI backend, AI layer (summarize/compare/chat)
+**Branch:** `feature/backend-data`
+**Role:** The data/backend half of the original Person A job. Person C builds AI alongside you, then moves to analysis; Person B builds the website.
 
----
+## File ownership — avoid overlapping edits
 
-## Before Hour 0 (Prep)
+You own these planned files and areas:
 
-- [ ] Confirm open decisions with the team:
-  - [ ] Globe vs. 2D map (affects what shape of data B needs, if any)
-  - [ ] Is IMF DataMapper in or out of scope for the data pipeline?
-  - [ ] Which OpenRouter model to use (small/fast, cost-conscious)
-- [ ] Create OpenRouter account, get API key, set a `max_price` cap / usage alert
-- [ ] Get World Bank (`wbgapi`) and yfinance working locally in a scratch script
-- [ ] Agree on the **per-country schema** with B and C:
-  `{country_code, country_name, gdp, gdp_per_capita, inflation, bond_yield_10y, fx_rate, ...}`
-- [ ] Draft the **country config file** shape: `country_code → ticker suffix → index/ETF ticker → currency → World Bank code`, capped at ~25–30 countries
+- `backend/main.py`: app setup and router registration.
+- `backend/requirements.txt` and shared backend/deployment configuration.
+- `backend/config/`: country/source/ticker mappings.
+- `backend/services/world_bank.py` and `market_data.py`: fetching and normalization.
+- `backend/services/data_store.py`: shared cache-reading functions.
+- `backend/routes/countries.py`: country data endpoints.
+- `backend/cache/countries/` and `backend/cache/mock/`: economic data and shared sample fixtures.
 
-## Hours 0–4: Skeleton + Mock Fixture
+C owns AI and analysis services/routers and `backend/cache/ai/`. Register C's routers; leave their handlers to C. Coordinate dependency/configuration requests through you. These are proposed ownership boundaries, not existing-file claims.
 
-- [ ] Set up FastAPI app skeleton (`backend/main.py`), confirm `/api/health` returns `{"status": "healthy"}`
-- [ ] Create `backend/config/` with the country config file (25–30 countries)
-- [ ] Write a small hand-written **mock data fixture** JSON matching the shared schema and publish it immediately — this unblocks B and C
-- [ ] Start fetch/normalize scripts:
-  - [ ] `services/` — World Bank fetch (`wbgapi`)
-  - [ ] `services/` — yfinance fetch (rate-limited, cached, retry/backoff)
-  - [ ] IMF fetch, if kept in scope
-- [ ] Set up the shared per-country JSON cache location (`backend/cache/`)
+## Before Hour 0
 
-## Hours 4–8: Real Data + Routes
+- [ ] Agree with B and C on country codes, metric names, units, observation dates, sources, null values, and history format.
+- [ ] Agree on `get_country(code)` and `list_countries()` in `services/data_store.py`, including what missing countries return.
+- [ ] Choose a reliable initial country/metric set; aim for 25–30 countries if coverage allows.
+- [ ] Verify the existing backend scaffold and source access.
+- [ ] Agree on country endpoint payloads with B and C.
 
-- [ ] Finish fetch/normalize scripts, populate the real cache from live sources
-- [ ] Implement cache-first read pattern: reads hit cache; live yfinance call only as optional refresh, with fallback to last-known-good data
-- [ ] Build data-serving routes:
-  - [ ] By country
-  - [ ] By metric
-  - [ ] By comparison pair
-- [ ] **Hour 4 sync**: confirm schema hasn't drifted, hand off real routes so B can swap off the mock fixture
-- [ ] Swap the mock fixture for real cached data once validated
+## Hours 0–4: Unblock B and C
 
-## Hours 8–14: AI Layer
+- [ ] Publish sample data in hour 0–1, including dated history and missing-value examples.
+- [ ] Make the shared data-reader functions return that fixture initially, so C can build AI immediately.
+- [ ] Build country mappings and World Bank/yfinance fetchers.
+- [ ] Save normalized real data with units, dates, sources, and missing values.
+- [ ] Begin country-list/detail endpoints; keep live refresh separate from normal reads.
+- [ ] At hour 4, merge the first working real-data subset and cache-reader implementation.
 
-- [ ] Build `services/ai.py` as a reusable OpenRouter client/module (so C can reuse it for anomaly narration instead of duplicating)
-- [ ] Implement `summarize_country`
-- [ ] Implement `compare_countries`
-- [ ] Implement `chat_about_country` (streaming-friendly, since B's chat UI expects streaming)
-- [ ] Wire routes:
-  - [ ] `POST /api/summarize/{country_code}`
-  - [ ] `POST /api/compare`
-  - [ ] `POST /api/chat/{country_code}`
-- [ ] Pre-generate and cache country summaries ahead of the demo (fallback if live AI calls are slow/rate-limited)
-- [ ] **Hour 8 sync**: confirm AI route contracts with B, confirm Market Health Score / anomaly output shape with C
+## Hours 4–8: Reliable data backend
 
-## Hours 14–18: Integrate C's Analysis Layer
+- [ ] Complete country endpoints, including history for charts and analysis.
+- [ ] Replace mock reader inputs with real cached data without changing the agreed return format.
+- [ ] Preserve last-known-good data on refresh failure; use bounded retries.
+- [ ] Validate demo-country values, dates, and units.
+- [ ] Register C's AI router in `main.py`.
+- [ ] Help B connect data and C connect real country context.
+- [ ] At hour 8, check summary/comparison/chat with B and C.
 
-- [ ] Wire in Person C's Market Health Score, anomaly, and rankings outputs
-- [ ] Register route `POST /api/anomaly/explain` (logic owned by C, route lives here)
-- [ ] Confirm C's `explain_anomaly` reuses your OpenRouter client module rather than a separate implementation
-- [ ] Smoke-test the full detect → explain → serve flow end-to-end with B's UI
+## Hours 8–14: Integration and early deployment
 
-## Hours 18–22: Deploy & Harden
+- [ ] Resolve data gaps while C starts analysis.
+- [ ] Confirm adequate history for C's selected anomaly metric.
+- [ ] Agree on analysis outputs with B/C and register C's analysis router when ready.
+- [ ] Try backend deployment early: packaged cache, environment variables, frontend origin, and deployed requests.
+- [ ] At hour 14, check ranking/anomaly endpoints with B.
 
-- [ ] Deploy backend to Vercel (Services, same project as frontend)
-- [ ] Test cold starts and timeouts against real AI call latency
-- [ ] Confirm cache-first fallback behaves correctly under rate limits / API failures
-- [ ] Double-check OpenRouter usage/cost is within budget
-- [ ] Fix any last integration bugs surfaced by B or C
+## Hours 14–18: End-to-end checks
+
+- [ ] Verify data → AI → UI and anomaly → explanation → UI.
+- [ ] Check unknown countries, missing data, and unavailable historical analysis.
+- [ ] Fix integration/deployment issues and freeze feature scope at hour 18.
+
+## Hours 18–22: Deploy and rehearse
+
+- [ ] Finalize backend deployment with B.
+- [ ] Check cold starts, timeouts, and fallbacks with C.
+- [ ] Freeze real demo data and rehearse the full flow.
 
 ## Hours 22–24: Buffer
 
-- [ ] Kept empty on purpose — use only if something upstream slipped
+- [ ] Fix demo blockers only.
 
----
-
-## Cross-cutting reminders
-
-- Never let a live external API call sit in the critical demo path — cache-first, always.
-- Publish the mock fixture **early** (hour 0–1 ideally) — B and C are blocked without it.
-- Keep `services/ai.py` generic enough that C's anomaly narration is a thin wrapper, not a fork.
+**Done:** Real cached data is served reliably, C's routers are registered, and the deployed frontend can use the backend.

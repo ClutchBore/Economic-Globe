@@ -25,6 +25,13 @@ function AppShell() {
     setCompareCountry(null)
   }
 
+  // Entering comparison hides the search bar, so drop any half-typed query with
+  // it — otherwise it reappears, stale, when the comparison closes.
+  function compareWith(country) {
+    setCompareCountry(country)
+    if (country) setCountrySearch('')
+  }
+
   const searchResults = useMemo(() => {
     const query = countrySearch.trim().toLowerCase()
     if (!query) return []
@@ -145,31 +152,35 @@ function AppShell() {
         </button>
       </div>
 
-      <div className="absolute left-1/2 top-7 z-10 w-[280px] -translate-x-1/2">
-        <input
-          value={countrySearch}
-          onChange={(e) => setCountrySearch(e.target.value)}
-          placeholder="Search countries..."
-          className="w-full border border-slate-900 bg-white px-3 py-1.5 text-[12.5px] font-semibold text-slate-950 outline-none placeholder:text-slate-500 focus:border-slate-950"
-        />
-        {searchResults.length > 0 && (
-          <div className="mt-1 max-h-64 overflow-y-auto border border-slate-900 bg-white shadow-lg">
-            {searchResults.map((country) => (
-              <button
-                key={country.country_code}
-                onClick={() => {
-                  selectCountry(country)
-                  setCountrySearch('')
-                }}
-                className="flex w-full items-center justify-between px-3 py-1.5 text-left text-[12.5px] font-semibold text-slate-800 hover:bg-slate-100"
-              >
-                <span>{country.country_name}</span>
-                <span className="text-[11px] font-bold text-slate-500">{country.country_code}</span>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+      {/* Comparison view owns the top of the screen and picks its own second
+          country, so the global search would be both redundant and overlapping. */}
+      {!compareCountry && (
+        <div className="absolute left-1/2 top-7 z-10 w-[280px] -translate-x-1/2">
+          <input
+            value={countrySearch}
+            onChange={(e) => setCountrySearch(e.target.value)}
+            placeholder="Search countries..."
+            className="w-full border border-slate-900 bg-white px-3 py-1.5 text-[12.5px] font-semibold text-slate-950 outline-none placeholder:text-slate-500 focus:border-slate-950"
+          />
+          {searchResults.length > 0 && (
+            <div className="mt-1 max-h-64 overflow-y-auto border border-slate-900 bg-white shadow-lg">
+              {searchResults.map((country) => (
+                <button
+                  key={country.country_code}
+                  onClick={() => {
+                    selectCountry(country)
+                    setCountrySearch('')
+                  }}
+                  className="flex w-full items-center justify-between px-3 py-1.5 text-left text-[12.5px] font-semibold text-slate-800 hover:bg-slate-100"
+                >
+                  <span>{country.country_name}</span>
+                  <span className="text-[11px] font-bold text-slate-500">{country.country_code}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="absolute right-8 top-7 flex items-center gap-3">
         <span className="text-[12px] font-bold uppercase tracking-wide text-slate-950">
@@ -212,14 +223,14 @@ function AppShell() {
               countryA={selectedCountry}
               countryB={compareCountry}
               onClose={() => setCompareCountry(null)}
-              onChangeCountryB={setCompareCountry}
+              onChangeCountryB={compareWith}
             />
           ) : (
             <CountryPanel
               key={selectedCountry.country_code}
               country={selectedCountry}
               onClose={() => setSelectedCountry(null)}
-              onCompare={setCompareCountry}
+              onCompare={compareWith}
             />
           )}
         </div>

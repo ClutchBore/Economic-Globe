@@ -50,6 +50,7 @@ function App() {
         >
           {compareCountry ? (
             <ComparisonPanel
+              key={`${selectedCountry.country_code}-${compareCountry.country_code}`}
               countryA={selectedCountry}
               countryB={compareCountry}
               onClose={() => setCompareCountry(null)}
@@ -57,6 +58,7 @@ function App() {
             />
           ) : (
             <CountryPanel
+              key={selectedCountry.country_code}
               country={selectedCountry}
               onClose={() => setSelectedCountry(null)}
               onCompare={setCompareCountry}

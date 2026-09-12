@@ -38,10 +38,37 @@ COUNTRIES = [
     {"code": "SAU", "name": "Saudi Arabia", "region": "Middle East", "wb_code": "SAU", "fx_ticker": "SARUSD=X", "fx_pair": "SAR / USD"},
 ]
 
-# US 10-year Treasury yield is the only bond series with a reliable free
-# daily ticker; other countries stay null until a comparable source is added.
-BOND_YIELD_TICKERS = {
-    "USA": "^TNX",
+# FRED's mirror of OECD's long-term (10y) government bond yield series,
+# `IRLTLT01<ISO2>M156N`. Confirmed OECD members first; the "key partner"
+# entries below are a best-effort guess at the same naming pattern — the
+# fetch nulls out cleanly if a series doesn't actually exist. Countries with
+# no entry (SGP, THA, VNM, ARG, NGA, EGY, SAU) have no known free source.
+FRED_BOND_SERIES = {
+    "USA": "IRLTLT01USM156N",
+    "DEU": "IRLTLT01DEM156N",
+    "FRA": "IRLTLT01FRM156N",
+    "GBR": "IRLTLT01GBM156N",
+    "ITA": "IRLTLT01ITM156N",
+    "ESP": "IRLTLT01ESM156N",
+    "NLD": "IRLTLT01NLM156N",
+    "CHE": "IRLTLT01CHM156N",
+    "SWE": "IRLTLT01SEM156N",
+    "NOR": "IRLTLT01NOM156N",
+    "POL": "IRLTLT01PLM156N",
+    "TUR": "IRLTLT01TRM156N",
+    "JPN": "IRLTLT01JPM156N",
+    "KOR": "IRLTLT01KRM156N",
+    "AUS": "IRLTLT01AUM156N",
+    "NZL": "IRLTLT01NZM156N",
+    "CAN": "IRLTLT01CAM156N",
+    "MEX": "IRLTLT01MXM156N",
+    # Unverified — OECD "key partner" coverage varies by series family.
+    "CHN": "IRLTLT01CNM156N",
+    "IND": "IRLTLT01INM156N",
+    "IDN": "IRLTLT01IDM156N",
+    "ZAF": "IRLTLT01ZAM156N",
+    "BRA": "IRLTLT01BRM156N",
+    "RUS": "IRLTLT01RUM156N",
 }
 
 

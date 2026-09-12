@@ -29,14 +29,14 @@ It does not need a running server — it drives the app in-process through FastA
 |---|---|
 | API contract | `/api/health` and `/` respond; `/api/countries` returns a non-empty list; every entry has `country_code`, `country_name`, `region` |
 | Country detail | `/api/countries/DEU` returns 200 with all 15 required keys; `history`, `units`, `sources` and `dates` cover all five metrics; GDP history is non-empty and dated; lowercase codes resolve |
-| Missing data | Unknown code returns 404 with a message; USA `fx_rate` is null (USD is the quote currency); USA `bond_yield_10y` is a plausible percentage; non-US bond yields are null with an empty history array |
+| Missing data | Unknown code returns 404 with a message; USA `fx_rate` is null (USD is the quote currency); for USA/DEU/SAU, `bond_yield_10y` is either null with an empty history array, or a plausible percentage with non-empty history — never inconsistent |
 
 ### When it fails
 
 - **Import errors** — you're not in `backend/`. The packages resolve relative to it.
 - **`0 countries`** — `cache/countries/` is empty. Run `python scripts/fetch_data.py`.
 - **Missing keys / empty history** — the cache predates a schema change. Re-run the fetch.
-- **Bond yield out of range** — the `^TNX` scaling is wrong again. Yahoo has changed this convention before; it currently returns a plain percentage (`4.975` = 4.975%), so `services/market_data.py` must not rescale it.
+- **Bond yield value/history mismatch** — a non-null value with an empty history array (or vice versa) means `services/fred.py` or the cache is inconsistent; every metric should have both or neither.
 
 ## Refreshing the cache
 
@@ -44,9 +44,11 @@ It does not need a running server — it drives the app in-process through FastA
 python scripts/fetch_data.py
 ```
 
-Re-fetches all 31 countries from the World Bank (`wbgapi`) and Yahoo Finance (`yfinance`), writing `cache/countries/<CODE>.json`. Takes a few minutes. Safe to re-run: a country whose fetch raises is skipped and keeps its last good file.
+Re-fetches all 31 countries from the World Bank (`wbgapi`), Yahoo Finance (`yfinance`, FX only), and FRED (`bond_yield_10y`), writing `cache/countries/<CODE>.json`. Takes a few minutes. Safe to re-run: a country whose fetch raises is skipped and keeps its last good file.
 
 Requests never hit these sources — reads come from the cached JSON, so refreshing is always a deliberate step.
+
+**Bond yields need `FRED_API_KEY`** in `backend/.env` (free, instant: https://fred.stlouisfed.org/docs/api/api_key.html). Without it, every country's `bond_yield_10y` comes back null — the fetch doesn't fail, it just has nothing to report. Coverage is `config.countries.FRED_BOND_SERIES`: confirmed for 18 OECD members, best-effort for 6 more (China, India, Indonesia, South Africa, Brazil, Russia — unverified series IDs, null out cleanly if wrong), no known free source for the remaining 7 (Singapore, Thailand, Vietnam, Argentina, Nigeria, Egypt, Saudi Arabia).
 
 ## Data spot-checks
 

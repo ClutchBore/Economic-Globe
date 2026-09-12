@@ -2,14 +2,14 @@
   "country_code": "POL",
   "country_name": "Poland",
   "region": "Europe",
-  "data_as_of": "2026-09-11",
+  "data_as_of": "2026-09-12",
   "gdp": 1035491784197.44,
   "gdp_per_capita": 28419.5777,
   "inflation": 3.8142,
-  "bond_yield_10y": null,
-  "fx_rate": 0.268449,
+  "bond_yield_10y": 5.51,
+  "fx_rate": 0.268572,
   "fx_pair": "PLN / USD",
-  "fx_change_pct": -0.027,
+  "fx_change_pct": 0.019,
   "units": {
     "gdp": "USD",
     "gdp_per_capita": "USD",
@@ -21,15 +21,15 @@
     "gdp": "World Bank NY.GDP.MKTP.CD",
     "gdp_per_capita": "World Bank NY.GDP.PCAP.CD",
     "inflation": "World Bank FP.CPI.TOTL.ZG",
-    "bond_yield_10y": "Yahoo Finance",
+    "bond_yield_10y": "FRED (OECD IRLTLT01)",
     "fx_rate": "Yahoo Finance"
   },
   "dates": {
     "gdp": "2025",
     "gdp_per_capita": "2025",
     "inflation": "2025",
-    "bond_yield_10y": null,
-    "fx_rate": "2026-09-11"
+    "bond_yield_10y": "2026-06-01",
+    "fx_rate": "2026-09-12"
   },
   "history": {
     "gdp": [
@@ -158,7 +158,52 @@
         "value": 3.8142
       }
     ],
-    "bond_yield_10y": [],
+    "bond_yield_10y": [
+      {
+        "year": "2016",
+        "value": 3.0357
+      },
+      {
+        "year": "2017",
+        "value": 3.42
+      },
+      {
+        "year": "2018",
+        "value": 3.1983
+      },
+      {
+        "year": "2019",
+        "value": 2.3475
+      },
+      {
+        "year": "2020",
+        "value": 1.4992
+      },
+      {
+        "year": "2021",
+        "value": 1.9442
+      },
+      {
+        "year": "2022",
+        "value": 6.0533
+      },
+      {
+        "year": "2023",
+        "value": 5.8058
+      },
+      {
+        "year": "2024",
+        "value": 5.525
+      },
+      {
+        "year": "2025",
+        "value": 5.4975
+      },
+      {
+        "year": "2026",
+        "value": 5.4167
+      }
+    ],
     "fx_rate": [
       {
         "year": "2020",
@@ -186,7 +231,7 @@
       },
       {
         "year": "2026",
-        "value": 0.272848
+        "value": 0.272849
       }
     ]
   }

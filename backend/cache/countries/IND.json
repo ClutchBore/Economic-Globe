@@ -2,14 +2,14 @@
   "country_code": "IND",
   "country_name": "India",
   "region": "Asia",
-  "data_as_of": "2026-09-11",
+  "data_as_of": "2026-09-12",
   "gdp": 3956067115771.63,
   "gdp_per_capita": 2702.4799,
   "inflation": 2.3988,
   "bond_yield_10y": null,
   "fx_rate": 0.010467,
   "fx_pair": "INR / USD",
-  "fx_change_pct": -0.448,
+  "fx_change_pct": 0.162,
   "units": {
     "gdp": "USD",
     "gdp_per_capita": "USD",
@@ -21,7 +21,7 @@
     "gdp": "World Bank NY.GDP.MKTP.CD",
     "gdp_per_capita": "World Bank NY.GDP.PCAP.CD",
     "inflation": "World Bank FP.CPI.TOTL.ZG",
-    "bond_yield_10y": "Yahoo Finance",
+    "bond_yield_10y": "FRED (OECD IRLTLT01)",
     "fx_rate": "Yahoo Finance"
   },
   "dates": {
@@ -29,7 +29,7 @@
     "gdp_per_capita": "2025",
     "inflation": "2025",
     "bond_yield_10y": null,
-    "fx_rate": "2026-09-11"
+    "fx_rate": "2026-09-12"
   },
   "history": {
     "gdp": [
@@ -186,7 +186,7 @@
       },
       {
         "year": "2026",
-        "value": 0.010665
+        "value": 0.010664
       }
     ]
   }

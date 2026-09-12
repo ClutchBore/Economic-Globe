@@ -1,32 +1,35 @@
-"""Shared reader for country data. Loads the cached JSON into memory once at
-import time, so requests do zero disk or network I/O; `scripts/fetch_data.py`
-is what refreshes the on-disk cache this loads from.
+"""Shared reader for country data. Loads the cached payloads into memory once at
+import time, so requests do zero network I/O; `scripts/fetch_data.py` is what
+refreshes the KV entries this loads from.
 """
 
 import json
 from pathlib import Path
 
 from config.countries import list_country_configs
+from services import kv_client
 
-CACHE_DIR = Path(__file__).resolve().parent.parent / "cache"
-COUNTRIES_CACHE_DIR = CACHE_DIR / "countries"
-MOCK_CACHE_DIR = CACHE_DIR / "mock"
+MOCK_CACHE_DIR = Path(__file__).resolve().parent.parent / "cache" / "mock"
 
 
 def _load_all() -> dict[str, dict]:
-    """Read every cached country file into memory once, at import time.
+    """Read the mock files, then overlay whatever KV holds, once at import time.
 
-    Real fetched data wins over the mock fallback when both exist for the
-    same code. A malformed JSON file fails loudly here — at boot — instead
-    of on whichever request happens to hit that country during a demo.
+    Real fetched data wins over the mock fallback when both exist for the same
+    code. An unreachable KV fails loudly here — at boot — instead of on
+    whichever request happens to hit that country during a demo.
     """
     data: dict[str, dict] = {}
-    for directory in (MOCK_CACHE_DIR, COUNTRIES_CACHE_DIR):
-        if not directory.exists():
-            continue
-        for path in sorted(directory.glob("*.json")):
+    if MOCK_CACHE_DIR.exists():
+        for path in sorted(MOCK_CACHE_DIR.glob("*.json")):
             with open(path) as f:
                 data[path.stem] = json.load(f)
+
+    codes = [c["code"] for c in list_country_configs()]
+    payloads = kv_client.mget_json([kv_client.country_key(code) for code in codes])
+    for code, payload in zip(codes, payloads):
+        if payload is not None:
+            data[code] = payload
     return data
 
 

@@ -183,6 +183,71 @@ Send one anomaly object from `/api/anomalies/{metric}` plus threshold and method
 ```
 
 If `is_fallback` is true, the backend used a deterministic template because IFM failed or was unavailable. The explanation should be displayed as a statistical explanation only. It does not claim a real-world cause.
+Market Health Score:
+
+```http
+GET /api/market-health
+```
+
+This is a stretch-goal demo score on a 0-100 scale. It combines available GDP per capita, latest GDP growth, inflation stability, FX stability, and 10-year bond yield components. Missing components are excluded and the remaining weights are re-normalized, so show the `missing_components` list or a small "based on available data" label.
+
+Response shape:
+
+```json
+{
+  "method": "weighted normalized score across available GDP per capita, GDP growth, inflation, FX movement, and bond yield components",
+  "score_scale": "0-100",
+  "weights": {
+    "gdp_per_capita": 30,
+    "gdp_growth": 25,
+    "inflation_stability": 25,
+    "fx_stability": 10,
+    "bond_yield": 10
+  },
+  "rankings": [
+    {
+      "rank": 1,
+      "country_code": "USA",
+      "country_name": "United States",
+      "score": 82.4,
+      "used_weight": 90,
+      "missing_components": ["bond_yield"],
+      "components": [
+        {
+          "name": "inflation_stability",
+          "label": "Inflation stability",
+          "value": 2.5,
+          "unit": "%",
+          "score": 95.0,
+          "weight": 25,
+          "note": "Scores highest near 2%; farther away scores lower."
+        }
+      ]
+    }
+  ],
+  "skipped": [],
+  "note": "This is a demo score for comparison only. Missing components are excluded and weights are re-normalized."
+}
+```
+
+Use this for a leaderboard card or a detail-panel breakdown. Do not present it as an official economic rating.
+Additional stretch analysis endpoints:
+
+```http
+GET /api/correlations?metric_x=gdp_per_capita&metric_y=inflation
+GET /api/trends/{metric}?window=3
+GET /api/movers/{metric}?limit=5
+GET /api/timeline/{metric}
+```
+
+Supported metrics are the same analysis metrics: `gdp`, `gdp_per_capita`, `inflation`, `bond_yield_10y`, and `fx_rate`.
+
+- Correlations return a Pearson-style coefficient across latest country values. Show the note that correlation does not prove causation.
+- Trends return each country's first-to-last change inside the recent window.
+- Movers return the biggest latest-vs-previous changes for a metric.
+- Timeline returns `{years, countries}` so B can build a time slider with gaps for missing values.
+
+These are optional demo features. If time is short, prioritize Market Health Score and Biggest Movers first.
 
 ## Person A: registration
 

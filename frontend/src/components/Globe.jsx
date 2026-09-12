@@ -6,8 +6,6 @@ import { mockCountries } from '../data/mockCountries'
 const BY_CODE = Object.fromEntries(mockCountries.map((c) => [c.country_code, c]))
 const UNCOVERED_COLOR = '#1e293b'
 
-const SEQ_LOW = [158, 197, 244] // #9ec5f4
-const SEQ_HIGH = [16, 66, 129] // #104281
 const DIV_NEGATIVE = [208, 59, 59] // #d03b3b
 const DIV_NEUTRAL = [71, 85, 105] // slate-600
 const DIV_POSITIVE = [57, 135, 229] // #3987e5
@@ -17,6 +15,8 @@ const METRICS = [
     key: 'gdp',
     label: 'GDP',
     scale: 'sequential',
+    ramp: [[153, 246, 228], [17, 94, 89]], // teal: #99f6e4 -> #115e59
+    accent: [45, 212, 191], // teal-400
     getValue: (c) => Math.log10(c.gdp),
     format: (c) => `$${(c.gdp / 1e12).toFixed(2)}T`,
   },
@@ -24,6 +24,8 @@ const METRICS = [
     key: 'inflation',
     label: 'Inflation',
     scale: 'sequential',
+    ramp: [[233, 213, 255], [107, 33, 168]], // purple: #e9d5ff -> #6b21a8
+    accent: [192, 132, 252], // purple-400
     getValue: (c) => c.inflation,
     format: (c) => `${c.inflation.toFixed(1)}%`,
   },
@@ -31,6 +33,8 @@ const METRICS = [
     key: 'bond_yield_10y',
     label: 'Bond yield',
     scale: 'sequential',
+    ramp: [[253, 230, 138], [146, 64, 14]], // amber: #fde68a -> #92400e
+    accent: [251, 191, 36], // amber-400
     getValue: (c) => c.bond_yield_10y,
     format: (c) => `${c.bond_yield_10y.toFixed(2)}%`,
   },
@@ -38,6 +42,7 @@ const METRICS = [
     key: 'fx_rate',
     label: 'Currency',
     scale: 'diverging',
+    accent: DIV_POSITIVE,
     getValue: (c) => c.fx_change_pct,
     format: (c) => `${c.fx_change_pct > 0 ? '+' : ''}${c.fx_change_pct.toFixed(1)}% today`,
   },
@@ -70,7 +75,8 @@ function colorForMetric(metric, country) {
   }
   const { min, max } = range
   const t = max === min ? 0.5 : colorForMetric.clamp((metric.getValue(country) - min) / (max - min), 0, 1)
-  return mix(SEQ_LOW, SEQ_HIGH, t)
+  const [low, high] = metric.ramp
+  return mix(low, high, t)
 }
 colorForMetric.clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v))
 
@@ -165,23 +171,35 @@ export default function Globe({ onSelectCountry, spinning }) {
       )}
 
       <div className="pointer-events-none absolute left-1/2 top-7 flex -translate-x-1/2 gap-1.5">
-        {METRICS.map((metric) => (
-          <button
-            key={metric.key}
-            onClick={(e) => {
-              e.stopPropagation()
-              setActiveMetricKey(metric.key)
-            }}
-            className={
-              'pointer-events-auto whitespace-nowrap rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ' +
-              (metric.key === activeMetricKey
-                ? 'border border-[#3987e5]/45 bg-[#3987e5]/[0.16] text-[#7db3f2]'
-                : 'border border-white/10 text-slate-400 hover:bg-white/[0.06]')
-            }
-          >
-            {metric.label}
-          </button>
-        ))}
+        {METRICS.map((metric) => {
+          const isActive = metric.key === activeMetricKey
+          const [r, g, b] = metric.accent
+          const textColor = mix(metric.accent, [255, 255, 255], 0.35)
+          return (
+            <button
+              key={metric.key}
+              onClick={(e) => {
+                e.stopPropagation()
+                setActiveMetricKey(metric.key)
+              }}
+              className={
+                'pointer-events-auto whitespace-nowrap rounded-full border px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ' +
+                (isActive ? '' : 'border-white/10 text-slate-400 hover:bg-white/[0.06]')
+              }
+              style={
+                isActive
+                  ? {
+                      borderColor: `rgba(${r}, ${g}, ${b}, 0.45)`,
+                      backgroundColor: `rgba(${r}, ${g}, ${b}, 0.16)`,
+                      color: textColor,
+                    }
+                  : undefined
+              }
+            >
+              {metric.label}
+            </button>
+          )
+        })}
       </div>
 
       <div className="pointer-events-none absolute bottom-7 left-8 flex flex-col gap-1.5">
@@ -192,7 +210,7 @@ export default function Globe({ onSelectCountry, spinning }) {
             background:
               activeMetric.scale === 'diverging'
                 ? `linear-gradient(to right, rgb(${DIV_NEGATIVE.join(',')}), rgb(${DIV_NEUTRAL.join(',')}), rgb(${DIV_POSITIVE.join(',')}))`
-                : `linear-gradient(to right, rgb(${SEQ_LOW.join(',')}), rgb(${SEQ_HIGH.join(',')}))`,
+                : `linear-gradient(to right, rgb(${activeMetric.ramp[0].join(',')}), rgb(${activeMetric.ramp[1].join(',')}))`,
           }}
         />
         <div className="flex justify-between text-[11px] text-slate-600">

@@ -200,16 +200,6 @@ function AppShell() {
         />
       )}
 
-
-      <a
-        href="/provenance.html"
-        target="_blank"
-        rel="noreferrer"
-        className="absolute bottom-7 right-8 z-10 border border-slate-900 bg-white px-3 py-1.5 text-[12px] font-bold tracking-wide text-slate-950 hover:bg-slate-100"
-      >
-        Sources
-      </a>
-
       {selectedCountry && (        <div
           className={
             'absolute inset-0 ' +

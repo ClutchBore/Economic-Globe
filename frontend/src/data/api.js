@@ -1,4 +1,6 @@
-export const API_BASE = 'http://localhost:8000'
+// Vite only exposes env vars prefixed VITE_ to client code. Falls back to local dev's backend
+// when unset, so nothing changes for anyone running this locally without a .env file.
+export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
 export async function fetchCountryList() {
   const res = await fetch(`${API_BASE}/api/countries`)

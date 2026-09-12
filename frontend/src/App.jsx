@@ -3,6 +3,7 @@ import CountryPanel from './components/CountryPanel'
 import ComparisonPanel from './components/ComparisonPanel'
 import Globe from './components/Globe'
 import { CountriesProvider, useCountries } from './data/CountriesContext'
+import { API_BASE } from './data/api'
 
 // Space to reserve to the right of the globe so an open panel never covers a selected country —
 // matches each panel's own width (452px / 820px) plus its right-4 offset and a little breathing room.
@@ -16,7 +17,7 @@ function AppShell() {
   const { countries, geojsonFeatures, loading, error } = useCountries()
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/health')
+    fetch(`${API_BASE}/api/health`)
       .then((res) => res.json())
       .then((data) => setStatus(data.status))
       .catch(() => setStatus('backend not reachable'))
@@ -40,7 +41,7 @@ function AppShell() {
   if (error) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-slate-950 text-center text-slate-500">
-        Couldn't load country data ({error}). Is the backend running on localhost:8000?
+        Couldn't load country data ({error}). Is the backend running at {API_BASE}?
       </div>
     )
   }

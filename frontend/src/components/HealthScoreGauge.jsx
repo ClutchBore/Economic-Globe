@@ -1,4 +1,4 @@
-const RADIUS = 78
+const RADIUS = 66
 const STROKE = 14
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 const ARC_FRACTION = 0.75 // 270° gauge, gap at the bottom
@@ -24,7 +24,7 @@ export default function HealthScoreGauge({ score, label, showLabel = true }) {
 
   return (
     <div className="flex flex-col items-center gap-0.5">
-      <svg width={188} height={188} viewBox="0 0 200 200">
+      <svg width={188} height={188} viewBox="0 0 200 200" className="overflow-visible">
         <defs>
           <linearGradient id="gaugeGrad" x1="0%" y1="50%" x2="100%" y2="50%">
             <stop offset="0%" stopColor="#d03b3b" />
@@ -38,7 +38,7 @@ export default function HealthScoreGauge({ score, label, showLabel = true }) {
           cy={100}
           r={RADIUS}
           fill="none"
-          stroke="rgba(255,255,255,0.07)"
+          className="health-score-track"
           strokeWidth={STROKE}
           strokeLinecap="round"
           strokeDasharray={`${ARC_LENGTH} ${GAP_LENGTH}`}
@@ -56,7 +56,7 @@ export default function HealthScoreGauge({ score, label, showLabel = true }) {
           transform="rotate(-225 100 100)"
           style={{ transition: 'stroke-dasharray 400ms ease' }}
         />
-        <text x="100" y="98" textAnchor="middle" fontSize="42" fontWeight="700" fill="#ffffff">
+        <text x="100" y="98" textAnchor="middle" fontSize="42" fontWeight="700" className="health-score-value">
           {hasScore ? Math.round(clamped) : '—'}
         </text>
         <text x="100" y="120" textAnchor="middle" fontSize="13" fill="#64748b">

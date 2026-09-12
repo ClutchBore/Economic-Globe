@@ -4,7 +4,8 @@ import * as THREE from 'three'
 import { isNumber, metricTabs, missingValue } from '../data/metricTabs'
 import { geoCountryCode } from '../utils/geoCountryCode'
 
-const UNCOVERED_COLOR = '#1e293b'
+const UNCOVERED_COLOR_LIGHT = '#e5e7eb'
+const UNCOVERED_COLOR_DARK = '#111827'
 const DIV_NEGATIVE = [208, 59, 59] // #d03b3b
 const DIV_NEUTRAL = [71, 85, 105] // slate-600
 const DIV_POSITIVE = [57, 135, 229] // #3987e5
@@ -46,9 +47,9 @@ const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v))
 // the real dataset; fx_rate/fx_change_pct are null for the US, the FX base currency) — a null
 // value means "not covered by this metric", not zero, so it's treated the same as an
 // uncovered country rather than plotted at the low end of the scale.
-function colorForMetric(metric, ranges, country) {
+function colorForMetric(metric, ranges, country, theme) {
   const value = country ? metric.getValue(country) : null
-  if (value == null) return UNCOVERED_COLOR
+  if (value == null) return theme === 'dark' ? UNCOVERED_COLOR_DARK : UNCOVERED_COLOR_LIGHT
 
   const range = ranges[metric.key]
   if (metric.scale === 'diverging') {
@@ -70,7 +71,7 @@ function angularDistanceDeg(a, b) {
   return (Math.acos(Math.max(-1, Math.min(1, cosD))) * 180) / Math.PI
 }
 
-export default function Globe({ countries, geojsonFeatures, onSelectCountry, rightInset = 0, arcCountries = null }) {
+export default function Globe({ countries, geojsonFeatures, onSelectCountry, rightInset = 0, arcCountries = null, theme = 'light', focusedCountry = null, horizontalOffset = 0 }) {
   const globeRef = useRef()
   const containerRef = useRef()
   const hoveredCountryRef = useRef(null)
@@ -127,6 +128,19 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, rig
     globe.pointOfView({ lat: 25, lng: 15, altitude: 2.1 }, 0)
   }, [])
 
+  useEffect(() => {
+    const globe = globeRef.current
+    if (!globe || !focusedCountry || arcCountries) return
+    globe.pointOfView(
+      {
+        lat: focusedCountry.lat,
+        lng: focusedCountry.lng,
+        altitude: 1.35,
+      },
+      900
+    )
+  }, [focusedCountry, arcCountries])
+
   // Frame both compared countries so the connecting arc is actually visible, rather than
   // leaving it undiscoverable behind whatever rotation the globe happened to stop at.
   useEffect(() => {
@@ -144,7 +158,7 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, rig
     )
   }, [arcCountries])
 
-  const globeMaterial = useMemo(() => new THREE.MeshPhongMaterial({ color: '#000000' }), [])
+  const globeMaterial = useMemo(() => new THREE.MeshPhongMaterial({ color: theme === 'dark' ? '#000000' : '#ffffff' }), [theme])
 
   const arcsData = useMemo(() => {
     if (!arcCountries) return []
@@ -166,7 +180,7 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, rig
   }
 
   return (
-    <div ref={containerRef} className="h-screen w-screen" onClick={handleClick}>
+    <div ref={containerRef} className="h-screen w-screen transition-transform duration-300" style={{ transform: `translateX(-${horizontalOffset}px)` }} onClick={handleClick}>
       <GlobeGL
         ref={globeRef}
         width={size.width}
@@ -174,7 +188,7 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, rig
         backgroundColor="rgba(0,0,0,0)"
         globeMaterial={globeMaterial}
         showAtmosphere={false}
-        showGraticules
+        showGraticules={false}
         arcsData={arcsData}
         arcColor={() => ['#3987e5', '#eb6834']}
         arcAltitudeAutoScale={0.35}
@@ -183,18 +197,28 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, rig
         arcDashGap={0.2}
         arcDashAnimateTime={1500}
         polygonsData={geojsonFeatures}
-        polygonCapColor={(feature) => colorForMetric(activeMetric, ranges, byCode[geoCountryCode(feature.properties)])}
-        polygonSideColor={() => 'rgba(15,23,42,0.6)'}
-        polygonStrokeColor={() => 'rgba(0,0,0,0.85)'}
-        polygonAltitude={(feature) => (byCode[geoCountryCode(feature.properties)] ? 0.02 : 0.006)}
+        polygonCapColor={(feature) => colorForMetric(activeMetric, ranges, byCode[geoCountryCode(feature.properties)], theme)}
+        polygonSideColor={() => 'rgba(0,0,0,0)'}
+        polygonStrokeColor={(feature) => {
+          const code = geoCountryCode(feature.properties)
+          return code && focusedCountry?.country_code === code ? '#f59e0b' : 'rgba(0,0,0,0.85)'
+        }}
+        polygonStrokeWidth={(feature) => {
+          const code = geoCountryCode(feature.properties)
+          return code && focusedCountry?.country_code === code ? 1.8 : 0.6
+        }}
+        polygonAltitude={(feature) => {
+          const code = geoCountryCode(feature.properties)
+          return code && focusedCountry?.country_code === code ? 0.018 : 0.008
+        }}
         polygonLabel={(feature) => {
           const country = byCode[geoCountryCode(feature.properties)]
           if (!country) return `<div style="font-size:12px;">${feature.properties.NAME}</div>`
           const value = activeMetric.getValue(country)
           const valueText = value == null ? 'No data' : activeMetric.format(country)
-          return `<div style="font:600 13px system-ui; background:#1e293b; color:#fff; padding:6px 9px; border-radius:6px; border:1px solid rgba(255,255,255,0.12);">
+          return `<div style="font:600 13px system-ui; background:#ffffff; color:#0f172a; padding:6px 9px; border-radius:6px; border:1px solid rgba(15,23,42,0.25);">
             ${country.country_name}<br/>
-            <span style="color:#94a3b8; font-weight:400;">${activeMetric.label}: ${valueText}</span>
+            <span style="color:#475569; font-weight:400;">${activeMetric.label}: ${valueText}</span>
           </div>`
         }}
         onPolygonHover={(feature) => {
@@ -205,8 +229,8 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, rig
         onPolygonClick={(feature) => selectCountry(byCode[geoCountryCode(feature.properties)])}
       />
 
-      <div className="pointer-events-none absolute right-4 top-1/2 max-h-[56vh] w-[210px] -translate-y-1/2 overflow-hidden rounded-none border border-slate-400 bg-black/80 p-2 shadow-lg backdrop-blur sm:right-7">
-        <div className="px-2 pb-2 text-[12px] font-bold uppercase tracking-wide text-slate-200">
+      <div className="pointer-events-none absolute right-4 top-1/2 max-h-[56vh] w-[210px] -translate-y-1/2 overflow-hidden rounded-none border border-slate-900 bg-white p-2 shadow-lg backdrop-blur sm:right-7">
+        <div className="px-2 pb-2 text-[12px] font-bold uppercase tracking-wide text-slate-800">
           Globe metric
         </div>
         <div className="metric-scrollbar pointer-events-auto flex max-h-[calc(56vh-34px)] flex-col gap-1 overflow-y-auto pr-1">
@@ -223,13 +247,13 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, rig
                 }}
                 className={
                   'w-full rounded-none border px-3 py-2 text-left text-[13px] font-bold transition-colors ' +
-                  (isActive ? '' : 'border-transparent text-slate-300 hover:bg-white/[0.08] hover:text-white')
+                  (isActive ? '' : 'border-transparent text-slate-700 hover:bg-slate-100 hover:text-slate-950')
                 }
                 style={
                   isActive
                     ? {
-                        borderColor: `rgba(${r}, ${g}, ${b}, 0.28)`,
-                        backgroundColor: `rgba(${r}, ${g}, ${b}, 0.10)`,
+                        borderColor: `rgba(15, 23, 42, 0.35)`,
+                        backgroundColor: `rgba(${r}, ${g}, ${b}, 0.18)`,
                         color: textColor,
                       }
                     : undefined
@@ -242,8 +266,8 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, rig
         </div>
       </div>
 
-      <div className="pointer-events-none absolute bottom-7 left-8 flex flex-col gap-1.5 border border-slate-400 bg-black/80 p-3">
-        <span className="text-[13px] font-semibold text-slate-200">{activeMetric.label}</span>
+      <div className="pointer-events-none absolute bottom-7 left-8 flex flex-col gap-1.5 border border-slate-900 bg-white p-3">
+        <span className="text-[13px] font-semibold text-slate-900">{activeMetric.label}</span>
         <div
           className="h-1.5 w-40 rounded-none"
           style={{
@@ -253,7 +277,7 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, rig
                 : `linear-gradient(to right, rgb(${activeMetric.ramp[0].join(',')}), rgb(${activeMetric.ramp[1].join(',')}))`,
           }}
         />
-        <div className="flex justify-between text-[12px] font-semibold text-slate-300">
+        <div className="flex justify-between text-[12px] font-semibold text-slate-700">
           {activeMetric.scale === 'diverging' ? (
             <>
               <span>-{ranges[activeMetric.key].maxAbs.toFixed(1)}%</span>

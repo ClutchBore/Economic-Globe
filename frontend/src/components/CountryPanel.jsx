@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import HealthScoreGauge from './HealthScoreGauge'
 import MetricChart from './MetricChart'
 import CountryPickerList from './CountryPickerList'
 import AISummary from './AISummary'
 import { metricTabs } from '../data/metricTabs'
+import { streamChat } from '../data/api'
 
 function StatTile({ label, value }) {
   return (
@@ -27,24 +28,60 @@ export default function CountryPanel({ country, onClose, onCompare }) {
   const [activeMetric, setActiveMetric] = useState(metricTabs[0].key)
   const [messages, setMessages] = useState([])
   const [draft, setDraft] = useState('')
+  const [isStreaming, setIsStreaming] = useState(false)
   const [showComparePicker, setShowComparePicker] = useState(false)
+  const abortRef = useRef(null)
+
+  // Cancel any in-flight stream if the panel unmounts mid-answer (closing it, or switching
+  // countries — CountryPanel is remounted per country via its key, so this covers both).
+  useEffect(() => () => abortRef.current?.abort(), [])
 
   const activeTab = metricTabs.find((t) => t.key === activeMetric)
   const chartData = country.history?.[activeMetric] ?? []
   const latestValue = chartData.length > 0 ? chartData[chartData.length - 1].value : null
   const fxUp = country.fx_change_pct != null && country.fx_change_pct > 0
 
-  function askQuestion(question) {
-    if (!question.trim()) return
-    setMessages((prev) => [
-      ...prev,
-      { role: 'user', text: question },
-      {
-        role: 'assistant',
-        text: `Placeholder response — wire this up to POST /api/chat/${country.country_code}.`,
-      },
-    ])
+  function appendToLastMessage(deltaText) {
+    setMessages((prev) => {
+      const next = [...prev]
+      const last = next[next.length - 1]
+      next[next.length - 1] = { ...last, text: last.text + deltaText }
+      return next
+    })
+  }
+
+  function setLastMessageText(text) {
+    setMessages((prev) => {
+      const next = [...prev]
+      next[next.length - 1] = { ...next[next.length - 1], text }
+      return next
+    })
+  }
+
+  async function askQuestion(question) {
+    const trimmed = question.trim()
+    if (!trimmed || isStreaming) return
+
+    const history = messages.slice(-20).map((m) => ({ role: m.role, content: m.text }))
+    setMessages((prev) => [...prev, { role: 'user', text: trimmed }, { role: 'assistant', text: '' }])
     setDraft('')
+    setIsStreaming(true)
+
+    const controller = new AbortController()
+    abortRef.current = controller
+
+    try {
+      await streamChat(country.country_code, trimmed, history, {
+        signal: controller.signal,
+        onDelta: appendToLastMessage,
+      })
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        setLastMessageText(err.detail ?? 'Country chat is temporarily unavailable. Please retry.')
+      }
+    } finally {
+      setIsStreaming(false)
+    }
   }
 
   return (
@@ -178,19 +215,22 @@ export default function CountryPanel({ country, onClose, onCompare }) {
       <div className="flex flex-none flex-col gap-2.5 border-t border-white/[0.07] bg-slate-900 px-5 pb-[18px] pt-3.5">
         {messages.length > 0 && (
           <div className="flex max-h-[120px] flex-col gap-1.5 overflow-y-auto">
-            {messages.map((m, i) => (
-              <div
-                key={i}
-                className={
-                  'max-w-[85%] rounded-lg px-2.5 py-1.5 text-[12.5px] ' +
-                  (m.role === 'user'
-                    ? 'self-end bg-[#3987e5]/[0.18] text-slate-100'
-                    : 'self-start bg-slate-800 text-slate-300')
-                }
-              >
-                {m.text}
-              </div>
-            ))}
+            {messages.map((m, i) => {
+              const isStreamingReply = isStreaming && i === messages.length - 1 && m.role === 'assistant'
+              return (
+                <div
+                  key={i}
+                  className={
+                    'max-w-[85%] rounded-lg px-2.5 py-1.5 text-[12.5px] ' +
+                    (m.role === 'user'
+                      ? 'self-end bg-[#3987e5]/[0.18] text-slate-100'
+                      : 'self-start bg-slate-800 text-slate-300')
+                  }
+                >
+                  {m.text || (isStreamingReply && <span className="italic text-slate-500">Thinking…</span>)}
+                </div>
+              )
+            })}
           </div>
         )}
 
@@ -199,7 +239,8 @@ export default function CountryPanel({ country, onClose, onCompare }) {
             <button
               key={q}
               onClick={() => askQuestion(q)}
-              className="whitespace-nowrap rounded-full border border-white/[0.14] px-2.5 py-1.5 text-xs text-slate-400 hover:border-white/[0.28] hover:text-white"
+              disabled={isStreaming}
+              className="whitespace-nowrap rounded-full border border-white/[0.14] px-2.5 py-1.5 text-xs text-slate-400 hover:border-white/[0.28] hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-white/[0.14]"
             >
               {q}
             </button>
@@ -215,12 +256,14 @@ export default function CountryPanel({ country, onClose, onCompare }) {
           <input
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder={`Ask about ${country.country_name}'s economy...`}
-            className="flex-1 bg-transparent text-[13.5px] text-slate-200 outline-none placeholder:text-slate-500"
+            disabled={isStreaming}
+            placeholder={isStreaming ? 'Waiting for a response…' : `Ask about ${country.country_name}'s economy...`}
+            className="flex-1 bg-transparent text-[13.5px] text-slate-200 outline-none placeholder:text-slate-500 disabled:opacity-50"
           />
           <button
             type="submit"
-            className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-[#3987e5] hover:bg-[#5aa0ee]"
+            disabled={isStreaming}
+            className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-[#3987e5] hover:bg-[#5aa0ee] disabled:cursor-not-allowed disabled:bg-slate-700"
             aria-label="Send"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">

@@ -1,8 +1,8 @@
 {
   "country_code": "DEU",
   "country_name": "Germany",
-  "summary": "Germany’s GDP was 5,050,922,925,047.05 USD and GDP per capita was 60,496.4351 USD in 2025, with inflation at 2.1718% in 2025. The EUR/USD exchange rate was 1.160227 USD per EUR as of 2026-09-11, a change of -0.271%. The 10-year bond yield is unavailable (null), and no bond yield history is provided.",
+  "summary": "Germany's GDP was USD 5,050,922,925,047.05 and GDP per capita was USD 60,496.4351 in 2025, with inflation at 2.1718% for that same year. The EUR/USD exchange rate was 1.160227 USD per 1 unit of local currency as of 2026-09-11, a change of -0.271%. The 10-year bond yield is unavailable (null) for all periods, while GDP, GDP per capita, and inflation histories span 2016–2025.",
   "is_mock": false,
-  "generated_at": "2026-09-12T04:28:35.618122+00:00",
+  "generated_at": "2026-09-12T04:40:47.281585+00:00",
   "data_as_of": "2026-09-11"
 }

@@ -56,6 +56,61 @@ export async function fetchRankings(metric) {
   return data
 }
 
+export async function fetchTrends(metric, window = 3) {
+  const res = await fetch(`${API_BASE}/api/trends/${metric}?window=${window}`)
+  const data = await res.json()
+  if (!res.ok) {
+    const err = new Error(data.detail ?? `GET /api/trends/${metric} failed: ${res.status}`)
+    err.detail = data.detail
+    throw err
+  }
+  return data
+}
+
+export async function fetchTimeline(metric) {
+  const res = await fetch(`${API_BASE}/api/timeline/${metric}`)
+  const data = await res.json()
+  if (!res.ok) {
+    const err = new Error(data.detail ?? `GET /api/timeline/${metric} failed: ${res.status}`)
+    err.detail = data.detail
+    throw err
+  }
+  return data
+}
+
+export async function fetchCorrelation(metricX, metricY) {
+  const res = await fetch(`${API_BASE}/api/correlations?metric_x=${metricX}&metric_y=${metricY}`)
+  const data = await res.json()
+  if (!res.ok) {
+    const err = new Error(data.detail ?? `GET /api/correlations failed: ${res.status}`)
+    err.detail = data.detail
+    throw err
+  }
+  return data
+}
+
+export async function fetchMarketHealth() {
+  const res = await fetch(`${API_BASE}/api/market-health`)
+  const data = await res.json()
+  if (!res.ok) {
+    const err = new Error(data.detail ?? `GET /api/market-health failed: ${res.status}`)
+    err.detail = data.detail
+    throw err
+  }
+  return data
+}
+
+export async function fetchMovers(metric, limit = 8) {
+  const res = await fetch(`${API_BASE}/api/movers/${metric}?limit=${limit}`)
+  const data = await res.json()
+  if (!res.ok) {
+    const err = new Error(data.detail ?? `GET /api/movers/${metric} failed: ${res.status}`)
+    err.detail = data.detail
+    throw err
+  }
+  return data
+}
+
 export async function fetchAnomalies(metric) {
   const res = await fetch(`${API_BASE}/api/anomalies/${metric}`)
   const data = await res.json()

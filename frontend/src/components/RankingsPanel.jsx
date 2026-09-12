@@ -1,29 +1,73 @@
 import { useEffect, useState } from 'react'
-import { fetchRankings } from '../data/api'
+import { fetchRankings, fetchMarketHealth, fetchMovers, fetchTrends, fetchTimeline, fetchCorrelation } from '../data/api'
 import { metricTabs } from '../data/metricTabs'
+import CorrelationScatter from './CorrelationScatter'
+import TimelineChart from './TimelineChart'
+
+const VIEW_MODES = [
+  { key: 'rankings', label: 'Rankings' },
+  { key: 'health', label: 'Market Health' },
+  { key: 'movers', label: 'Movers' },
+  { key: 'correlations', label: 'Correlations' },
+  { key: 'timeline', label: 'Timeline' },
+]
+
+const TIMELINE_COUNTRY_CAP = 8
+
+function ChangeArrow({ direction }) {
+  const up = direction === 'up'
+  return (
+    <svg width="9" height="9" viewBox="0 0 10 10">
+      <path d={up ? 'M5 1l4 6H1z' : 'M5 9L1 3h8z'} fill={up ? '#0ca30c' : '#d03b3b'} />
+    </svg>
+  )
+}
+
+function formatFor(metricKey) {
+  return metricTabs.find((t) => t.key === metricKey)?.format ?? ((v) => v)
+}
 
 export default function RankingsPanel({ onClose, onSelectCountry }) {
+  const [mode, setMode] = useState('rankings')
   const [activeMetric, setActiveMetric] = useState(metricTabs[0].key)
-  const [state, setState] = useState({ status: 'loading', data: null, error: null })
+  const [trendWindow, setTrendWindow] = useState(null) // null = latest change (movers), else N-year trend
+  const [metricX, setMetricX] = useState('gdp_per_capita')
+  const [metricY, setMetricY] = useState('inflation')
+  // `mode` rides along inside state so a render always knows which shape `data` is in —
+  // `mode` itself updates synchronously on click, one render before the effect below resets
+  // `state`, and that render would otherwise read e.g. market-health fields off rankings data.
+  const [state, setState] = useState({ status: 'loading', data: null, error: null, mode })
 
   useEffect(() => {
     let cancelled = false
-    setState({ status: 'loading', data: null, error: null })
+    setState({ status: 'loading', data: null, error: null, mode })
 
-    fetchRankings(activeMetric)
+    const request =
+      mode === 'health' ? fetchMarketHealth()
+      : mode === 'movers' && trendWindow
+        ? fetchTrends(activeMetric, trendWindow).then((d) => ({
+            ...d,
+            movers: d.trends.map((row) => ({ ...row, latest_value: row.end_value })),
+          }))
+      : mode === 'movers' ? fetchMovers(activeMetric, 8)
+      : mode === 'correlations' ? fetchCorrelation(metricX, metricY)
+      : mode === 'timeline' ? fetchTimeline(activeMetric)
+      : fetchRankings(activeMetric)
+
+    request
       .then((data) => {
-        if (!cancelled) setState({ status: 'ready', data, error: null })
+        if (!cancelled) setState({ status: 'ready', data, error: null, mode })
       })
       .catch((err) => {
-        if (!cancelled) setState({ status: 'error', data: null, error: err.detail ?? err.message })
+        if (!cancelled) setState({ status: 'error', data: null, error: err.detail ?? err.message, mode })
       })
 
     return () => {
       cancelled = true
     }
-  }, [activeMetric])
+  }, [mode, activeMetric, trendWindow, metricX, metricY])
 
-  const activeTab = metricTabs.find((t) => t.key === activeMetric)
+  const showMetricTabs = mode === 'rankings' || mode === 'movers' || mode === 'timeline'
 
   return (
     <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
@@ -44,27 +88,97 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
           </button>
         </div>
 
-        <div className="flex flex-none flex-wrap gap-1.5 px-5 pt-4">
-          {metricTabs.map((tab) => (
+        <div className="flex flex-none flex-wrap gap-1 px-5 pt-4">
+          {VIEW_MODES.map((m) => (
             <button
-              key={tab.key}
-              onClick={() => setActiveMetric(tab.key)}
+              key={m.key}
+              onClick={() => setMode(m.key)}
               className={
-                'rounded-full px-3 py-1.5 text-[12.5px] font-semibold transition-colors ' +
-                (tab.key === activeMetric
-                  ? 'border border-[#3987e5]/45 bg-[#3987e5]/[0.16] text-[#7db3f2]'
-                  : 'border border-transparent text-slate-400 hover:bg-white/[0.06]')
+                'rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-colors ' +
+                (m.key === mode
+                  ? 'bg-[#3987e5]/[0.16] text-[#7db3f2]'
+                  : 'text-slate-500 hover:bg-white/[0.06] hover:text-slate-300')
               }
             >
-              {tab.label}
+              {m.label}
             </button>
           ))}
         </div>
 
+        {showMetricTabs && (
+          <div className="flex flex-none flex-wrap gap-1.5 px-5 pt-3">
+            {metricTabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveMetric(tab.key)}
+                className={
+                  'rounded-full px-3 py-1.5 text-[12.5px] font-semibold transition-colors ' +
+                  (tab.key === activeMetric
+                    ? 'border border-[#3987e5]/45 bg-[#3987e5]/[0.16] text-[#7db3f2]'
+                    : 'border border-transparent text-slate-400 hover:bg-white/[0.06]')
+                }
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {mode === 'movers' && (
+          <div className="flex flex-none gap-1.5 px-5 pt-2.5">
+            {[
+              { key: null, label: 'Latest change' },
+              { key: 3, label: '3-year trend' },
+            ].map((opt) => (
+              <button
+                key={String(opt.key)}
+                onClick={() => setTrendWindow(opt.key)}
+                className={
+                  'rounded-full px-2.5 py-1 text-[11.5px] font-semibold transition-colors ' +
+                  (trendWindow === opt.key
+                    ? 'bg-white/[0.1] text-slate-200'
+                    : 'text-slate-500 hover:text-slate-300')
+                }
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {mode === 'correlations' && (
+          <div className="flex flex-none items-center gap-2 px-5 pt-3">
+            <select
+              value={metricX}
+              onChange={(e) => setMetricX(e.target.value)}
+              className="rounded-lg border border-white/10 bg-slate-800 px-2 py-1.5 text-xs text-slate-200 outline-none"
+            >
+              {metricTabs.map((t) => (
+                <option key={t.key} value={t.key}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+            <span className="text-xs text-slate-500">vs</span>
+            <select
+              value={metricY}
+              onChange={(e) => setMetricY(e.target.value)}
+              className="rounded-lg border border-white/10 bg-slate-800 px-2 py-1.5 text-xs text-slate-200 outline-none"
+            >
+              {metricTabs.map((t) => (
+                <option key={t.key} value={t.key}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div className="flex flex-1 flex-col overflow-y-auto px-5 py-4">
-          {state.status === 'loading' && <p className="text-sm text-slate-500">Loading rankings…</p>}
+          {state.status === 'loading' && <p className="text-sm text-slate-500">Loading…</p>}
           {state.status === 'error' && <p className="text-sm text-slate-500">{state.error}</p>}
-          {state.status === 'ready' && (
+
+          {state.status === 'ready' && state.mode === 'rankings' && (
             <div className="flex flex-col gap-1">
               {state.data.rankings.map((row) => (
                 <button
@@ -76,14 +190,120 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
                     {row.rank}
                   </span>
                   <span className="flex-1 text-[13.5px] text-slate-200">{row.country_name}</span>
-                  <span className="text-[13.5px] font-semibold text-white">{activeTab.format(row.value)}</span>
+                  <span className="text-[13.5px] font-semibold text-white">
+                    {formatFor(state.data.metric)(row.value)}
+                  </span>
                 </button>
               ))}
             </div>
           )}
+
+          {state.status === 'ready' && state.mode === 'health' && (
+            <div className="flex flex-col gap-1">
+              {state.data.rankings.map((row) => (
+                <button
+                  key={row.country_code}
+                  onClick={() => onSelectCountry(row.country_code)}
+                  className="flex items-center gap-3 rounded-lg px-2 py-2 text-left hover:bg-white/[0.05]"
+                >
+                  <span className="w-6 flex-none text-right text-[12.5px] font-semibold text-slate-500">
+                    {row.rank}
+                  </span>
+                  <div className="flex flex-1 flex-col gap-0.5">
+                    <span className="text-[13.5px] text-slate-200">{row.country_name}</span>
+                    {row.missing_components.length > 0 && (
+                      <span className="text-[10.5px] text-slate-600">
+                        Based on available data — missing {row.missing_components.join(', ')}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[13.5px] font-semibold text-white">{row.score.toFixed(1)}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {state.status === 'ready' && state.mode === 'movers' && (
+            <div className="flex flex-col gap-1">
+              {state.data.movers.map((row, i) => (
+                <button
+                  key={row.country_code}
+                  onClick={() => onSelectCountry(row.country_code)}
+                  className="flex items-center gap-3 rounded-lg px-2 py-2 text-left hover:bg-white/[0.05]"
+                >
+                  <span className="w-6 flex-none text-right text-[12.5px] font-semibold text-slate-500">
+                    {i + 1}
+                  </span>
+                  <span className="flex-1 text-[13.5px] text-slate-200">{row.country_name}</span>
+                  <span className="text-[12.5px] text-slate-500">
+                    {formatFor(state.data.metric)(row.latest_value)}
+                  </span>
+                  <div className="flex w-[62px] flex-none items-center justify-end gap-1.5">
+                    <ChangeArrow direction={row.direction} />
+                    <span
+                      className="text-[13px] font-semibold"
+                      style={{ color: row.direction === 'up' ? '#0ca30c' : '#d03b3b' }}
+                    >
+                      {row.direction === 'up' ? '+' : ''}
+                      {row.percent_change.toFixed(1)}%
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {state.status === 'ready' && state.mode === 'correlations' && (
+            <div className="flex flex-col gap-3">
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { label: 'Coefficient', value: state.data.coefficient.toFixed(2) },
+                  { label: 'Strength', value: state.data.strength },
+                  { label: 'Direction', value: state.data.direction },
+                ].map((s) => (
+                  <div key={s.label} className="flex flex-col gap-0.5 rounded-lg bg-slate-800 px-3 py-2">
+                    <span className="text-[10.5px] text-slate-500">{s.label}</span>
+                    <span className="text-[13.5px] font-semibold capitalize text-white">{s.value}</span>
+                  </div>
+                ))}
+              </div>
+              <CorrelationScatter
+                pairs={state.data.pairs.map((p) => ({
+                  ...p,
+                  x: p[state.data.metric_x],
+                  y: p[state.data.metric_y],
+                }))}
+                formatX={formatFor(state.data.metric_x)}
+                formatY={formatFor(state.data.metric_y)}
+              />
+            </div>
+          )}
+
+          {state.status === 'ready' && state.mode === 'timeline' && (() => {
+            const ranked = [...state.data.countries].sort((a, b) => {
+              const av = Object.values(a.values).filter((v) => v != null).pop() ?? -Infinity
+              const bv = Object.values(b.values).filter((v) => v != null).pop() ?? -Infinity
+              return bv - av
+            })
+            const top = ranked.slice(0, TIMELINE_COUNTRY_CAP)
+            return (
+              <div className="flex flex-col gap-2">
+                {ranked.length > TIMELINE_COUNTRY_CAP && (
+                  <p className="text-[11px] text-slate-600">
+                    Showing the top {TIMELINE_COUNTRY_CAP} of {ranked.length} countries by latest value.
+                  </p>
+                )}
+                <TimelineChart
+                  years={state.data.years}
+                  series={top.map((c) => ({ code: c.country_code, name: c.country_name, values: c.values }))}
+                  formatValue={formatFor(state.data.metric)}
+                />
+              </div>
+            )
+          })()}
         </div>
 
-        {state.status === 'ready' && (
+        {state.status === 'ready' && state.data.note && (
           <div className="flex-none border-t border-white/[0.07] px-5 py-3">
             <p className="text-[11px] text-slate-600">{state.data.note}</p>
           </div>

@@ -1,8 +1,8 @@
 {
   "country_code": "RUS",
   "country_name": "Russia",
-  "summary": "Russia's 2025 GDP was USD 2,561,310,169,358.74 with GDP per capita of USD 17,546.6094, and inflation was 8.7199% in 2025. As of 2026-09-12, the RUB/USD exchange rate was 0.011854 USD per RUB, reflecting a -0.487% change. The 10-year bond yield is unavailable (null, not zero), so no figure can be reported for that metric.",
+  "summary": "Russia's GDP was $2,561,310,169,358.74 USD in 2025, with GDP per capita of $17,546.6094 USD and inflation of 8.7199% in 2025. The 10-year bond yield is unavailable (null), while the RUB/USD exchange rate stood at 0.011854 USD per 1 RUB as of 2026-09-12, a -0.487% change. Historical figures include GDP of $1,496,075,894,362.14 USD in 2020 and $2,292,495,097,681.47 USD in 2022, inflation of 13.7437% in 2022 and 5.8657% in 2023, and an exchange rate of 0.013137 in 2020 versus 0.012881 in 2026.",
   "is_mock": false,
-  "generated_at": "2026-09-12T05:57:54.072244+00:00",
+  "generated_at": "2026-09-12T07:16:31.751957+00:00",
   "data_as_of": "2026-09-12"
 }

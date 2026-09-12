@@ -1,8 +1,8 @@
 {
   "country_code": "CAN",
   "country_name": "Canada",
-  "summary": "Canada (CAN, North America) has a 2025 GDP of USD 2,319,899,772,425.92 and GDP per capita of USD 55,697.664, with inflation of 2.0723% in 2025. As of 2026-06-01, the 10-year bond yield is 3.42%, and as of 2026-09-12 the FX rate is 0.721033 USD per 1 CAD, with fx_change_pct of -0.243. The supplied data contain no null values, so no missing information needs to be acknowledged.",
+  "summary": "In 2025, Canada's GDP was USD 2,319,899,772,425.92 and GDP per capita was USD 55,697.664. Inflation was 2.0723% in 2025, while the 10-year bond yield was 3.42% as of 2026-06-01. As of 2026-09-12, the CAD/USD exchange rate was 0.721033 USD per CAD (fx_change_pct -0.243, with no unit specified), and FX rate history is available only from 2020 onward.",
   "is_mock": false,
-  "generated_at": "2026-09-12T05:57:55.227124+00:00",
+  "generated_at": "2026-09-12T07:09:26.018668+00:00",
   "data_as_of": "2026-09-12"
 }

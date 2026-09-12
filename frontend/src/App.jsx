@@ -6,7 +6,8 @@ import Globe from './components/Globe'
 import { CountriesProvider, useCountries } from './data/CountriesContext'
 import { API_BASE } from './data/api'
 
-// Space to reserve to the right of the globe so an open panel never covers a selected country —
+// Space to reserve to the right of the globe and the header so an open panel never covers a
+// selected country, or the panel's own close button —
 // matches each panel's own width (452px / 820px) plus its right-4 offset and a little breathing room.
 const SINGLE_PANEL_INSET = 508
 const COMPARISON_PANEL_INSET = 876
@@ -131,13 +132,21 @@ function AppShell() {
         horizontalOffset={globeOffset}
       />
 
-      {/* Hidden below the same breakpoint each panel goes fullscreen at (sm: for a single
-          country, lg: for comparison, matching the panel wrapper below) — otherwise this
-          header sits underneath and collides with that panel's own title. */}
+      {/* This bar is z-10 and the panel wrapper below isn't, so whatever sits at its right edge
+          lands on top of the panel's own close button. With a panel open the right edge moves
+          left of that panel rather than running underneath it, which costs the bar 508px (or
+          876px when comparing) — so the breakpoints are raised to the width where the title
+          still fits in what's left, and below that the bar hides entirely, as it already did
+          below the breakpoint each panel goes fullscreen at. */}
       <div
         className={
-          'absolute left-8 right-8 top-7 z-10 flex flex-wrap items-start justify-between gap-4 ' +
-          (selectedCountry ? (compareCountry ? 'hidden lg:flex' : 'hidden sm:flex') : '')
+          'absolute left-8 top-7 z-10 flex flex-wrap items-start justify-between gap-4 ' +
+          (selectedCountry ? (compareCountry ? 'hidden xl:flex' : 'hidden lg:flex') : 'right-8')
+        }
+        style={
+          selectedCountry
+            ? { right: compareCountry ? COMPARISON_PANEL_INSET : SINGLE_PANEL_INSET }
+            : undefined
         }
       >
         <div className="flex flex-wrap items-start gap-4">

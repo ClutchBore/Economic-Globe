@@ -2,14 +2,14 @@
   "country_code": "TUR",
   "country_name": "Turkey",
   "region": "Europe",
-  "data_as_of": "2026-09-11",
+  "data_as_of": "2026-09-12",
   "gdp": 1597293229287.0,
   "gdp_per_capita": 18599.4421,
   "inflation": 34.8812,
   "bond_yield_10y": null,
   "fx_rate": 0.020595,
   "fx_pair": "TRY / USD",
-  "fx_change_pct": -0.139,
+  "fx_change_pct": 0.077,
   "units": {
     "gdp": "USD",
     "gdp_per_capita": "USD",
@@ -21,7 +21,7 @@
     "gdp": "World Bank NY.GDP.MKTP.CD",
     "gdp_per_capita": "World Bank NY.GDP.PCAP.CD",
     "inflation": "World Bank FP.CPI.TOTL.ZG",
-    "bond_yield_10y": "Yahoo Finance",
+    "bond_yield_10y": "FRED (OECD IRLTLT01)",
     "fx_rate": "Yahoo Finance"
   },
   "dates": {
@@ -29,7 +29,7 @@
     "gdp_per_capita": "2025",
     "inflation": "2025",
     "bond_yield_10y": null,
-    "fx_rate": "2026-09-11"
+    "fx_rate": "2026-09-12"
   },
   "history": {
     "gdp": [
@@ -186,7 +186,7 @@
       },
       {
         "year": "2026",
-        "value": 0.022008
+        "value": 0.022
       }
     ]
   }

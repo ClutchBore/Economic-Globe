@@ -2,14 +2,14 @@
   "country_code": "ARG",
   "country_name": "Argentina",
   "region": "South America",
-  "data_as_of": "2026-09-11",
+  "data_as_of": "2026-09-12",
   "gdp": 683097891618.597,
   "gdp_per_capita": 14898.0886,
   "inflation": 219.8839,
   "bond_yield_10y": null,
   "fx_rate": 0.000663,
   "fx_pair": "ARS / USD",
-  "fx_change_pct": 0.348,
+  "fx_change_pct": 0.282,
   "units": {
     "gdp": "USD",
     "gdp_per_capita": "USD",
@@ -21,7 +21,7 @@
     "gdp": "World Bank NY.GDP.MKTP.CD",
     "gdp_per_capita": "World Bank NY.GDP.PCAP.CD",
     "inflation": "World Bank FP.CPI.TOTL.ZG",
-    "bond_yield_10y": "Yahoo Finance",
+    "bond_yield_10y": "FRED (OECD IRLTLT01)",
     "fx_rate": "Yahoo Finance"
   },
   "dates": {
@@ -29,7 +29,7 @@
     "gdp_per_capita": "2025",
     "inflation": "2024",
     "bond_yield_10y": null,
-    "fx_rate": "2026-09-11"
+    "fx_rate": "2026-09-12"
   },
   "history": {
     "gdp": [

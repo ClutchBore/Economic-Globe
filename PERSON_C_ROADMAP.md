@@ -20,7 +20,7 @@ A owns `main.py`, shared dependencies/configuration, data fetchers, the data rea
 
 ## Progress note
 
-Summary, comparison, and streaming chat are implemented, connected to A's cached country reader, and verified by 30 offline tests. The AI router is registered locally in `backend/main.py` on this branch. Live IFM summary, comparison, and streaming chat requests succeeded using `IFM/K2-Horizon-375B-A23B`, including cache-backed summary, comparison, and chat requests. Summary fallback caching is implemented; generating demo cache files, A/B contract confirmation, and frontend validation remain pending. See [AI_HANDOFF.md](backend/AI_HANDOFF.md) for provisional contracts and examples.
+Summary, comparison, and streaming chat are implemented, connected to A's cached country reader, and verified by offline tests. The AI router is registered locally in `backend/main.py` on this branch. Live IFM summary, comparison, and streaming chat requests succeeded using `IFM/K2-Horizon-375B-A23B`, including cache-backed summary, comparison, and chat requests. Summary fallback caching is implemented. Basic metric rankings, standard-deviation anomaly detection, and anomaly explanations are implemented through `/api/rankings/{metric}`, `/api/anomalies/{metric}`, and `/api/anomaly/explain`. A/B contract confirmation and frontend validation remain pending. See [AI_HANDOFF.md](backend/AI_HANDOFF.md) for provisional contracts and examples.
 
 ## Before Hour 0
 
@@ -83,21 +83,24 @@ If AI takes longer, finish core AI first and reduce analysis scope. The original
 
 ## Hours 8–14: Basic rankings and anomalies
 
-- [ ] Build rankings by available metrics first, with clear ordering, units, and dates. Higher does not always mean better.
-- [ ] Share sample ranking/anomaly outputs immediately so A/B can prepare integration.
-- [ ] Choose one metric with sufficient comparable dated history.
-- [ ] Implement a simple standard-deviation anomaly rule comparing the latest observation with prior observations.
-- [ ] Document the window, minimum history, and threshold; handle nulls, insufficient history, and zero variation explicitly.
+- [x] Build rankings by available metrics first, with clear ordering, units, and dates. Higher does not always mean better.
+- [x] Expose rankings through `GET /api/rankings/{metric}` and register the analysis router.
+- [x] Check ranking outputs with offline tests and a real-app smoke test; current suite passes 36 tests.
+- [x] Share sample ranking/anomaly outputs immediately so A/B can prepare integration.
+- [x] Choose one metric with sufficient comparable dated history.
+- [x] Implement a simple standard-deviation anomaly rule comparing the latest observation with prior observations.
+- [x] Document the window, minimum history, and threshold; handle nulls, insufficient history, and zero variation explicitly.
 - [ ] Keep annual and daily series separate.
-- [ ] Check ordinary values, an obvious outlier, insufficient data, constant data, and real demo-country results.
-- [ ] Package calculations as importable functions and expose ranking/anomaly retrieval in your analysis router.
+- [x] Check ordinary values, an obvious outlier, insufficient data, constant data, and real demo-country results.
+- [x] Package ranking calculations as importable functions and expose ranking retrieval in your analysis router.
+- [x] Package anomaly calculations as importable functions and expose anomaly retrieval in your analysis router.
 - [ ] Deliver working outputs by hour 14. If delayed, prioritize rankings and agree on reduced anomaly scope.
 
 ## Hours 14–18: Anomaly explanations
 
-- [ ] Build `POST /api/anomaly/explain` using your existing IFM client and calculated anomaly results.
-- [ ] Explain the observed deviation and rule without asserting unsupported real-world causes.
-- [ ] Provide a template explanation if AI fails.
+- [x] Build `POST /api/anomaly/explain` using your existing IFM client and calculated anomaly results.
+- [x] Explain the observed deviation and rule without asserting unsupported real-world causes.
+- [x] Provide a template explanation if AI fails.
 - [ ] Give A the analysis router to register and verify detect → explain → API → B's panel.
 - [ ] Document rules and limitations for judges; freeze features at hour 18.
 

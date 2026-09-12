@@ -96,6 +96,92 @@ data: {}
 
 Keep chat history on the frontend and clear it when switching countries.
 
+Rankings:
+
+```http
+GET /api/rankings/{metric}
+```
+
+Supported metrics: `gdp`, `gdp_per_capita`, `inflation`, `bond_yield_10y`, `fx_rate`.
+
+Example: `GET /api/rankings/gdp`. Response:
+
+```json
+{
+  "metric": "gdp",
+  "unit": "USD",
+  "date": "2025",
+  "sort": "desc",
+  "rankings": [
+    {
+      "rank": 1,
+      "country_code": "USA",
+      "country_name": "United States",
+      "value": 30769700000000.0,
+      "unit": "USD",
+      "date": "2025"
+    }
+  ],
+  "skipped": ["..."],
+  "note": "Higher values are listed first; higher is not always better."
+}
+```
+
+Anomalies:
+
+```http
+GET /api/anomalies/{metric}
+```
+
+Optional query params: `threshold` defaults to `2.0`, `min_prior` defaults to `5`.
+
+Example: `GET /api/anomalies/inflation`. Response:
+
+```json
+{
+  "metric": "inflation",
+  "unit": "%",
+  "threshold": 2.0,
+  "min_prior_observations": 5,
+  "method": "latest value compared with prior observations using population standard deviation",
+  "anomalies": [
+    {
+      "country_code": "ARG",
+      "country_name": "Argentina",
+      "metric": "inflation",
+      "value": 219.8839,
+      "date": "2024",
+      "unit": "%",
+      "prior_mean": 64.028283,
+      "prior_stdev": 33.213617,
+      "z_score": 4.693,
+      "direction": "above",
+      "prior_observations": 6
+    }
+  ],
+  "skipped": []
+}
+```
+
+Show the method/threshold somewhere small in the UI so judges know this is a simple statistical flag, not a claim about real-world causes.
+
+Anomaly explanations:
+
+```http
+POST /api/anomaly/explain
+```
+
+Send one anomaly object from `/api/anomalies/{metric}` plus threshold and method fields. Response:
+
+```json
+{
+  "explanation": "Argentina's inflation value ... is above its prior average ...",
+  "is_fallback": true
+}
+```
+
+If `is_fallback` is true, the backend used a deterministic template because IFM failed or was unavailable. The explanation should be displayed as a statistical explanation only. It does not claim a real-world cause.
+
 ## Person A: registration
 
 With the existing backend-directory launch command, add these lines to main.py:

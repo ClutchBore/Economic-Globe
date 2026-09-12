@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routes import countries
+from routes.analysis import router as analysis_router
 from routes.ai import router as ai_router
 
 app = FastAPI(title="Economic Globe API")
@@ -29,9 +30,9 @@ def health_check():
 
 app.include_router(countries.router)
 app.include_router(ai_router)
+app.include_router(analysis_router)
 
 
 # --- Routes go here as the hackathon progresses ---
 # from routes import countries, ai, analysis
 # app.include_router(ai.router)
-# app.include_router(analysis.router)

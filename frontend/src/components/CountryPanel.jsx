@@ -4,7 +4,7 @@ import MetricChart from './MetricChart'
 import CountryPickerList from './CountryPickerList'
 import AISummary from './AISummary'
 import AnomalyCallout from './AnomalyCallout'
-import { metricTabs } from '../data/metricTabs'
+import { isNumber, metricTabs, missingValue } from '../data/metricTabs'
 import { streamChat } from '../data/api'
 
 function StatTile({ label, value }) {
@@ -14,6 +14,10 @@ function StatTile({ label, value }) {
       <span className="text-lg font-bold text-white">{value}</span>
     </div>
   )
+}
+
+function fmtNumber(value, digits = 2) {
+  return isNumber(value) ? value.toFixed(digits) : missingValue
 }
 
 function CompareIcon() {
@@ -40,7 +44,7 @@ export default function CountryPanel({ country, onClose, onCompare }) {
   const activeTab = metricTabs.find((t) => t.key === activeMetric)
   const chartData = country.history?.[activeMetric] ?? []
   const latestValue = chartData.length > 0 ? chartData[chartData.length - 1].value : null
-  const fxUp = country.fx_change_pct != null && country.fx_change_pct > 0
+  const fxUp = isNumber(country.fx_change_pct) && country.fx_change_pct > 0
 
   function appendToLastMessage(deltaText) {
     setMessages((prev) => {
@@ -100,7 +104,7 @@ export default function CountryPanel({ country, onClose, onCompare }) {
           <div className="flex flex-col gap-0.5">
             <span className="text-[17px] font-bold leading-tight text-white">{country.country_name}</span>
             <span className="text-xs text-slate-500">
-              {country.country_code} · {country.region} · data as of {country.data_as_of}
+              {country.country_code} · {country.region} · data as of {country.data_as_of ?? missingValue}
             </span>
           </div>
         </div>
@@ -119,15 +123,21 @@ export default function CountryPanel({ country, onClose, onCompare }) {
       <div className="flex flex-1 flex-col gap-[22px] overflow-y-auto px-5 pb-[18px] pt-[22px]">
         <HealthScoreGauge score={country.health_score} label={country.health_label} />
 
+        {country.is_placeholder && (
+          <div className="rounded-md border border-white/[0.08] bg-slate-800/70 px-3.5 py-3 text-[12.5px] leading-relaxed text-slate-400">
+            Country profile is available, but detailed economic metrics have not been fetched yet.
+          </div>
+        )}
+
         <div className="flex flex-col gap-2">
           <div className="grid grid-cols-2 gap-2">
-            <StatTile label="GDP" value={`$${(country.gdp / 1e12).toFixed(2)}T`} />
-            <StatTile label="GDP per capita" value={`$${Math.round(country.gdp_per_capita).toLocaleString()}`} />
-            <StatTile label="Inflation (YoY)" value={`${country.inflation.toFixed(1)}%`} />
-            <StatTile
-              label="10Y bond yield"
-              value={country.bond_yield_10y == null ? '—' : `${country.bond_yield_10y.toFixed(2)}%`}
-            />
+            {metricTabs.map((metric) => (
+              <StatTile
+                key={metric.key}
+                label={metric.label}
+                value={metric.format(country[metric.key])}
+              />
+            ))}
           </div>
           <div className="flex items-center justify-between rounded-[10px] bg-slate-800 px-3.5 py-3">
             <div className="flex flex-col gap-1">
@@ -135,10 +145,10 @@ export default function CountryPanel({ country, onClose, onCompare }) {
                 Currency{country.fx_pair ? ` · ${country.fx_pair}` : ''}
               </span>
               <span className="text-lg font-bold text-white">
-                {country.fx_rate == null ? '—' : country.fx_rate.toFixed(2)}
+                {fmtNumber(country.fx_rate)}
               </span>
             </div>
-            {country.fx_change_pct != null && (
+            {isNumber(country.fx_change_pct) && (
               <div className="flex items-center gap-1.5">
                 <svg width="10" height="10" viewBox="0 0 10 10">
                   <path d={fxUp ? 'M5 1l4 6H1z' : 'M5 9L1 3h8z'} fill={fxUp ? '#0ca30c' : '#d03b3b'} />
@@ -183,21 +193,22 @@ export default function CountryPanel({ country, onClose, onCompare }) {
         </div>
 
         <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap gap-1.5">
-            {metricTabs.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveMetric(tab.key)}
-                className={
-                  'rounded-full px-3 py-1.5 text-[12.5px] font-semibold transition-colors ' +
-                  (tab.key === activeMetric
-                    ? 'border border-[#3987e5]/45 bg-[#3987e5]/[0.16] text-[#7db3f2]'
-                    : 'border border-transparent text-slate-400 hover:bg-white/[0.06]')
-                }
-              >
-                {tab.label}
-              </button>
-            ))}
+          <div className="flex items-center gap-2">
+            <label htmlFor="country-chart-metric" className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+              Chart
+            </label>
+            <select
+              id="country-chart-metric"
+              value={activeMetric}
+              onChange={(e) => setActiveMetric(e.target.value)}
+              className="min-w-0 flex-1 rounded-md border border-white/10 bg-slate-800 px-3 py-2 text-[13px] font-semibold text-slate-200 outline-none transition-colors hover:border-white/20 focus:border-slate-500"
+            >
+              {metricTabs.map((tab) => (
+                <option key={tab.key} value={tab.key}>
+                  {tab.label}
+                </option>
+              ))}
+            </select>
           </div>
           {chartData.length > 0 ? (
             <div className="relative">
@@ -230,7 +241,7 @@ export default function CountryPanel({ country, onClose, onCompare }) {
                   className={
                     'max-w-[85%] rounded-lg px-2.5 py-1.5 text-[12.5px] ' +
                     (m.role === 'user'
-                      ? 'self-end bg-[#3987e5]/[0.18] text-slate-100'
+                      ? 'self-end bg-slate-700 text-slate-100'
                       : 'self-start bg-slate-800 text-slate-300')
                   }
                 >
@@ -242,12 +253,12 @@ export default function CountryPanel({ country, onClose, onCompare }) {
         )}
 
         <div className="flex gap-2">
-          {country.suggested_questions.map((q) => (
+          {(country.suggested_questions ?? []).map((q) => (
             <button
               key={q}
               onClick={() => askQuestion(q)}
               disabled={isStreaming}
-              className="whitespace-nowrap rounded-full border border-white/[0.14] px-2.5 py-1.5 text-xs text-slate-400 hover:border-white/[0.28] hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-white/[0.14]"
+              className="whitespace-nowrap rounded-md border border-white/[0.12] px-2.5 py-1.5 text-xs text-slate-400 hover:border-white/[0.2] hover:text-slate-200 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-white/[0.14]"
             >
               {q}
             </button>
@@ -258,7 +269,7 @@ export default function CountryPanel({ country, onClose, onCompare }) {
             e.preventDefault()
             askQuestion(draft)
           }}
-          className="flex items-center gap-2 rounded-full border border-white/[0.1] bg-slate-800 py-1.5 pl-4 pr-1.5"
+          className="flex items-center gap-2 rounded-md border border-white/[0.1] bg-slate-800 py-1.5 pl-4 pr-1.5"
         >
           <input
             value={draft}
@@ -270,7 +281,7 @@ export default function CountryPanel({ country, onClose, onCompare }) {
           <button
             type="submit"
             disabled={isStreaming}
-            className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-[#3987e5] hover:bg-[#5aa0ee] disabled:cursor-not-allowed disabled:bg-slate-700"
+            className="flex h-8 w-8 flex-none items-center justify-center rounded-md bg-slate-700 hover:bg-slate-600 disabled:cursor-not-allowed disabled:bg-slate-700"
             aria-label="Send"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">

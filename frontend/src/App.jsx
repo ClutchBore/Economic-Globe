@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import CountryPanel from './components/CountryPanel'
 import ComparisonPanel from './components/ComparisonPanel'
 import RankingsPanel from './components/RankingsPanel'
@@ -12,18 +12,10 @@ const SINGLE_PANEL_INSET = 508
 const COMPARISON_PANEL_INSET = 876
 
 function AppShell() {
-  const [status, setStatus] = useState('checking...')
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [compareCountry, setCompareCountry] = useState(null)
   const [showRankings, setShowRankings] = useState(false)
   const { countries, geojsonFeatures, loading, error } = useCountries()
-
-  useEffect(() => {
-    fetch(`${API_BASE}/api/health`)
-      .then((res) => res.json())
-      .then((data) => setStatus(data.status))
-      .catch(() => setStatus('backend not reachable'))
-  }, [])
 
   function selectCountry(country) {
     setSelectedCountry(country)
@@ -61,12 +53,11 @@ function AppShell() {
 
       <div className="absolute left-8 top-7 flex flex-col items-start gap-2">
         <div className="pointer-events-none flex flex-col gap-1">
-          <span className="text-[15px] font-semibold tracking-wide text-slate-100">Economic Globe</span>
-          <span className="text-xs text-slate-600">Backend status: {status}</span>
+          <span className="brand-title text-[21px] font-extrabold leading-none text-slate-100">Terraconomic</span>
         </div>
         <button
           onClick={() => setShowRankings(true)}
-          className="rounded-full border border-white/10 bg-slate-900/70 px-3.5 py-1.5 text-[12.5px] font-semibold text-slate-300 hover:bg-white/[0.06]"
+          className="rounded-md border border-white/10 bg-slate-900/60 px-3.5 py-1.5 text-[12.5px] font-semibold text-slate-300 hover:bg-white/[0.06]"
         >
           Rankings
         </button>

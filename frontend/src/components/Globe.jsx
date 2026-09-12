@@ -1,50 +1,37 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import GlobeGL from 'react-globe.gl'
 import * as THREE from 'three'
+import { isNumber, metricTabs, missingValue } from '../data/metricTabs'
+import { geoCountryCode } from '../utils/geoCountryCode'
 
 const UNCOVERED_COLOR = '#1e293b'
-
 const DIV_NEGATIVE = [208, 59, 59] // #d03b3b
 const DIV_NEUTRAL = [71, 85, 105] // slate-600
 const DIV_POSITIVE = [57, 135, 229] // #3987e5
 
-const METRICS = [
-  {
-    key: 'gdp',
-    label: 'GDP',
-    scale: 'sequential',
-    ramp: [[153, 246, 228], [17, 94, 89]], // teal: #99f6e4 -> #115e59
-    accent: [45, 212, 191], // teal-400
-    getValue: (c) => (c.gdp == null ? null : Math.log10(c.gdp)),
-    format: (c) => `$${(c.gdp / 1e12).toFixed(2)}T`,
-  },
-  {
-    key: 'inflation',
-    label: 'Inflation',
-    scale: 'sequential',
-    ramp: [[233, 213, 255], [107, 33, 168]], // purple: #e9d5ff -> #6b21a8
-    accent: [192, 132, 252], // purple-400
-    getValue: (c) => c.inflation,
-    format: (c) => `${c.inflation.toFixed(1)}%`,
-  },
-  {
-    key: 'bond_yield_10y',
-    label: 'Bond yield',
-    scale: 'sequential',
-    ramp: [[253, 230, 138], [146, 64, 14]], // amber: #fde68a -> #92400e
-    accent: [251, 191, 36], // amber-400
-    getValue: (c) => c.bond_yield_10y,
-    format: (c) => `${c.bond_yield_10y.toFixed(2)}%`,
-  },
-  {
-    key: 'fx_rate',
-    label: 'Currency',
-    scale: 'diverging',
-    accent: DIV_POSITIVE,
-    getValue: (c) => c.fx_change_pct,
-    format: (c) => `${c.fx_change_pct > 0 ? '+' : ''}${c.fx_change_pct.toFixed(1)}% today`,
-  },
+const METRIC_COLORS = [
+  { ramp: [[153, 246, 228], [17, 94, 89]], accent: [45, 212, 191] },
+  { ramp: [[233, 213, 255], [107, 33, 168]], accent: [192, 132, 252] },
+  { ramp: [[253, 230, 138], [146, 64, 14]], accent: [251, 191, 36] },
+  { ramp: [[191, 219, 254], [30, 64, 175]], accent: [96, 165, 250] },
+  { ramp: [[254, 202, 202], [153, 27, 27]], accent: [248, 113, 113] },
 ]
+
+const METRICS = metricTabs.map((metric, index) => {
+  const colors = METRIC_COLORS[index % METRIC_COLORS.length]
+  return {
+    ...metric,
+    scale: 'sequential',
+    ramp: colors.ramp,
+    accent: colors.accent,
+    getValue: (country) => {
+      const value = country?.[metric.key]
+      if (!isNumber(value)) return null
+      return metric.mapScale === 'log' && value > 0 ? Math.log10(value) : value
+    },
+    format: (country) => metric.format(country?.[metric.key]),
+  }
+})
 
 function mix(a, b, t) {
   const r = Math.round(a[0] + (b[0] - a[0]) * t)
@@ -100,6 +87,9 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, spi
       Object.fromEntries(
         METRICS.map((m) => {
           const values = countries.map(m.getValue).filter((v) => v != null)
+          if (values.length === 0) {
+            return [m.key, m.scale === 'diverging' ? { maxAbs: 1 } : { min: null, max: null }]
+          }
           return [
             m.key,
             m.scale === 'diverging'
@@ -202,12 +192,12 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, spi
         arcDashGap={0.2}
         arcDashAnimateTime={1500}
         polygonsData={geojsonFeatures}
-        polygonCapColor={(feature) => colorForMetric(activeMetric, ranges, byCode[feature.properties.ISO_A3])}
+        polygonCapColor={(feature) => colorForMetric(activeMetric, ranges, byCode[geoCountryCode(feature.properties)])}
         polygonSideColor={() => 'rgba(15,23,42,0.6)'}
         polygonStrokeColor={() => 'rgba(255,255,255,0.15)'}
-        polygonAltitude={(feature) => (byCode[feature.properties.ISO_A3] ? 0.02 : 0.006)}
+        polygonAltitude={(feature) => (byCode[geoCountryCode(feature.properties)] ? 0.02 : 0.006)}
         polygonLabel={(feature) => {
-          const country = byCode[feature.properties.ISO_A3]
+          const country = byCode[geoCountryCode(feature.properties)]
           if (!country) return `<div style="font-size:12px;">${feature.properties.NAME}</div>`
           const value = activeMetric.getValue(country)
           const valueText = value == null ? 'No data' : activeMetric.format(country)
@@ -217,52 +207,54 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, spi
           </div>`
         }}
         onPolygonHover={(feature) => {
-          const country = feature ? byCode[feature.properties.ISO_A3] : null
+          const country = feature ? byCode[geoCountryCode(feature.properties)] : null
           hoveredCountryRef.current = country
           document.body.style.cursor = country ? 'pointer' : 'default'
         }}
-        onPolygonClick={(feature) => selectCountry(byCode[feature.properties.ISO_A3])}
+        onPolygonClick={(feature) => selectCountry(byCode[geoCountryCode(feature.properties)])}
       />
 
-      <div
-        className="pointer-events-none absolute top-24 flex max-w-[92%] flex-wrap justify-center gap-1.5 sm:top-7"
-        style={{ left: size.width / 2, transform: 'translateX(-50%)' }}
-      >
-        {METRICS.map((metric) => {
-          const isActive = metric.key === activeMetricKey
-          const [r, g, b] = metric.accent
-          const textColor = mix(metric.accent, [255, 255, 255], 0.35)
-          return (
-            <button
-              key={metric.key}
-              onClick={(e) => {
-                e.stopPropagation()
-                setActiveMetricKey(metric.key)
-              }}
-              className={
-                'pointer-events-auto whitespace-nowrap rounded-full border px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ' +
-                (isActive ? '' : 'border-white/10 text-slate-400 hover:bg-white/[0.06]')
-              }
-              style={
-                isActive
-                  ? {
-                      borderColor: `rgba(${r}, ${g}, ${b}, 0.45)`,
-                      backgroundColor: `rgba(${r}, ${g}, ${b}, 0.16)`,
-                      color: textColor,
-                    }
-                  : undefined
-              }
-            >
-              {metric.label}
-            </button>
-          )
-        })}
+      <div className="pointer-events-none absolute right-4 top-24 max-h-[46vh] w-[210px] overflow-hidden rounded-md border border-white/10 bg-slate-950/75 p-2 shadow-lg backdrop-blur sm:right-7 sm:top-7">
+        <div className="px-2 pb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+          Globe metric
+        </div>
+        <div className="pointer-events-auto flex max-h-[calc(46vh-34px)] flex-col gap-1 overflow-y-auto pr-1">
+          {METRICS.map((metric) => {
+            const isActive = metric.key === activeMetricKey
+            const [r, g, b] = metric.accent
+            const textColor = mix(metric.accent, [255, 255, 255], 0.35)
+            return (
+              <button
+                key={metric.key}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setActiveMetricKey(metric.key)
+                }}
+                className={
+                  'w-full rounded-md border px-3 py-2 text-left text-[12.5px] font-semibold transition-colors ' +
+                  (isActive ? '' : 'border-transparent text-slate-400 hover:bg-white/[0.06] hover:text-slate-200')
+                }
+                style={
+                  isActive
+                    ? {
+                        borderColor: `rgba(${r}, ${g}, ${b}, 0.28)`,
+                        backgroundColor: `rgba(${r}, ${g}, ${b}, 0.10)`,
+                        color: textColor,
+                      }
+                    : undefined
+                }
+              >
+                {metric.label}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       <div className="pointer-events-none absolute bottom-7 left-8 flex flex-col gap-1.5">
         <span className="text-xs text-slate-500">{activeMetric.label}</span>
         <div
-          className="h-1.5 w-40 rounded-full"
+          className="h-1.5 w-40 rounded-sm"
           style={{
             background:
               activeMetric.scale === 'diverging'

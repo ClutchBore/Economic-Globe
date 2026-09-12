@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { fetchCountryList, fetchCountryDetail, fetchMarketHealth } from './api'
 import { countryCentroid } from '../utils/geo'
+import { geoCountryCode } from '../utils/geoCountryCode'
 
 const CountriesContext = createContext(null)
 
@@ -21,8 +22,8 @@ export function CountriesProvider({ children }) {
           fetchCountryList(),
           fetchMarketHealth().catch(() => null), // stretch endpoint — degrade to no score, not a load failure
         ])
-        const features = geojson.features.filter((f) => f.properties.ISO_A3 !== 'ATA')
-        const centroidByCode = Object.fromEntries(features.map((f) => [f.properties.ISO_A3, countryCentroid(f)]))
+        const features = geojson.features.filter((f) => geoCountryCode(f.properties) !== 'ATA')
+        const centroidByCode = Object.fromEntries(features.map((f) => [geoCountryCode(f.properties), countryCentroid(f)]).filter(([code]) => code))
         const healthByCode = Object.fromEntries((health?.rankings ?? []).map((r) => [r.country_code, r]))
 
         const details = await Promise.all(summaries.map((s) => fetchCountryDetail(s.country_code)))

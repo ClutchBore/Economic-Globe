@@ -20,7 +20,11 @@ A owns `main.py`, shared dependencies/configuration, data fetchers, the data rea
 
 ## Progress note
 
+<<<<<<< Updated upstream
 Summary, comparison, and streaming chat are implemented, connected to A's cached country reader, and verified by offline tests. The AI router is registered locally in `backend/main.py` on this branch. Live IFM summary, comparison, and streaming chat requests succeeded using `IFM/K2-Horizon-375B-A23B`, including cache-backed summary, comparison, and chat requests. Summary fallback caching is implemented. Basic metric rankings, standard-deviation anomaly detection, and anomaly explanations are implemented through `/api/rankings/{metric}`, `/api/anomalies/{metric}`, and `/api/anomaly/explain`. A/B contract confirmation and frontend validation remain pending. See [AI_HANDOFF.md](backend/AI_HANDOFF.md) for provisional contracts and examples.
+=======
+Summary, comparison, and streaming chat are implemented, connected to A's cached country reader, and verified by offline tests. The AI router is registered locally in `backend/main.py` on this branch. Live IFM summary, comparison, and streaming chat requests succeeded using `IFM/K2-Horizon-375B-A23B`, including cache-backed summary, comparison, and chat requests. Summary fallback caching is implemented, with saved demo summaries for `IND` and `USA`. Frontend validation with B remains pending. See [AI_HANDOFF.md](backend/AI_HANDOFF.md) for provisional contracts and examples.
+>>>>>>> Stashed changes
 
 ## Before Hour 0
 
@@ -51,9 +55,10 @@ Generate one country summary grounded in supplied sample data.
 - [x] Prepare router registration instructions for A in `backend/AI_HANDOFF.md`.
 - [x] Register the AI router in `backend/main.py` on this branch for local integration testing.
 - [x] Verify the registered AI routes through the real FastAPI app with offline tests.
-- [ ] Share the handoff with A and confirm this `backend/main.py` registration is okay to keep.
+- [ ] Confirm with A that this `backend/main.py` registration is okay to keep.
 - [x] Prepare hand-written summary/comparison response examples and streaming event documentation for B.
 - [x] Add quick-copy summary, comparison, and chat integration instructions for B.
+- [x] Share the AI handoff with B.
 - [ ] Confirm with B that the provisional API contracts work in the frontend.
 
 ## Hours 4–8: Finish core AI
@@ -71,9 +76,10 @@ Generate one country summary grounded in supplied sample data.
 - [ ] Confirm the streaming format with B and verify it in the frontend.
 - [x] Use A's real cache through the same reader interface.
 - [x] Implement cached summary fallback in your AI cache folder.
-- [ ] Generate cached summaries for demo countries in your AI cache folder.
+- [x] Generate cached summaries for demo countries in your AI cache folder.
 - [ ] Check the UI with B, including missing information, AI failures, and timeouts.
-- [ ] Monitor spending and identify fallback responses clearly.
+- [x] Document cached-summary fallback responses clearly for B.
+- [ ] Monitor IFM spending during live testing and demo.
 
 ## Transition checkpoint — target hour 8
 

@@ -1,8 +1,14 @@
 {
   "country_code": "EGY",
   "country_name": "Egypt",
+<<<<<<< Updated upstream
   "summary": "Egypt's GDP was 365,254,630,179.737 USD in 2025, with a GDP per capita of 3,085.8071 USD that same year. Inflation was 14.0735% in 2025, while the 10-year bond yield was unavailable (null). The EGP/USD exchange rate on 2026-09-11 was 0.019489 USD per EGP, with a 0.035% change.",
   "is_mock": false,
   "generated_at": "2026-09-12T05:01:58.303027+00:00",
+=======
+  "summary": "Egypt's GDP was USD 365,254,630,179.737 in 2025, down from a 2022 peak of USD 476,747,720,364.742, while GDP per capita fell from USD 4,233.3078 in 2022 to USD 3,085.8071 in 2025. Inflation was 14.0735% in 2025, compared to 33.8848% in 2023 and 28.2706% in 2024. The exchange rate was 0.019489 USD per 1 EGP as of 2026-09-11, and the 10-year bond yield is unavailable (null).",
+  "is_mock": false,
+  "generated_at": "2026-09-12T04:40:43.279990+00:00",
+>>>>>>> Stashed changes
   "data_as_of": "2026-09-11"
 }

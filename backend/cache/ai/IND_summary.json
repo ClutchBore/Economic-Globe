@@ -1,8 +1,14 @@
 {
   "country_code": "IND",
   "country_name": "India",
+<<<<<<< Updated upstream
   "summary": "India's GDP was USD 3,956,067,115,771.63 in 2025, up from USD 2,294,796,885,663.16 in 2016 despite a 2020 dip to USD 2,674,851,578,587.27. GDP per capita was USD 2,702.4799 and inflation was 2.3988% in 2025, with inflation falling from a 2022 peak of 6.699%. The INR/USD exchange rate was 0.010467 on 2026-09-11, a 0.448% decline, while the 10-year bond yield is unavailable (null).",
   "is_mock": false,
   "generated_at": "2026-09-12T04:52:29.711384+00:00",
+=======
+  "summary": "India (IND) in Asia reported 2025 GDP of USD 3,956,067,115,771.63, 2025 GDP per capita of USD 2702.4799, and 2025 inflation of 2.3988%. As of 2026-09-11, the INR/USD rate was 0.010467 USD per 1 unit of local currency with a -0.448% change, and the 10-year bond yield is unavailable (null). Historical figures show GDP of USD 2,294,796,885,663.16 in 2016 and USD 3,956,067,115,771.63 in 2025, GDP per capita of USD 1707.5089 in 2016 and USD 2702.4799 in 2025, inflation of 6.699% in 2022 and 2.3988% in 2025, and an exchange rate of 0.013546 in 2020 and 0.010665 in 2026 (USD per 1 unit of local currency).",
+  "is_mock": false,
+  "generated_at": "2026-09-12T04:40:58.967282+00:00",
+>>>>>>> Stashed changes
   "data_as_of": "2026-09-11"
 }

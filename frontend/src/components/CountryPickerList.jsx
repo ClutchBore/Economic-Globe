@@ -1,7 +1,8 @@
-import { mockCountries } from '../data/mockCountries'
+import { useCountries } from '../data/CountriesContext'
 
 export default function CountryPickerList({ excludeCodes = [], onSelect }) {
-  const options = mockCountries.filter((c) => !excludeCodes.includes(c.country_code))
+  const { countries } = useCountries()
+  const options = countries.filter((c) => !excludeCodes.includes(c.country_code))
 
   return (
     <div className="flex max-h-[220px] flex-col gap-1 overflow-y-auto rounded-[10px] border border-white/[0.1] bg-slate-800/60 p-1.5">

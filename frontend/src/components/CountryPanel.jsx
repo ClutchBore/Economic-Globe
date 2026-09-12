@@ -2,7 +2,7 @@ import { useState } from 'react'
 import HealthScoreGauge from './HealthScoreGauge'
 import MetricChart from './MetricChart'
 import CountryPickerList from './CountryPickerList'
-import { metricTabs } from '../data/mockCountries'
+import { metricTabs } from '../data/metricTabs'
 
 function StatTile({ label, value }) {
   return (
@@ -29,8 +29,9 @@ export default function CountryPanel({ country, onClose, onCompare }) {
   const [showComparePicker, setShowComparePicker] = useState(false)
 
   const activeTab = metricTabs.find((t) => t.key === activeMetric)
-  const chartData = country.history[activeMetric]
-  const latestValue = chartData[chartData.length - 1].value
+  const chartData = country.history?.[activeMetric] ?? []
+  const latestValue = chartData.length > 0 ? chartData[chartData.length - 1].value : null
+  const fxUp = country.fx_change_pct != null && country.fx_change_pct > 0
 
   function askQuestion(question) {
     if (!question.trim()) return
@@ -78,23 +79,33 @@ export default function CountryPanel({ country, onClose, onCompare }) {
         <div className="flex flex-col gap-2">
           <div className="grid grid-cols-2 gap-2">
             <StatTile label="GDP" value={`$${(country.gdp / 1e12).toFixed(2)}T`} />
-            <StatTile label="GDP per capita" value={`$${country.gdp_per_capita.toLocaleString()}`} />
-            <StatTile label="Inflation (YoY)" value={`${country.inflation}%`} />
-            <StatTile label="10Y bond yield" value={`${country.bond_yield_10y}%`} />
+            <StatTile label="GDP per capita" value={`$${Math.round(country.gdp_per_capita).toLocaleString()}`} />
+            <StatTile label="Inflation (YoY)" value={`${country.inflation.toFixed(1)}%`} />
+            <StatTile
+              label="10Y bond yield"
+              value={country.bond_yield_10y == null ? '—' : `${country.bond_yield_10y.toFixed(2)}%`}
+            />
           </div>
           <div className="flex items-center justify-between rounded-[10px] bg-slate-800 px-3.5 py-3">
             <div className="flex flex-col gap-1">
-              <span className="text-[11.5px] text-slate-400">Currency · {country.fx_pair}</span>
-              <span className="text-lg font-bold text-white">{country.fx_rate.toFixed(2)}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <svg width="10" height="10" viewBox="0 0 10 10">
-                <path d="M5 1l4 6H1z" fill="#0ca30c" />
-              </svg>
-              <span className="text-[12.5px] font-semibold text-[#0ca30c]">
-                +{country.fx_change_pct}% today
+              <span className="text-[11.5px] text-slate-400">
+                Currency{country.fx_pair ? ` · ${country.fx_pair}` : ''}
+              </span>
+              <span className="text-lg font-bold text-white">
+                {country.fx_rate == null ? '—' : country.fx_rate.toFixed(2)}
               </span>
             </div>
+            {country.fx_change_pct != null && (
+              <div className="flex items-center gap-1.5">
+                <svg width="10" height="10" viewBox="0 0 10 10">
+                  <path d={fxUp ? 'M5 1l4 6H1z' : 'M5 9L1 3h8z'} fill={fxUp ? '#0ca30c' : '#d03b3b'} />
+                </svg>
+                <span className="text-[12.5px] font-semibold" style={{ color: fxUp ? '#0ca30c' : '#d03b3b' }}>
+                  {fxUp ? '+' : ''}
+                  {country.fx_change_pct.toFixed(1)}% today
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -145,12 +156,18 @@ export default function CountryPanel({ country, onClose, onCompare }) {
               </button>
             ))}
           </div>
-          <div className="relative">
-            <MetricChart data={chartData} formatValue={activeTab.format} />
-            <div className="pointer-events-none absolute right-1 top-0 rounded-md border border-white/[0.12] bg-slate-800 px-2.5 py-1 text-xs font-bold text-white">
-              {activeTab.format(latestValue)}
+          {chartData.length > 0 ? (
+            <div className="relative">
+              <MetricChart data={chartData} formatValue={activeTab.format} />
+              <div className="pointer-events-none absolute right-1 top-0 rounded-md border border-white/[0.12] bg-slate-800 px-2.5 py-1 text-xs font-bold text-white">
+                {activeTab.format(latestValue)}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex h-[150px] items-center justify-center text-sm text-slate-600">
+              No {activeTab.label.toLowerCase()} data available for {country.country_name}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-2.5 rounded-xl border border-white/[0.07] bg-white/[0.035] px-4 py-[15px]">

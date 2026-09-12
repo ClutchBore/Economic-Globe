@@ -2,16 +2,18 @@ import { useEffect, useState } from 'react'
 import CountryPanel from './components/CountryPanel'
 import ComparisonPanel from './components/ComparisonPanel'
 import Globe from './components/Globe'
+import { CountriesProvider, useCountries } from './data/CountriesContext'
 
 // Space to reserve to the right of the globe so an open panel never covers a selected country —
 // matches each panel's own width (452px / 820px) plus its right-4 offset and a little breathing room.
 const SINGLE_PANEL_INSET = 508
 const COMPARISON_PANEL_INSET = 876
 
-function App() {
+function AppShell() {
   const [status, setStatus] = useState('checking...')
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [compareCountry, setCompareCountry] = useState(null)
+  const { countries, geojsonFeatures, loading, error } = useCountries()
 
   useEffect(() => {
     fetch('http://localhost:8000/api/health')
@@ -27,9 +29,27 @@ function App() {
 
   const rightInset = compareCountry ? COMPARISON_PANEL_INSET : selectedCountry ? SINGLE_PANEL_INSET : 0
 
+  if (loading) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-slate-950 text-slate-500">
+        Loading country data…
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-slate-950 text-center text-slate-500">
+        Couldn't load country data ({error}). Is the backend running on localhost:8000?
+      </div>
+    )
+  }
+
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-slate-950 text-white">
       <Globe
+        countries={countries}
+        geojsonFeatures={geojsonFeatures}
         onSelectCountry={selectCountry}
         spinning={!selectedCountry}
         rightInset={rightInset}
@@ -70,4 +90,10 @@ function App() {
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <CountriesProvider>
+      <AppShell />
+    </CountriesProvider>
+  )
+}

@@ -46,7 +46,7 @@ export default function CountryPanel({ country, onClose, onCompare }) {
   }
 
   return (
-    <div className="flex h-full w-[452px] flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900 shadow-2xl">
+    <div className="flex h-full w-full flex-col overflow-hidden rounded-none border-0 bg-slate-900 shadow-2xl sm:w-[452px] sm:rounded-2xl sm:border sm:border-white/[0.08]">
       {/* header */}
       <div className="flex flex-none items-center justify-between border-b border-white/[0.07] px-5 py-[18px]">
         <div className="flex items-center gap-3">
@@ -129,7 +129,7 @@ export default function CountryPanel({ country, onClose, onCompare }) {
         </div>
 
         <div className="flex flex-col gap-3">
-          <div className="flex gap-1.5">
+          <div className="flex flex-wrap gap-1.5">
             {metricTabs.map((tab) => (
               <button
                 key={tab.key}

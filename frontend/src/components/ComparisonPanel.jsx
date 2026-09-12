@@ -37,7 +37,7 @@ export default function ComparisonPanel({ countryA, countryB, onClose, onChangeC
   const fxFmt = (c) => `${c.fx_change_pct > 0 ? '+' : ''}${c.fx_change_pct.toFixed(1)}%`
 
   return (
-    <div className="flex h-full w-[820px] flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900 shadow-2xl">
+    <div className="flex h-full w-full flex-col overflow-hidden rounded-none border-0 bg-slate-900 shadow-2xl lg:w-[820px] lg:rounded-2xl lg:border lg:border-white/[0.08]">
       {/* header */}
       <div className="flex flex-none items-center justify-between border-b border-white/[0.07] px-5 py-[18px]">
         <div className="flex flex-col gap-0.5">
@@ -60,7 +60,7 @@ export default function ComparisonPanel({ countryA, countryB, onClose, onChangeC
       {/* scrollable content */}
       <div className="flex flex-1 flex-col gap-[22px] overflow-y-auto px-5 pb-[22px] pt-[22px]">
         <div className="flex flex-col items-center gap-2">
-          <div className="flex w-full items-start gap-4">
+          <div className="flex w-full flex-col items-center gap-6 lg:flex-row lg:items-start lg:gap-4">
             <GaugeColumn country={countryA} />
             <GaugeColumn country={countryB} />
           </div>
@@ -86,7 +86,7 @@ export default function ComparisonPanel({ countryA, countryB, onClose, onChangeC
         </div>
 
         <div className="flex flex-col gap-3">
-          <div className="flex gap-1.5">
+          <div className="flex flex-wrap gap-1.5">
             {metricTabs.map((tab) => (
               <button
                 key={tab.key}

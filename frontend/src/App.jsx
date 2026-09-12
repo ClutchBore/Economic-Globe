@@ -42,7 +42,12 @@ function App() {
       </div>
 
       {selectedCountry && (
-        <div className="absolute inset-y-4 right-4">
+        <div
+          className={
+            'absolute inset-0 ' +
+            (compareCountry ? 'lg:inset-y-4 lg:right-4 lg:left-auto' : 'sm:inset-y-4 sm:right-4 sm:left-auto')
+          }
+        >
           {compareCountry ? (
             <ComparisonPanel
               countryA={selectedCountry}

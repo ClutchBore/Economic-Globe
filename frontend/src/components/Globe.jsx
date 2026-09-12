@@ -91,6 +91,7 @@ function angularDistanceDeg(a, b) {
 
 export default function Globe({ onSelectCountry, spinning, rightInset = 0, arcCountries = null }) {
   const globeRef = useRef()
+  const containerRef = useRef()
   // react-globe.gl's own onPolygonClick can silently miss the first click on a given polygon
   // (the raycasted click and its internal hover cache can land a frame apart). onPolygonHover
   // fires reliably and immediately, so we track the hovered country ourselves and select it on
@@ -116,12 +117,19 @@ export default function Globe({ onSelectCountry, spinning, rightInset = 0, arcCo
       })
   }, [])
 
+  // ResizeObserver rather than a window 'resize' listener — the container's actual box size can
+  // change (devtools device toolbar, orientation change, viewport emulation) without the browser
+  // ever firing a 'resize' event, which would leave the WebGL renderer's internal size stale and
+  // throw off raycasting (clicks landing on the wrong world position) even though CSS layout looks fine.
   useEffect(() => {
-    function handleResize() {
-      setWindowSize({ width: window.innerWidth, height: window.innerHeight })
-    }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    const el = containerRef.current
+    if (!el) return
+    const observer = new ResizeObserver((entries) => {
+      const { width, height } = entries[0].contentRect
+      setWindowSize({ width, height })
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
   }, [])
 
   useEffect(() => {
@@ -161,15 +169,22 @@ export default function Globe({ onSelectCountry, spinning, rightInset = 0, arcCo
     return [{ startLat: a.lat, startLng: a.lng, endLat: b.lat, endLng: b.lng }]
   }, [arcCountries])
 
-  function handleClick() {
-    const country = hoveredCountryRef.current
+  function selectCountry(country) {
     if (!country) return
     globeRef.current.controls().autoRotate = false
     onSelectCountry(country)
   }
 
+  // Mouse clicks go through the hover-primed ref (see the note on hoveredCountryRef above).
+  // Touch devices never fire a hover, so we also handle react-globe.gl's own onPolygonClick
+  // below, which does its own fresh raycast at tap time — the two paths just call the same
+  // helper, so a mouse click that happens to trigger both is harmless (same country twice).
+  function handleClick() {
+    selectCountry(hoveredCountryRef.current)
+  }
+
   return (
-    <div className="h-screen w-screen" onClick={handleClick}>
+    <div ref={containerRef} className="h-screen w-screen" onClick={handleClick}>
       <GlobeGL
         ref={globeRef}
         width={size.width}
@@ -208,6 +223,7 @@ export default function Globe({ onSelectCountry, spinning, rightInset = 0, arcCo
           hoveredCountryRef.current = country
           document.body.style.cursor = country ? 'pointer' : 'default'
         }}
+        onPolygonClick={(feature) => selectCountry(BY_CODE[feature.properties.ISO_A3])}
       />
 
       {countries.length === 0 && (
@@ -217,7 +233,7 @@ export default function Globe({ onSelectCountry, spinning, rightInset = 0, arcCo
       )}
 
       <div
-        className="pointer-events-none absolute top-7 flex gap-1.5"
+        className="pointer-events-none absolute top-24 flex max-w-[92%] flex-wrap justify-center gap-1.5 sm:top-7"
         style={{ left: size.width / 2, transform: 'translateX(-50%)' }}
       >
         {METRICS.map((metric) => {

@@ -1,0 +1,33 @@
+name: Refresh country data
+
+# Writes straight to Upstash KV, so the deployed API picks the new data up on
+# its next cold start — no redeploy involved.
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: aahan-branch
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - run: pip install -r requirements.txt
+        working-directory: backend
+
+      - run: python -m scripts.fetch_data
+        working-directory: backend
+        env:
+          KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
+          KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}

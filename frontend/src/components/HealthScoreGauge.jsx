@@ -16,10 +16,11 @@ function bandFor(score) {
 }
 
 export default function HealthScoreGauge({ score, label, showLabel = true }) {
-  const clamped = Math.max(0, Math.min(100, score))
-  const filled = (clamped / 100) * ARC_LENGTH
+  const hasScore = typeof score === 'number' && !Number.isNaN(score)
+  const clamped = hasScore ? Math.max(0, Math.min(100, score)) : 0
+  const filled = hasScore ? (clamped / 100) * ARC_LENGTH : 0
   const band = bandFor(clamped)
-  const statusLabel = label ?? band.label
+  const statusLabel = hasScore ? label ?? band.label : 'No data'
 
   return (
     <div className="flex flex-col items-center gap-0.5">
@@ -56,12 +57,12 @@ export default function HealthScoreGauge({ score, label, showLabel = true }) {
           style={{ transition: 'stroke-dasharray 400ms ease' }}
         />
         <text x="100" y="98" textAnchor="middle" fontSize="42" fontWeight="700" fill="#ffffff">
-          {Math.round(clamped)}
+          {hasScore ? Math.round(clamped) : '—'}
         </text>
         <text x="100" y="120" textAnchor="middle" fontSize="13" fill="#64748b">
           out of 100
         </text>
-        <text x="100" y="150" textAnchor="middle" fontSize="14" fontWeight="600" fill={band.color}>
+        <text x="100" y="150" textAnchor="middle" fontSize="14" fontWeight="600" fill={hasScore ? band.color : '#64748b'}>
           {statusLabel}
         </text>
       </svg>

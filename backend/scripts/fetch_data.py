@@ -39,9 +39,7 @@ def build_country_payload(country: dict) -> dict:
     wb_data = world_bank.fetch_world_bank_metrics(country["wb_code"])
     fx = market_data.fetch_fx_data(country["fx_ticker"])
 
-    bond_ticker = BOND_YIELD_TICKERS.get(country["code"])
-    divide_by = 10 if bond_ticker == "^TNX" else 1
-    bond = market_data.fetch_bond_yield(bond_ticker, divide_by=divide_by)
+    bond = market_data.fetch_bond_yield(BOND_YIELD_TICKERS.get(country["code"]))
 
     today = str(datetime.date.today())
 

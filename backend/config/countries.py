@@ -41,7 +41,7 @@ COUNTRIES = [
 # US 10-year Treasury yield is the only bond series with a reliable free
 # daily ticker; other countries stay null until a comparable source is added.
 BOND_YIELD_TICKERS = {
-    "USA": "^TNX",  # quoted as yield * 10, e.g. 42.5 -> 4.25%
+    "USA": "^TNX",
 }
 
 

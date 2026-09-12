@@ -4,7 +4,7 @@ An interactive world map showing per-country economic data — GDP, GDP per capi
 
 Inspired by Harvard's [Globe of Economic Complexity](https://globe.cid.harvard.edu/).
 
-## Planned features
+## Features
 
 - **Interactive map** — countries colored by a selectable metric (GDP, inflation, bond yields, currency)
 - **AI country summaries** — plain-English summary of a country's economic picture
@@ -12,8 +12,10 @@ Inspired by Harvard's [Globe of Economic Complexity](https://globe.cid.harvard.e
 - **Anomaly detection** — statistically flagged outliers (std-dev threshold), narrated in plain English
 - **Rankings** — countries ordered by available metrics, with clear units and dates
 - **Chatbot** — ask questions about a specific country's data
+- **Market Health Score** — demo 0-100 score with component breakdowns and documented weights
+- **Stretch analysis** — correlations, rolling trends, biggest movers, and time-slider-ready history payloads
 
-Build the map/data and core AI first, then basic rankings and anomalies. The custom Market Health Score, correlations, rolling trends, biggest movers, and time slider are stretch goals.
+The core backend AI and analysis endpoints are implemented on `shrav-branch`. Some stretch features still need frontend placement depending on Person B's available time.
 
 ## Tech stack
 
@@ -21,8 +23,30 @@ Build the map/data and core AI first, then basic rankings and anomalies. The cus
 **Backend:** Python + FastAPI
 **Data sources:** World Bank API (`wbgapi`), yfinance
 **AI:** IFM
-**Analysis:** pandas
+**Analysis:** Python standard library statistics helpers over cached country JSON
 **Deployment:** Vercel (frontend + backend)
+
+
+## API highlights
+
+Backend base URL during local development: `http://localhost:8000`.
+
+| Feature | Endpoint |
+|---|---|
+| Country list/detail | `GET /api/countries`, `GET /api/countries/{code}` |
+| AI summary | `POST /api/summarize/{country_code}` |
+| AI comparison | `POST /api/compare` |
+| Streaming country chat | `POST /api/chat/{country_code}` |
+| Rankings | `GET /api/rankings/{metric}` |
+| Anomalies | `GET /api/anomalies/{metric}` |
+| Anomaly explanation | `POST /api/anomaly/explain` |
+| Market Health Score | `GET /api/market-health` |
+| Correlations | `GET /api/correlations?metric_x=gdp_per_capita&metric_y=inflation` |
+| Rolling trends | `GET /api/trends/{metric}?window=3` |
+| Biggest movers | `GET /api/movers/{metric}?limit=5` |
+| Time-slider data | `GET /api/timeline/{metric}` |
+
+Supported analysis metrics are `gdp`, `gdp_per_capita`, `inflation`, `bond_yield_10y`, and `fx_rate`. See [backend/AI_HANDOFF.md](backend/AI_HANDOFF.md) for response shapes and frontend integration notes.
 
 ## Project structure
 
@@ -64,6 +88,23 @@ npm install
 npm run dev
 ```
 Visit http://localhost:5173 — you should see "Backend status: healthy" once both are running.
+
+
+## Verification
+
+Backend tests:
+
+```bash
+cd backend
+python -m unittest discover -s tests
+```
+
+Frontend build:
+
+```bash
+cd frontend
+npm run build
+```
 
 ## Team & branches
 

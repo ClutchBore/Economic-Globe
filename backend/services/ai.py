@@ -17,7 +17,12 @@ from dotenv import load_dotenv
 
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
-API_URL = "https://openrouter.ai/api/v1/chat/completions"
+API_URL = "https://api.ifm.ai/v1/chat/completions"
+IFM_DEFAULT_PARAMS = {
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "chat_template_kwargs": {"reasoning_effort": "high"},
+}
 SUMMARY_PROMPT = """Summarize the supplied country data in three concise sentences.
 Use only the supplied facts, preserve units, and mention observation years.
 Null means unavailable, not zero. Acknowledge relevant missing information.
@@ -41,11 +46,28 @@ class AIServiceError(RuntimeError):
 
 def _settings():
     load_dotenv(BACKEND_DIR / ".env", override=False, encoding="utf-8-sig")
-    key = os.getenv("OPENROUTER_API_KEY", "").strip()
-    model = os.getenv("OPENROUTER_MODEL", "").strip()
+    key = os.getenv("IFM_API_KEY", "").strip()
+    model = os.getenv("IFM_MODEL", "").strip()
     if not key or not model:
-        raise AIServiceError("Set OPENROUTER_API_KEY and OPENROUTER_MODEL in backend/.env.")
+        raise AIServiceError("Set IFM_API_KEY and IFM_MODEL in backend/.env.")
     return key, model
+
+
+def _provider_error_detail(response: httpx.Response) -> str:
+    try:
+        body = response.json()
+    except ValueError:
+        body = response.text
+    if isinstance(body, dict):
+        error = body.get("error", body)
+        if isinstance(error, dict):
+            detail = error.get("message") or error.get("detail") or json.dumps(error)
+        else:
+            detail = str(error)
+    else:
+        detail = str(body)
+    detail = " ".join(detail.split())
+    return detail[:240] if detail else f"HTTP {response.status_code}"
 
 
 async def chat_about_country(country_data, message, history=None, *, client=None):
@@ -83,8 +105,13 @@ async def chat_about_country(country_data, message, history=None, *, client=None
         try:
             async with asyncio.timeout(90):
                 async with http.stream("POST", API_URL,
-                        headers={"Authorization": f"Bearer {key}"},
-                        json={"model": model, "messages": messages, "stream": True, "max_tokens": 600},
+                        headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+                        json={
+                            "model": model,
+                            "messages": messages,
+                            "stream": True,
+                            **IFM_DEFAULT_PARAMS,
+                        },
                         timeout=30.0) as response:
                     response.raise_for_status()
                     async for line in response.aiter_lines():
@@ -159,7 +186,7 @@ async def _generate_text(
     country_data: dict[str, Any], prompt: str, max_tokens: int,
     *, client: httpx.AsyncClient | None = None,
 ) -> str:
-    """Shared OpenRouter request and error handling for summaries/comparisons."""
+    """Shared IFM request and error handling for summaries/comparisons."""
     try:
         serialized = json.dumps(country_data, ensure_ascii=False, allow_nan=False)
     except (TypeError, ValueError):
@@ -174,15 +201,15 @@ async def _generate_text(
             {"role": "system", "content": prompt},
             {"role": "user", "content": serialized},
         ],
-        "max_tokens": max_tokens,
         "stream": False,
+        **IFM_DEFAULT_PARAMS,
     }
 
     async def request_summary(http: httpx.AsyncClient) -> str:
         try:
             response = await http.post(
                 API_URL,
-                headers={"Authorization": f"Bearer {api_key}"},
+                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
                 json=payload,
                 timeout=30.0,
             )
@@ -192,13 +219,16 @@ async def _generate_text(
         except httpx.HTTPStatusError as exc:
             status = exc.response.status_code
             messages = {
-                401: "OpenRouter rejected the API key. Check backend/.env.",
-                402: "OpenRouter reports insufficient credits.",
-                429: "OpenRouter is rate limiting requests. Try again later.",
+                401: "IFM rejected the API key. Check backend/.env.",
+                402: "IFM reports insufficient credits.",
+                429: "IFM is rate limiting requests. Try again later.",
             }
-            raise AIServiceError(messages.get(status, f"OpenRouter request failed (HTTP {status}).")) from None
+            detail = _provider_error_detail(exc.response)
+            raise AIServiceError(
+                messages.get(status, f"IFM request failed (HTTP {status}): {detail}")
+            ) from None
         except httpx.RequestError:
-            raise AIServiceError("Could not connect to OpenRouter. Try again later.") from None
+            raise AIServiceError("Could not connect to IFM. Try again later.") from None
 
         try:
             body = response.json()
@@ -209,7 +239,7 @@ async def _generate_text(
             if not isinstance(summary, str) or not summary.strip():
                 raise ValueError("Empty summary")
         except (ValueError, KeyError, IndexError, TypeError):
-            raise AIServiceError("OpenRouter returned no usable text.") from None
+            raise AIServiceError("IFM returned no usable text.") from None
         return summary.strip()
 
     if client is not None:

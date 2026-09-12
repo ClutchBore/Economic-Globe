@@ -33,7 +33,7 @@ class FragmentedStream(httpx.AsyncByteStream):
 
 class ChatServiceTests(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
-        env = patch.dict(os.environ, {"OPENROUTER_API_KEY": "test-only", "OPENROUTER_MODEL": "test/model"})
+        env = patch.dict(os.environ, {"IFM_API_KEY": "test-only", "IFM_MODEL": "test/model"})
         env.start()
         self.addCleanup(env.stop)
 
@@ -105,6 +105,24 @@ class ChatRouteTests(unittest.TestCase):
         self.assertIn('event: error', response.text)
         self.assertNotIn('event: done', response.text)
         self.assertNotIn('private', response.text)
+
+    def test_chat_can_load_country_from_cache(self):
+        async def fake(*args):
+            yield 'Cached answer'
+        body = {"message": "Explain inflation", "history": []}
+        with patch("routes.ai.data_store.get_country", return_value=COUNTRY), \
+                patch("routes.ai.chat_about_country", fake):
+            response = self.client.post("/api/chat/IND", json=body)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('event: meta', response.text)
+        self.assertIn('event: delta', response.text)
+        self.assertIn('Cached answer', response.text)
+
+    def test_chat_unknown_cached_country(self):
+        body = {"message": "Explain inflation", "history": []}
+        with patch("routes.ai.data_store.get_country", return_value=None):
+            response = self.client.post("/api/chat/ZZZ", json=body)
+        self.assertEqual(response.status_code, 404)
 
     def test_bad_requests(self):
         cases = [{**self.body, 'message': ' '}, {**self.body, 'message': 'x' * 4001},

@@ -3,7 +3,6 @@ __pycache__/
 *.pyc
 .env
 
-# Country payloads and AI summaries live in Upstash KV now; these are local
-# leftovers. cache/mock/ stays tracked as the demo fallback.
-cache/countries/
+# AI summaries live in Upstash KV; keep those local leftovers ignored.
+# Country payloads in cache/countries/ are tracked for production demo fallback.
 cache/ai/

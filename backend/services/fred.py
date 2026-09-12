@@ -43,7 +43,6 @@ def fetch_bond_yield(series_id: str | None) -> dict:
             },
             timeout=10,
             follow_redirects=True,
-            verify=False,
             trust_env=False,
         )
         resp.raise_for_status()

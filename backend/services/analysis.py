@@ -6,21 +6,26 @@ from typing import Any
 from services import data_store
 
 
-SUPPORTED_RANKING_METRICS = {
+SUPPORTED_METRICS = {
     "gdp",
     "gdp_per_capita",
+    "gdp_per_capita_ppp",
+    "gdp_growth",
     "inflation",
+    "unemployment",
+    "population",
+    "life_expectancy",
+    "govt_debt_pct_gdp",
+    "exports_pct_gdp",
+    "urban_population_pct",
+    "internet_users_pct",
+    "co2_per_capita",
     "bond_yield_10y",
     "fx_rate",
 }
 
-SUPPORTED_ANOMALY_METRICS = {
-    "gdp",
-    "gdp_per_capita",
-    "inflation",
-    "bond_yield_10y",
-    "fx_rate",
-}
+SUPPORTED_RANKING_METRICS = SUPPORTED_METRICS
+SUPPORTED_ANOMALY_METRICS = SUPPORTED_METRICS
 
 HEALTH_COMPONENT_WEIGHTS = {
     "gdp_per_capita": 30,

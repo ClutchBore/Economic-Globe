@@ -1,6 +1,46 @@
 # Backend — Economic Globe API
 
-FastAPI service that serves cached per-country economic data. See the [root README](../README.md) for first-time setup.
+FastAPI service that serves cached per-country economic data, AI summaries/comparisons/chat, and analysis endpoints. See the [root README](../README.md) for first-time setup.
+
+
+## Main API endpoints
+
+Run the server from `backend/`:
+
+```bash
+uvicorn main:app --reload --port 8000
+```
+
+Useful local URLs:
+
+| Feature | Endpoint |
+|---|---|
+| Health | `GET /api/health` |
+| Countries | `GET /api/countries`, `GET /api/countries/{code}` |
+| AI summary | `POST /api/summarize/{country_code}` |
+| AI comparison | `POST /api/compare` |
+| Streaming chat | `POST /api/chat/{country_code}` |
+| Rankings | `GET /api/rankings/{metric}` |
+| Anomalies | `GET /api/anomalies/{metric}` |
+| Anomaly explanation | `POST /api/anomaly/explain` |
+| Market Health Score | `GET /api/market-health` |
+| Correlations | `GET /api/correlations?metric_x=gdp_per_capita&metric_y=inflation` |
+| Rolling trends | `GET /api/trends/{metric}?window=3` |
+| Biggest movers | `GET /api/movers/{metric}?limit=5` |
+| Time-slider data | `GET /api/timeline/{metric}` |
+
+AI calls require `IFM_API_KEY` and `IFM_MODEL` in `backend/.env`. Chat intentionally sends previous turns as a transcript and omits IFM high-reasoning params so follow-up questions work without hidden provider thinking fields.
+
+For frontend request/response examples, see [AI_HANDOFF.md](AI_HANDOFF.md).
+
+## Running tests
+
+```bash
+cd backend
+python -m unittest discover -s tests
+```
+
+This suite covers country routes, AI route contracts, streaming chat parsing, rankings, anomalies, Market Health Score, correlations, trends, movers, timeline payloads, and app route registration. Current expected result: all tests pass.
 
 ## Running the smoke test
 

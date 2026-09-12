@@ -3,7 +3,7 @@ import HealthScoreGauge from './HealthScoreGauge'
 import ComparisonChart from './ComparisonChart'
 import CountryPickerList from './CountryPickerList'
 import AIComparison from './AIComparison'
-import { metricTabs } from '../data/metricTabs'
+import { isNumber, metricTabs, missingValue } from '../data/metricTabs'
 
 function GaugeColumn({ country }) {
   return (
@@ -24,8 +24,8 @@ function StatRow({ label, valueA, valueB }) {
   )
 }
 
-const fxFmt = (c) => (c.fx_change_pct == null ? '—' : `${c.fx_change_pct > 0 ? '+' : ''}${c.fx_change_pct.toFixed(1)}%`)
-const bondFmt = (c) => (c.bond_yield_10y == null ? '—' : `${c.bond_yield_10y.toFixed(2)}%`)
+const scoreFmt = (value) => (isNumber(value) ? value.toFixed(1) : missingValue)
+const fxFmt = (c) => (isNumber(c.fx_change_pct) ? `${c.fx_change_pct > 0 ? '+' : ''}${c.fx_change_pct.toFixed(1)}%` : missingValue)
 
 export default function ComparisonPanel({ countryA, countryB, onClose, onChangeCountryB }) {
   const [activeMetric, setActiveMetric] = useState(metricTabs[0].key)
@@ -47,7 +47,7 @@ export default function ComparisonPanel({ countryA, countryB, onClose, onChangeC
           <span className="text-[17px] font-bold leading-tight text-white">
             {countryA.country_name} <span className="font-normal text-slate-500">vs.</span> {countryB.country_name}
           </span>
-          <span className="text-xs text-slate-500">Comparison · data as of {countryA.data_as_of}</span>
+          <span className="text-xs text-slate-500">Comparison · data as of {countryA.data_as_of ?? missingValue}</span>
         </div>
         <button
           onClick={onClose}
@@ -76,16 +76,16 @@ export default function ComparisonPanel({ countryA, countryB, onClose, onChangeC
             <span className="text-right text-[11px] uppercase tracking-wide text-slate-600">{countryA.country_code}</span>
             <span className="text-right text-[11px] uppercase tracking-wide text-slate-600">{countryB.country_code}</span>
           </div>
-          <StatRow label="Health score" valueA={countryA.health_score} valueB={countryB.health_score} />
-          <StatRow label="GDP" valueA={`$${(countryA.gdp / 1e12).toFixed(2)}T`} valueB={`$${(countryB.gdp / 1e12).toFixed(2)}T`} />
-          <StatRow
-            label="GDP per capita"
-            valueA={`$${Math.round(countryA.gdp_per_capita).toLocaleString()}`}
-            valueB={`$${Math.round(countryB.gdp_per_capita).toLocaleString()}`}
-          />
-          <StatRow label="Inflation (YoY)" valueA={`${countryA.inflation.toFixed(1)}%`} valueB={`${countryB.inflation.toFixed(1)}%`} />
-          <StatRow label="10Y bond yield" valueA={bondFmt(countryA)} valueB={bondFmt(countryB)} />
-          <StatRow label="Currency Δ today" valueA={fxFmt(countryA)} valueB={fxFmt(countryB)} />
+          <StatRow label="Health score" valueA={scoreFmt(countryA.health_score)} valueB={scoreFmt(countryB.health_score)} />
+          {metricTabs.map((metric) => (
+            <StatRow
+              key={metric.key}
+              label={metric.label}
+              valueA={metric.format(countryA[metric.key])}
+              valueB={metric.format(countryB[metric.key])}
+            />
+          ))}
+          <StatRow label="Currency change today" valueA={fxFmt(countryA)} valueB={fxFmt(countryB)} />
         </div>
 
         <div className="flex flex-col gap-3">
@@ -95,9 +95,9 @@ export default function ComparisonPanel({ countryA, countryB, onClose, onChangeC
                 key={tab.key}
                 onClick={() => setActiveMetric(tab.key)}
                 className={
-                  'rounded-full px-3 py-1.5 text-[12.5px] font-semibold transition-colors ' +
+                  'rounded-md px-3 py-1.5 text-[12.5px] font-semibold transition-colors ' +
                   (tab.key === activeMetric
-                    ? 'border border-[#3987e5]/45 bg-[#3987e5]/[0.16] text-[#7db3f2]'
+                    ? 'border border-slate-500 bg-slate-700 text-slate-100'
                     : 'border border-transparent text-slate-400 hover:bg-white/[0.06]')
                 }
               >

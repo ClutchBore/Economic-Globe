@@ -6,10 +6,46 @@ refreshes the KV entries this loads from.
 import json
 from pathlib import Path
 
-from config.countries import list_country_configs
+from config.countries import get_country_config, list_country_configs
 from services import kv_client
 
 MOCK_CACHE_DIR = Path(__file__).resolve().parent.parent / "cache" / "mock"
+
+METRIC_UNITS = {
+    "gdp": "USD",
+    "gdp_per_capita": "USD",
+    "gdp_per_capita_ppp": "international $ (PPP)",
+    "gdp_growth": "% per year",
+    "inflation": "%",
+    "unemployment": "% of labor force",
+    "population": "people",
+    "life_expectancy": "years",
+    "govt_debt_pct_gdp": "% of GDP",
+    "exports_pct_gdp": "% of GDP",
+    "urban_population_pct": "% of population",
+    "internet_users_pct": "% of population",
+    "co2_per_capita": "t CO2e per person",
+    "bond_yield_10y": "%",
+    "fx_rate": "USD per 1 unit of local currency",
+}
+
+
+def _empty_country_payload(country: dict) -> dict:
+    """Return the full frontend shape for a configured country with no cached metrics yet."""
+    return {
+        "country_code": country["code"],
+        "country_name": country["name"],
+        "region": country["region"],
+        "data_as_of": None,
+        **{metric: None for metric in METRIC_UNITS},
+        "fx_pair": country.get("fx_pair"),
+        "fx_change_pct": None,
+        "units": METRIC_UNITS,
+        "sources": {metric: None for metric in METRIC_UNITS},
+        "dates": {metric: None for metric in METRIC_UNITS},
+        "history": {metric: [] for metric in METRIC_UNITS},
+        "is_placeholder": True,
+    }
 
 
 def _load_all() -> dict[str, dict]:
@@ -26,7 +62,10 @@ def _load_all() -> dict[str, dict]:
                 data[path.stem] = json.load(f)
 
     codes = [c["code"] for c in list_country_configs()]
-    payloads = kv_client.mget_json([kv_client.country_key(code) for code in codes])
+    try:
+        payloads = kv_client.mget_json([kv_client.country_key(code) for code in codes])
+    except Exception:
+        payloads = []
     for code, payload in zip(codes, payloads):
         if payload is not None:
             data[code] = payload
@@ -58,5 +97,12 @@ def list_countries() -> list[dict]:
 
 
 def get_country(code: str) -> dict | None:
-    """Full country payload, or None if the code is unknown/has no cached data."""
-    return _data().get(code.upper())
+    """Full country payload, or a null-filled placeholder for configured countries."""
+    code = code.upper()
+    cached = _data().get(code)
+    if cached is not None:
+        return cached
+    country = get_country_config(code)
+    if country is None:
+        return None
+    return _empty_country_payload(country)

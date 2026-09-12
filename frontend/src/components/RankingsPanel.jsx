@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fetchRankings, fetchMarketHealth, fetchMovers, fetchTrends, fetchTimeline, fetchCorrelation } from '../data/api'
-import { metricTabs } from '../data/metricTabs'
+import { isNumber, metricTabs, missingValue } from '../data/metricTabs'
 import CorrelationScatter from './CorrelationScatter'
 import TimelineChart from './TimelineChart'
 
@@ -96,7 +96,7 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
               className={
                 'rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-colors ' +
                 (m.key === mode
-                  ? 'bg-[#3987e5]/[0.16] text-[#7db3f2]'
+                  ? 'bg-slate-700 text-slate-100'
                   : 'text-slate-500 hover:bg-white/[0.06] hover:text-slate-300')
               }
             >
@@ -106,21 +106,22 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
         </div>
 
         {showMetricTabs && (
-          <div className="flex flex-none flex-wrap gap-1.5 px-5 pt-3">
-            {metricTabs.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveMetric(tab.key)}
-                className={
-                  'rounded-full px-3 py-1.5 text-[12.5px] font-semibold transition-colors ' +
-                  (tab.key === activeMetric
-                    ? 'border border-[#3987e5]/45 bg-[#3987e5]/[0.16] text-[#7db3f2]'
-                    : 'border border-transparent text-slate-400 hover:bg-white/[0.06]')
-                }
-              >
-                {tab.label}
-              </button>
-            ))}
+          <div className="flex flex-none items-center gap-2 px-5 pt-3">
+            <label htmlFor="rankings-metric" className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
+              Metric
+            </label>
+            <select
+              id="rankings-metric"
+              value={activeMetric}
+              onChange={(e) => setActiveMetric(e.target.value)}
+              className="min-w-0 flex-1 rounded-md border border-white/10 bg-slate-800 px-3 py-2 text-[13px] font-semibold text-slate-200 outline-none transition-colors hover:border-white/20 focus:border-slate-500"
+            >
+              {metricTabs.map((tab) => (
+                <option key={tab.key} value={tab.key}>
+                  {tab.label}
+                </option>
+              ))}
+            </select>
           </div>
         )}
 
@@ -134,7 +135,7 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
                 key={String(opt.key)}
                 onClick={() => setTrendWindow(opt.key)}
                 className={
-                  'rounded-full px-2.5 py-1 text-[11.5px] font-semibold transition-colors ' +
+                  'rounded-md px-2.5 py-1 text-[11.5px] font-semibold transition-colors ' +
                   (trendWindow === opt.key
                     ? 'bg-white/[0.1] text-slate-200'
                     : 'text-slate-500 hover:text-slate-300')
@@ -211,13 +212,15 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
                   </span>
                   <div className="flex flex-1 flex-col gap-0.5">
                     <span className="text-[13.5px] text-slate-200">{row.country_name}</span>
-                    {row.missing_components.length > 0 && (
+                    {(row.missing_components ?? []).length > 0 && (
                       <span className="text-[10.5px] text-slate-600">
                         Based on available data — missing {row.missing_components.join(', ')}
                       </span>
                     )}
                   </div>
-                  <span className="text-[13.5px] font-semibold text-white">{row.score.toFixed(1)}</span>
+                  <span className="text-[13.5px] font-semibold text-white">
+                    {isNumber(row.score) ? row.score.toFixed(1) : missingValue}
+                  </span>
                 </button>
               ))}
             </div>
@@ -244,8 +247,9 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
                       className="text-[13px] font-semibold"
                       style={{ color: row.direction === 'up' ? '#0ca30c' : '#d03b3b' }}
                     >
-                      {row.direction === 'up' ? '+' : ''}
-                      {row.percent_change.toFixed(1)}%
+                      {isNumber(row.percent_change)
+                        ? `${row.direction === 'up' ? '+' : ''}${row.percent_change.toFixed(1)}%`
+                        : missingValue}
                     </span>
                   </div>
                 </button>

@@ -3,6 +3,7 @@ import HealthScoreGauge from './HealthScoreGauge'
 import MetricChart from './MetricChart'
 import CountryPickerList from './CountryPickerList'
 import AISummary from './AISummary'
+import AnomalyCallout from './AnomalyCallout'
 import { metricTabs } from '../data/metricTabs'
 import { streamChat } from '../data/api'
 
@@ -207,6 +208,8 @@ export default function CountryPanel({ country, onClose, onCompare }) {
             </div>
           )}
         </div>
+
+        <AnomalyCallout metric={activeMetric} metricLabel={activeTab.label} countryCode={country.country_code} />
 
         <AISummary countryCode={country.country_code} />
       </div>

@@ -45,6 +45,45 @@ export async function fetchComparison(countryCodeA, countryCodeB) {
   return data
 }
 
+export async function fetchRankings(metric) {
+  const res = await fetch(`${API_BASE}/api/rankings/${metric}`)
+  const data = await res.json()
+  if (!res.ok) {
+    const err = new Error(data.detail ?? `GET /api/rankings/${metric} failed: ${res.status}`)
+    err.detail = data.detail
+    throw err
+  }
+  return data
+}
+
+export async function fetchAnomalies(metric) {
+  const res = await fetch(`${API_BASE}/api/anomalies/${metric}`)
+  const data = await res.json()
+  if (!res.ok) {
+    const err = new Error(data.detail ?? `GET /api/anomalies/${metric} failed: ${res.status}`)
+    err.detail = data.detail
+    throw err
+  }
+  return data
+}
+
+// `anomaly` is one entry from fetchAnomalies(...).anomalies, plus the threshold/method fields
+// that ride alongside it in the same response — the endpoint wants all of it together.
+export async function fetchAnomalyExplanation(anomaly) {
+  const res = await fetch(`${API_BASE}/api/anomaly/explain`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(anomaly),
+  })
+  const data = await res.json()
+  if (!res.ok) {
+    const err = new Error(data.detail ?? `POST /api/anomaly/explain failed: ${res.status}`)
+    err.detail = data.detail
+    throw err
+  }
+  return data
+}
+
 // One SSE frame is "event: name\ndata: {...}" separated by a blank line. Returns null for a
 // frame with no data (e.g. a bare comment/keepalive), which callers should just skip.
 function parseSseFrame(frame) {

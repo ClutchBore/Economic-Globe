@@ -1,90 +1,87 @@
 # Economic Globe — Hackathon Plan
 
-## Overview
+## Goal and priorities
 
-An interactive world map/globe (inspired by Harvard's *Globe of Economic Complexity*) showing per-country economic data — GDP, GDP per capita, inflation, bond yields, currency — with an AI-assisted layer on top: country summarization, comparison, anomaly detection, and a chatbot for country-specific questions.
+An interactive country map with economic data, AI summaries, comparison, and country chat, inspired by Harvard's Globe of Economic Complexity. This three-person plan splits the original Person A workload between A (data/backend) and C (AI), with C moving to analysis afterward.
 
-**Stack**
-- **Frontend:** React + Vite, react-simple-maps (or globe.gl — see open decisions), Recharts/Plotly.js, Tailwind
-- **Backend:** Python + FastAPI
-- **Data sources:** World Bank API (via `wbgapi`), yfinance, optionally IMF DataMapper — see open decisions
-- **AI layer:** OpenRouter (paid balance, ~$10), small/fast model for cost + latency
-- **Analysis:** pandas — correlation, rolling windows, Composite Market Health Score, std-dev anomaly detection
-- **Cache:** flat JSON, pre-fetched ahead of the demo; live calls only as optional refresh, never in the critical demo path
-- **Deployment:** Vercel (frontend + FastAPI backend in one project via Services)
+1. Real cached country data and a working map.
+2. Country summaries, two-country comparisons, and streaming chat.
+3. Basic metric rankings and anomaly detection with explanations.
+4. Stretch: custom Market Health Score, correlations, rolling trends, biggest movers, and time slider.
 
-**Open decisions — lock these before hour 0:**
-1. **Globe vs. map** — 3D globe.gl (higher visual impact, higher build cost) vs. 2D react-simple-maps (faster, more predictable). Whoever owns the frontend branch needs this settled before they start.
-2. **IMF in or out of the hour 0–4 data pipeline** — was in the original 3-source plan, dropped from the latest consolidated list. Confirm intentional or add it back.
-3. **Which OpenRouter model** — pick a small/fast paid model before building against it.
+## Team and branches
 
----
+| Person | Branch | Responsibility | Checklist |
+|---|---|---|---|
+| A | `feature/backend-data-ai` (suggested existing name) | Data, cache, country routes, backend integration/deployment | [A roadmap](PERSON_A_ROADMAP.md) |
+| B | `feature/frontend-viz` (suggested) | Website, map, charts, frontend deployment | [B roadmap](PERSON_B_ROADMAP.md) |
+| C — Shrav | `shrav-branch` | AI client, summaries/comparison/chat first; basic analysis afterward | [C roadmap](PERSON_C_ROADMAP.md) |
 
-## Shared contract (all three branches build against this)
+A's branch name does not assign AI ownership: C owns AI. Keep actual team branches where already established. Start from a shared base and merge small working pieces at hours 4, 8, and 14.
 
-To let all three branches run in parallel without blocking on each other, agree on this up front and treat it as frozen once work starts:
+## File ownership
 
-- **Per-country schema** — one JSON shape every source normalizes into, e.g.:
-  `{country_code, country_name, gdp, gdp_per_capita, inflation, bond_yield_10y, fx_rate, ...}`
-- **Country config file** — `country_code → ticker suffix → index/ETF ticker → currency → World Bank code`, capped at ~25–30 countries
-- **Mock data fixture** — Person A publishes a small hand-written JSON file matching the schema in the first hour, so Person B and Person C can build against realistic-looking data before the real pipeline is done
-- **Merge cadence** — short syncs at hour 4, hour 8, and hour 14 to merge branches and catch integration issues early, not just at the end
+- A: app entry point, shared backend dependencies/configuration, country mappings, data fetchers, `services/data_store.py`, country routes, and economic/mock cache folders.
+- B: `frontend/` and frontend deployment configuration.
+- C: `services/ai.py`, `routes/ai.py`, `services/analysis.py`, `routes/analysis.py`, and `backend/cache/ai/`.
+- A registers C's routers in `backend/main.py`; C writes and maintains their handlers. Shared dependency/root configuration requests go through A.
 
----
+These are planned paths. Separate ownership lets A and C work concurrently without editing the same backend files.
 
-## Branch 1: `feature/backend-data-ai` — Person A
+## Stack and prep decisions
 
-Backend, data pipeline, and AI layer (folded together since the AI routes sit directly on top of the cache-read code).
+- Frontend: React + Vite, Tailwind, react-simple-maps, Recharts. B settles map versus globe before starting; the scaffold uses a 2D map library.
+- Backend: Python + FastAPI; pandas for analysis.
+- Data: World Bank via wbgapi and yfinance, saved as JSON. Verify actual coverage; IMF is optional.
+- AI: OpenRouter; C selects the model, manages the backend key, and monitors the budget.
+- Deployment target: Vercel frontend/backend. A/B verify the deployment setup early.
+- Aim for 25–30 countries, starting with a reliable subset and agreed demo countries.
 
-- Set up FastAPI app skeleton
-- Write fetch/normalize scripts for World Bank (`wbgapi`) and yfinance (rate-limited, cached, with retry/backoff), and IMF if kept in scope
-- Build the country config file and shared per-country JSON cache
-- Publish the mock data fixture early for B and C to build against
-- Cache-first read pattern: API reads cache, live yfinance call only as optional refresh with fallback to last-known-good data
-- Data-serving FastAPI routes (by country, by metric, by comparison pair)
-- AI layer (`services/ai.py`): `summarize_country`, `compare_countries`, `chat_about_country`, wired to OpenRouter — build this as a reusable client/module so Person C can call the same OpenRouter setup for anomaly narration rather than duplicating it
-- Routes: `POST /api/summarize/{country_code}`, `POST /api/compare`, `POST /api/chat/{country_code}`
-- Pre-generate and cache country summaries ahead of the demo as a fallback if live calls are slow/rate-limited
-- Wire in Person C's Market Health Score, anomaly, and rankings outputs once available (route registration for `POST /api/anomaly/explain` lives here, logic owned by Person C)
-- Set an OpenRouter `max_price` cap and usage alerts
+## Shared contract — agree in hour 0–1
 
-## Branch 2: `feature/frontend-viz` — Person B
+A publishes a labeled sample dataset and reader functions so B/C can begin without live sources.
 
-Frontend, visualization, and UI.
+- Agree on `get_country(code)` and `list_countries()`, return shapes, and unknown-country behavior.
+- Include country codes/names, metric values, units, sources, observation dates, and nulls for missing data.
+- Include dated history per metric with frequency and units. Current values alone cannot support historical charts/anomalies.
+- Keep annual macro data separate from daily market series; define FX quote direction and comparable periods.
+- B/C agree on AI request/response payloads, streamed chat events, and errors.
+- Share ranking/anomaly output examples before implementation: metric, dates, ordering, values, baseline window, threshold, and data-availability status.
 
-- Scaffold React + Vite project, Tailwind setup
-- Build the map/globe component against the mock data fixture (don't wait on Person A's real pipeline)
-- Metric switcher (GDP / inflation / bond yields / currency)
-- Country detail panel: click a country → show its data, AI summary, and a "compare to..." action
-- Comparison view/UI
-- Chat interface for the country chatbot (should support streaming)
-- Charts (Recharts or Plotly) for time-series/comparison views
-- Swap mock data for live API calls once Person A's routes are ready (hour 4 sync)
-- Handle loading/error states gracefully (cache misses, slow AI responses, rate limits)
+## Planned endpoint ownership
 
-## Branch 3: `feature/analysis-layer` — Person C
+| Endpoint | Handler owner |
+|---|---|
+| GET /api/health | A |
+| GET /api/countries | A |
+| GET /api/countries/{country_code} | A |
+| POST /api/summarize/{country_code} | C |
+| POST /api/compare | C |
+| POST /api/chat/{country_code} | C |
+| GET /api/rankings | C |
+| GET /api/anomalies/{country_code} | C |
+| POST /api/anomaly/explain | C |
 
-Quantitative analysis — the differentiator layer.
-
-- Prototype in a notebook first against the mock data fixture, then package as clean importable functions for Person A to wire into FastAPI routes
-- Correlation analysis and rolling windows across metrics
-- Design and compute the Composite Market Health Score (weighted combo of index performance, volatility, currency stability, inflation/GDP trend)
-- Std-dev threshold anomaly detection per metric per country
-- Document the score/anomaly logic clearly (units, thresholds, weighting rationale) so Person A can wire it in without needing to reverse-engineer it, and so it's easy to explain to judges
-- **Own `explain_anomaly` end-to-end**: write the AI narration call for flagged anomalies yourself, reusing Person A's OpenRouter client module rather than handing raw output to A to narrate — keeps the full anomaly feature (detect → explain) in one place
-- **Prep historical/trend data structures**: shape the rolling-window output so it's ready to back a time-slider if there's time for that stretch goal later — no one else needs to touch this later if you set the shape up now
-- **Rankings/leaderboard output**: top N countries by Market Health Score, biggest movers, most anomalies flagged — extends your existing computation (no new libraries) and gives Person B a demo-friendly UI surface beyond the map itself
-
----
+These are target interfaces; agree payloads before implementation. A registers all routers. B can compare numeric values from country responses; the comparison POST supplies AI narration.
 
 ## Timeline
 
-| Hours | Focus |
-|---|---|
-| Prep (before hour 0) | Lock open decisions, test data coverage, get accounts/keys sorted, scaffold repo, wireframe UI |
-| 0–4 | Data pipeline + mock fixture (A), map rendering with one metric live (B), analysis prototyping starts (C) |
-| 4–8 | Metric switcher, remaining data layers, styling (B); real data replaces mock fixture; FastAPI routes solidified (A) |
-| 8–14 | AI layer: summarization, chat, comparison (A); Market Health Score finalized (C) |
-| 14–18 | Anomaly detection + AI narration tying A and C together |
-| 18–22 | Deploy to Vercel, test cold starts/timeouts against real AI call latency, polish, rehearse demo |
-| 22–24 | Buffer — kept empty on purpose |
+| Hours | A | B | C |
+|---|---|---|---|
+| Prep | Verify sources/scaffold | Settle map and sketch screens | Model, key, AI interfaces |
+| 0–4 | Sample data in hour 0–1; first real cache | Map and basic country panel | AI client and summaries; start comparison |
+| 4–8 | Complete data routes; register AI router | Real data and core AI UI | Finish comparison/chat and summary fallback |
+| 8–14 | Data fixes, analysis integration, early deployment | Core UI/charts; prepare insight panels | After AI checkpoint, basic rankings/anomalies |
+| 14–18 | Full integration | Connect insights; try deployment | Anomaly explanations and validation |
+| 18–22 | Deploy and check reliability | Deploy, polish, rehearse | Deployed AI/analysis checks |
+| 22–24 | Buffer | Buffer | Buffer |
+
+At hour 8, C transitions only when summary/comparison/streaming chat work through B's UI with real data and clear failure behavior. C does not wait for all of A's backend work and still owns AI fixes.
+
+C shares sample analysis outputs early and delivers basic working outputs by hour 14. If AI slips, prioritize rankings and reduce anomaly scope. Full analysis is not assumed to be quick. Freeze features at hour 18 and omit stretch goals first.
+
+## Reliability and demo
+
+Serve country data from cache, preserving the last successful dataset if refresh fails. Use AI timeouts, clear errors, cached summaries, and template anomaly explanations. Identify mock data and fallback responses honestly.
+
+Check values/dates, missing data, streaming, and calculation edge cases. Rehearse map → country → summary → compare → chat → available insights on the deployed site. Reserve the last two hours for blockers.

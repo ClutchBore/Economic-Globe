@@ -4,15 +4,16 @@ An interactive world map showing per-country economic data — GDP, GDP per capi
 
 Inspired by Harvard's [Globe of Economic Complexity](https://globe.cid.harvard.edu/).
 
-## Features
+## Planned features
 
 - **Interactive map** — countries colored by a selectable metric (GDP, inflation, bond yields, currency)
 - **AI country summaries** — plain-English summary of a country's economic picture
 - **Country comparison** — side-by-side AI-generated comparison of two countries
 - **Anomaly detection** — statistically flagged outliers (std-dev threshold), narrated in plain English
-- **Composite Market Health Score** — weighted score combining index performance, volatility, currency stability, and inflation/GDP trend
-- **Rankings** — top countries by score, biggest movers, most anomalies
+- **Rankings** — countries ordered by available metrics, with clear units and dates
 - **Chatbot** — ask questions about a specific country's data
+
+Build the map/data and core AI first, then basic rankings and anomalies. The custom Market Health Score, correlations, rolling trends, biggest movers, and time slider are stretch goals.
 
 ## Tech stack
 
@@ -68,8 +69,10 @@ Visit http://localhost:5173 — you should see "Backend status: healthy" once bo
 
 | Branch | Owner | Scope |
 |---|---|---|
-| `feature/backend-data-ai` | Person A | Data pipeline, FastAPI backend, AI layer (summarize/compare/chat) |
+| `feature/backend-data-ai` (suggested existing name) | Person A | Data pipeline, cache, country routes, backend integration/deployment |
 | `feature/frontend-viz` | Person B | Map, charts, country panel, chat UI |
-| `feature/analysis-layer` | Person C | Correlation, Market Health Score, anomaly detection + explanation, rankings |
+| `shrav-branch` | Person C — Shrav | AI connection, summaries/comparison/chat first; basic analysis afterward |
 
-Cut all three branches from `main` once this scaffold is pushed, so everyone starts from the same working base. See `hackathon_plan.md` for the full task breakdown and timeline.
+Use a shared starting base and keep established team branches. A and C split the original backend/data/AI workload from the start; B builds the frontend throughout. C moves to analysis when core AI works through the UI with real data, targeting hour 8. C does not wait for A to finish all backend work.
+
+A owns shared backend configuration and registers C's routers; C owns their AI/analysis handlers. See [the shared plan](hackathon_plan.md) and roadmaps for [A](PERSON_A_ROADMAP.md), [B](PERSON_B_ROADMAP.md), and [C — Shrav](PERSON_C_ROADMAP.md) for file ownership and handoffs. Merge at hours 4, 8, and 14; reserve hours 22–24 for fixes.

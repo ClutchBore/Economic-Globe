@@ -15,7 +15,7 @@ function bandFor(score) {
   return BANDS.find((b) => score < b.max) ?? BANDS[BANDS.length - 1]
 }
 
-export default function HealthScoreGauge({ score, label }) {
+export default function HealthScoreGauge({ score, label, showLabel = true }) {
   const clamped = Math.max(0, Math.min(100, score))
   const filled = (clamped / 100) * ARC_LENGTH
   const band = bandFor(clamped)
@@ -65,7 +65,7 @@ export default function HealthScoreGauge({ score, label }) {
           {statusLabel}
         </text>
       </svg>
-      <span className="text-xs tracking-wide text-slate-500">COMPOSITE MARKET HEALTH SCORE</span>
+      {showLabel && <span className="text-xs tracking-wide text-slate-500">COMPOSITE MARKET HEALTH SCORE</span>}
     </div>
   )
 }

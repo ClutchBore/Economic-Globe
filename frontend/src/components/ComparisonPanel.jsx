@@ -8,7 +8,7 @@ import { isNumber, metricTabs, missingValue } from '../data/metricTabs'
 function GaugeColumn({ country }) {
   return (
     <div className="flex flex-1 flex-col items-center gap-1">
-      <span className="text-[13px] font-semibold text-slate-200">{country.country_name}</span>
+      <span className="text-[13px] font-semibold text-slate-800">{country.country_name}</span>
       <HealthScoreGauge score={country.health_score} label={country.health_label} showLabel={false} />
     </div>
   )
@@ -16,10 +16,10 @@ function GaugeColumn({ country }) {
 
 function StatRow({ label, valueA, valueB }) {
   return (
-    <div className="grid grid-cols-[1fr_1fr_1fr] items-center gap-3 border-b border-white/[0.05] py-2.5 last:border-0">
-      <span className="text-[12.5px] text-slate-400">{label}</span>
-      <span className="text-right text-[13.5px] font-semibold text-white">{valueA}</span>
-      <span className="text-right text-[13.5px] font-semibold text-white">{valueB}</span>
+    <div className="grid grid-cols-[1fr_1fr_1fr] items-center gap-3 border-b border-slate-200 py-2.5 last:border-0">
+      <span className="text-[12.5px] text-slate-500">{label}</span>
+      <span className="text-right text-[13.5px] font-semibold text-slate-950">{valueA}</span>
+      <span className="text-right text-[13.5px] font-semibold text-slate-950">{valueB}</span>
     </div>
   )
 }
@@ -40,18 +40,18 @@ export default function ComparisonPanel({ countryA, countryB, onClose, onChangeC
     : []
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden rounded-none border-0 bg-slate-900 shadow-2xl lg:w-[820px] lg:rounded-none lg:border lg:border-white/[0.08]">
+    <div className="flex h-full w-full flex-col overflow-hidden rounded-none border-0 bg-white shadow-2xl lg:w-[820px] lg:rounded-none lg:border lg:border-slate-200">
       {/* header */}
-      <div className="flex flex-none items-center justify-between border-b border-white/[0.07] px-5 py-[18px]">
+      <div className="flex flex-none items-center justify-between border-b border-slate-200 px-5 py-[18px]">
         <div className="flex flex-col gap-0.5">
-          <span className="text-[17px] font-bold leading-tight text-white">
+          <span className="text-[17px] font-bold leading-tight text-slate-950">
             {countryA.country_name} <span className="font-normal text-slate-500">vs.</span> {countryB.country_name}
           </span>
           <span className="text-xs text-slate-500">Comparison · data as of {countryA.data_as_of ?? missingValue}</span>
         </div>
         <button
           onClick={onClose}
-          className="flex h-[30px] w-[30px] items-center justify-center rounded-none text-slate-400 hover:bg-white/[0.08]"
+          className="flex h-[30px] w-[30px] items-center justify-center rounded-none text-slate-500 hover:bg-slate-100"
           aria-label="Close comparison"
         >
           <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
@@ -72,9 +72,9 @@ export default function ComparisonPanel({ countryA, countryB, onClose, onChangeC
 
         <div className="flex flex-col">
           <div className="grid grid-cols-[1fr_1fr_1fr] gap-3 pb-2">
-            <span className="text-[11px] uppercase tracking-wide text-slate-600">Metric</span>
-            <span className="text-right text-[11px] uppercase tracking-wide text-slate-600">{countryA.country_code}</span>
-            <span className="text-right text-[11px] uppercase tracking-wide text-slate-600">{countryB.country_code}</span>
+            <span className="text-[11px] uppercase tracking-wide text-slate-500">Metric</span>
+            <span className="text-right text-[11px] uppercase tracking-wide text-slate-500">{countryA.country_code}</span>
+            <span className="text-right text-[11px] uppercase tracking-wide text-slate-500">{countryB.country_code}</span>
           </div>
           <StatRow label="Health score" valueA={scoreFmt(countryA.health_score)} valueB={scoreFmt(countryB.health_score)} />
           {metricTabs.map((metric) => (
@@ -97,8 +97,8 @@ export default function ComparisonPanel({ countryA, countryB, onClose, onChangeC
                 className={
                   'rounded-none px-3 py-1.5 text-[12.5px] font-semibold transition-colors ' +
                   (tab.key === activeMetric
-                    ? 'border border-slate-500 bg-slate-700 text-slate-100'
-                    : 'border border-transparent text-slate-400 hover:bg-white/[0.06]')
+                    ? 'border border-slate-900 bg-slate-200 text-slate-950'
+                    : 'border border-transparent text-slate-500 hover:bg-slate-100')
                 }
               >
                 {tab.label}
@@ -113,7 +113,7 @@ export default function ComparisonPanel({ countryA, countryB, onClose, onChangeC
               nameB={countryB.country_name}
             />
           ) : (
-            <div className="flex h-[150px] items-center justify-center text-sm text-slate-600">
+            <div className="flex h-[150px] items-center justify-center text-sm text-slate-500">
               {activeTab.label} history isn't available for both countries
             </div>
           )}
@@ -124,7 +124,7 @@ export default function ComparisonPanel({ countryA, countryB, onClose, onChangeC
         <div className="flex flex-col gap-2">
           <button
             onClick={() => setShowPicker((s) => !s)}
-            className="self-start text-[12.5px] font-semibold text-slate-400 hover:text-white"
+            className="self-start text-[12.5px] font-semibold text-slate-500 hover:text-slate-950"
           >
             Change {countryB.country_name} →
           </button>

@@ -5,7 +5,7 @@ const COLORS = ['#3987e5', '#eb6834', '#0ca30c', '#d03b3b', '#a855f7', '#14b8a6'
 function TimelineTooltip({ active, payload, label, series, formatValue }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-none border border-white/10 bg-slate-800 px-2.5 py-1.5 text-xs">
+    <div className="rounded-none border border-slate-300 bg-slate-100 px-2.5 py-1.5 text-xs">
       <div className="mb-1 text-slate-500">{label}</div>
       {payload.map((p) => {
         const s = series.find((s) => s.code === p.dataKey)
@@ -35,7 +35,7 @@ export default function TimelineChart({ years, series, formatValue }) {
         {series.map((s, i) => (
           <div key={s.code} className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-none" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-            <span className="text-xs text-slate-400">{s.name}</span>
+            <span className="text-xs text-slate-500">{s.name}</span>
           </div>
         ))}
       </div>
@@ -61,7 +61,7 @@ export default function TimelineChart({ years, series, formatValue }) {
                 strokeWidth={2}
                 dot={false}
                 connectNulls
-                activeDot={{ r: 3.5, fill: '#0f172a', stroke: COLORS[i % COLORS.length], strokeWidth: 2 }}
+                activeDot={{ r: 3.5, fill: '#ffffff', stroke: COLORS[i % COLORS.length], strokeWidth: 2 }}
               />
             ))}
           </LineChart>

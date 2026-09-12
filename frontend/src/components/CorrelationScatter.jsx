@@ -4,10 +4,10 @@ function ScatterTooltip({ active, payload, formatX, formatY }) {
   if (!active || !payload?.length) return null
   const point = payload[0].payload
   return (
-    <div className="rounded-none border border-white/10 bg-slate-800 px-2.5 py-1.5 text-xs">
-      <div className="mb-0.5 font-semibold text-white">{point.country_name}</div>
-      <div className="text-slate-400">X: {formatX(point.x)}</div>
-      <div className="text-slate-400">Y: {formatY(point.y)}</div>
+    <div className="rounded-none border border-slate-300 bg-slate-100 px-2.5 py-1.5 text-xs">
+      <div className="mb-0.5 font-semibold text-slate-950">{point.country_name}</div>
+      <div className="text-slate-500">X: {formatX(point.x)}</div>
+      <div className="text-slate-500">Y: {formatY(point.y)}</div>
     </div>
   )
 }

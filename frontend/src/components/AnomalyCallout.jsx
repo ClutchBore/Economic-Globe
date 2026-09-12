@@ -45,7 +45,7 @@ export default function AnomalyCallout({ metric, metricLabel, countryCode }) {
 
   if (state.status === 'skipped') {
     return (
-      <div className="rounded-none border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5 text-xs text-slate-600">
+      <div className="rounded-none border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-500">
         Anomaly analysis unavailable for {metricLabel} — not enough history for {countryCode}.
       </div>
     )
@@ -69,7 +69,7 @@ export default function AnomalyCallout({ metric, metricLabel, countryCode }) {
         <p className="text-[13px] text-slate-500">Explanation unavailable right now.</p>
       )}
       {state.explanationStatus === 'ready' && (
-        <p className="text-[13px] leading-[1.5] text-slate-300">{state.explanation}</p>
+        <p className="text-[13px] leading-[1.5] text-slate-700">{state.explanation}</p>
       )}
     </div>
   )

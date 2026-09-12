@@ -70,16 +70,16 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
   const showMetricTabs = mode === 'rankings' || mode === 'movers' || mode === 'timeline'
 
   return (
-    <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-10 flex items-center justify-center bg-white/70 p-4" onClick={onClose}>
       <div
-        className="flex h-full max-h-[640px] w-full max-w-[480px] flex-col overflow-hidden rounded-none border border-white/[0.08] bg-slate-900 shadow-2xl"
+        className="flex h-full max-h-[640px] w-full max-w-[480px] flex-col overflow-hidden rounded-none border border-slate-200 bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex flex-none items-center justify-between border-b border-white/[0.07] px-5 py-[18px]">
-          <span className="text-[17px] font-bold text-white">Rankings</span>
+        <div className="flex flex-none items-center justify-between border-b border-slate-200 px-5 py-[18px]">
+          <span className="text-[17px] font-bold text-slate-950">Rankings</span>
           <button
             onClick={onClose}
-            className="flex h-[30px] w-[30px] items-center justify-center rounded-none text-slate-400 hover:bg-white/[0.08]"
+            className="flex h-[30px] w-[30px] items-center justify-center rounded-none text-slate-500 hover:bg-slate-100"
             aria-label="Close rankings"
           >
             <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
@@ -96,8 +96,8 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
               className={
                 'rounded-none px-2.5 py-1.5 text-[12px] font-semibold transition-colors ' +
                 (m.key === mode
-                  ? 'bg-slate-700 text-slate-100'
-                  : 'text-slate-500 hover:bg-white/[0.06] hover:text-slate-300')
+                  ? 'bg-slate-200 text-slate-950'
+                  : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700')
               }
             >
               {m.label}
@@ -114,7 +114,7 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
               id="rankings-metric"
               value={activeMetric}
               onChange={(e) => setActiveMetric(e.target.value)}
-              className="min-w-0 flex-1 rounded-none border border-white/10 bg-slate-800 px-3 py-2 text-[13px] font-semibold text-slate-200 outline-none transition-colors hover:border-white/20 focus:border-slate-500"
+              className="min-w-0 flex-1 rounded-none border border-slate-300 bg-slate-100 px-3 py-2 text-[13px] font-semibold text-slate-800 outline-none transition-colors hover:border-slate-500 focus:border-slate-500"
             >
               {metricTabs.map((tab) => (
                 <option key={tab.key} value={tab.key}>
@@ -137,8 +137,8 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
                 className={
                   'rounded-none px-2.5 py-1 text-[11.5px] font-semibold transition-colors ' +
                   (trendWindow === opt.key
-                    ? 'bg-white/[0.1] text-slate-200'
-                    : 'text-slate-500 hover:text-slate-300')
+                    ? 'bg-slate-100 text-slate-800'
+                    : 'text-slate-500 hover:text-slate-700')
                 }
               >
                 {opt.label}
@@ -152,7 +152,7 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
             <select
               value={metricX}
               onChange={(e) => setMetricX(e.target.value)}
-              className="rounded-none border border-white/10 bg-slate-800 px-2 py-1.5 text-xs text-slate-200 outline-none"
+              className="rounded-none border border-slate-300 bg-slate-100 px-2 py-1.5 text-xs text-slate-800 outline-none"
             >
               {metricTabs.map((t) => (
                 <option key={t.key} value={t.key}>
@@ -164,7 +164,7 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
             <select
               value={metricY}
               onChange={(e) => setMetricY(e.target.value)}
-              className="rounded-none border border-white/10 bg-slate-800 px-2 py-1.5 text-xs text-slate-200 outline-none"
+              className="rounded-none border border-slate-300 bg-slate-100 px-2 py-1.5 text-xs text-slate-800 outline-none"
             >
               {metricTabs.map((t) => (
                 <option key={t.key} value={t.key}>
@@ -185,13 +185,13 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
                 <button
                   key={row.country_code}
                   onClick={() => onSelectCountry(row.country_code)}
-                  className="flex items-center gap-3 rounded-none px-2 py-2 text-left hover:bg-white/[0.05]"
+                  className="flex items-center gap-3 rounded-none px-2 py-2 text-left hover:bg-slate-100"
                 >
                   <span className="w-6 flex-none text-right text-[12.5px] font-semibold text-slate-500">
                     {row.rank}
                   </span>
-                  <span className="flex-1 text-[13.5px] text-slate-200">{row.country_name}</span>
-                  <span className="text-[13.5px] font-semibold text-white">
+                  <span className="flex-1 text-[13.5px] text-slate-800">{row.country_name}</span>
+                  <span className="text-[13.5px] font-semibold text-slate-950">
                     {formatFor(state.data.metric)(row.value)}
                   </span>
                 </button>
@@ -205,20 +205,20 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
                 <button
                   key={row.country_code}
                   onClick={() => onSelectCountry(row.country_code)}
-                  className="flex items-center gap-3 rounded-none px-2 py-2 text-left hover:bg-white/[0.05]"
+                  className="flex items-center gap-3 rounded-none px-2 py-2 text-left hover:bg-slate-100"
                 >
                   <span className="w-6 flex-none text-right text-[12.5px] font-semibold text-slate-500">
                     {row.rank}
                   </span>
                   <div className="flex flex-1 flex-col gap-0.5">
-                    <span className="text-[13.5px] text-slate-200">{row.country_name}</span>
+                    <span className="text-[13.5px] text-slate-800">{row.country_name}</span>
                     {(row.missing_components ?? []).length > 0 && (
-                      <span className="text-[10.5px] text-slate-600">
+                      <span className="text-[10.5px] text-slate-500">
                         Based on available data — missing {row.missing_components.join(', ')}
                       </span>
                     )}
                   </div>
-                  <span className="text-[13.5px] font-semibold text-white">
+                  <span className="text-[13.5px] font-semibold text-slate-950">
                     {isNumber(row.score) ? row.score.toFixed(1) : missingValue}
                   </span>
                 </button>
@@ -232,12 +232,12 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
                 <button
                   key={row.country_code}
                   onClick={() => onSelectCountry(row.country_code)}
-                  className="flex items-center gap-3 rounded-none px-2 py-2 text-left hover:bg-white/[0.05]"
+                  className="flex items-center gap-3 rounded-none px-2 py-2 text-left hover:bg-slate-100"
                 >
                   <span className="w-6 flex-none text-right text-[12.5px] font-semibold text-slate-500">
                     {i + 1}
                   </span>
-                  <span className="flex-1 text-[13.5px] text-slate-200">{row.country_name}</span>
+                  <span className="flex-1 text-[13.5px] text-slate-800">{row.country_name}</span>
                   <span className="text-[12.5px] text-slate-500">
                     {formatFor(state.data.metric)(row.latest_value)}
                   </span>
@@ -265,9 +265,9 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
                   { label: 'Strength', value: state.data.strength },
                   { label: 'Direction', value: state.data.direction },
                 ].map((s) => (
-                  <div key={s.label} className="flex flex-col gap-0.5 rounded-none bg-slate-800 px-3 py-2">
+                  <div key={s.label} className="flex flex-col gap-0.5 rounded-none bg-slate-100 px-3 py-2">
                     <span className="text-[10.5px] text-slate-500">{s.label}</span>
-                    <span className="text-[13.5px] font-semibold capitalize text-white">{s.value}</span>
+                    <span className="text-[13.5px] font-semibold capitalize text-slate-950">{s.value}</span>
                   </div>
                 ))}
               </div>
@@ -293,7 +293,7 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
             return (
               <div className="flex flex-col gap-2">
                 {ranked.length > TIMELINE_COUNTRY_CAP && (
-                  <p className="text-[11px] text-slate-600">
+                  <p className="text-[11px] text-slate-500">
                     Showing the top {TIMELINE_COUNTRY_CAP} of {ranked.length} countries by latest value.
                   </p>
                 )}
@@ -308,8 +308,8 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
         </div>
 
         {state.status === 'ready' && state.data.note && (
-          <div className="flex-none border-t border-white/[0.07] px-5 py-3">
-            <p className="text-[11px] text-slate-600">{state.data.note}</p>
+          <div className="flex-none border-t border-slate-200 px-5 py-3">
+            <p className="text-[11px] text-slate-500">{state.data.note}</p>
           </div>
         )}
       </div>

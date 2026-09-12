@@ -3,9 +3,9 @@ import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts'
 function ChartTooltip({ active, payload, label, formatValue }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-none border border-white/10 bg-slate-800 px-2.5 py-1.5 text-xs">
+    <div className="rounded-none border border-slate-300 bg-slate-100 px-2.5 py-1.5 text-xs">
       <div className="text-slate-500">{label}</div>
-      <div className="font-semibold text-white">{formatValue(payload[0].value)}</div>
+      <div className="font-semibold text-slate-950">{formatValue(payload[0].value)}</div>
     </div>
   )
 }
@@ -35,7 +35,7 @@ export default function MetricChart({ data, formatValue }) {
             strokeWidth={2.5}
             fill="url(#lineFill)"
             dot={false}
-            activeDot={{ r: 4, fill: '#0f172a', stroke: '#3987e5', strokeWidth: 2.5 }}
+            activeDot={{ r: 4, fill: '#ffffff', stroke: '#3987e5', strokeWidth: 2.5 }}
           />
         </AreaChart>
       </ResponsiveContainer>

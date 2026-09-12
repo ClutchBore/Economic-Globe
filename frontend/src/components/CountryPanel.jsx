@@ -9,9 +9,9 @@ import { streamChat } from '../data/api'
 
 function StatTile({ label, value }) {
   return (
-    <div className="flex flex-col gap-1 rounded-none bg-slate-800 px-3.5 py-3">
-      <span className="text-[11.5px] text-slate-400">{label}</span>
-      <span className="text-lg font-bold text-white">{value}</span>
+    <div className="flex flex-col gap-1 rounded-none bg-slate-100 px-3 py-2">
+      <span className="text-[11px] text-slate-500">{label}</span>
+      <span className="text-[15px] font-bold text-slate-950">{value}</span>
     </div>
   )
 }
@@ -94,15 +94,15 @@ export default function CountryPanel({ country, onClose, onCompare }) {
   }
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden rounded-none border-0 bg-slate-900 shadow-2xl sm:w-[452px] sm:rounded-none sm:border sm:border-white/[0.08]">
+    <div className="flex h-full w-full flex-col overflow-hidden rounded-none border-0 bg-white shadow-2xl sm:w-[452px] sm:rounded-none sm:border sm:border-slate-200">
       {/* header */}
-      <div className="flex flex-none items-center justify-between border-b border-white/[0.07] px-5 py-[18px]">
+      <div className="flex flex-none items-center justify-between border-b border-slate-200 px-5 py-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-none border border-white/[0.14] bg-slate-800 text-xs font-semibold text-slate-400">
+          <div className="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-none border border-slate-300 bg-slate-100 text-xs font-semibold text-slate-500">
             {country.country_code.slice(0, 2)}
           </div>
           <div className="flex flex-col gap-0.5">
-            <span className="text-[17px] font-bold leading-tight text-white">{country.country_name}</span>
+            <span className="text-[17px] font-bold leading-tight text-slate-950">{country.country_name}</span>
             <span className="text-xs text-slate-500">
               {country.country_code} · {country.region} · data as of {country.data_as_of ?? missingValue}
             </span>
@@ -110,7 +110,7 @@ export default function CountryPanel({ country, onClose, onCompare }) {
         </div>
         <button
           onClick={onClose}
-          className="flex h-[30px] w-[30px] items-center justify-center rounded-none text-slate-400 hover:bg-white/[0.08]"
+          className="flex h-[30px] w-[30px] items-center justify-center rounded-none text-slate-500 hover:bg-slate-100"
           aria-label="Close panel"
         >
           <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
@@ -120,17 +120,17 @@ export default function CountryPanel({ country, onClose, onCompare }) {
       </div>
 
       {/* scrollable content */}
-      <div className="flex flex-1 flex-col gap-[22px] overflow-y-auto px-5 pb-[18px] pt-[22px]">
+      <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-5 pb-3 pt-3">
         <HealthScoreGauge score={country.health_score} label={country.health_label} />
 
         {country.is_placeholder && (
-          <div className="rounded-none border border-white/[0.08] bg-slate-800/70 px-3.5 py-3 text-[12.5px] leading-relaxed text-slate-400">
+          <div className="rounded-none border border-slate-200 bg-slate-100/70 px-3 py-2 text-[12px] leading-relaxed text-slate-500">
             Country profile is available, but detailed economic metrics have not been fetched yet.
           </div>
         )}
 
-        <div className="flex flex-col gap-2">
-          <div className="grid grid-cols-2 gap-2">
+        <div className="flex flex-col gap-1.5">
+          <div className="grid grid-cols-2 gap-1.5">
             {metricTabs.map((metric) => (
               <StatTile
                 key={metric.key}
@@ -139,12 +139,12 @@ export default function CountryPanel({ country, onClose, onCompare }) {
               />
             ))}
           </div>
-          <div className="flex items-center justify-between rounded-none bg-slate-800 px-3.5 py-3">
+          <div className="flex items-center justify-between rounded-none bg-slate-100 px-3 py-2">
             <div className="flex flex-col gap-1">
-              <span className="text-[11.5px] text-slate-400">
+              <span className="text-[11px] text-slate-500">
                 Currency{country.fx_pair ? ` · ${country.fx_pair}` : ''}
               </span>
-              <span className="text-lg font-bold text-white">
+              <span className="text-[15px] font-bold text-slate-950">
                 {fmtNumber(country.fx_rate)}
               </span>
             </div>
@@ -162,14 +162,14 @@ export default function CountryPanel({ country, onClose, onCompare }) {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1.5">
           <button
             onClick={() => setShowComparePicker((s) => !s)}
-            className="flex items-center justify-between rounded-none border border-white/[0.14] px-3.5 py-[11px] hover:bg-white/[0.05] hover:border-white/[0.22]"
+            className="flex items-center justify-between rounded-none border border-slate-300 px-3 py-2 hover:bg-slate-100 hover:border-slate-500"
           >
             <div className="flex items-center gap-2.5">
               <CompareIcon />
-              <span className="text-[13.5px] font-semibold text-slate-200">Compare to another country</span>
+              <span className="text-[13px] font-semibold text-slate-800">Compare to another country</span>
             </div>
             <svg
               width="11"
@@ -192,7 +192,7 @@ export default function CountryPanel({ country, onClose, onCompare }) {
           )}
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <label htmlFor="country-chart-metric" className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">
               Chart
@@ -201,7 +201,7 @@ export default function CountryPanel({ country, onClose, onCompare }) {
               id="country-chart-metric"
               value={activeMetric}
               onChange={(e) => setActiveMetric(e.target.value)}
-              className="min-w-0 flex-1 rounded-none border border-white/10 bg-slate-800 px-3 py-2 text-[13px] font-semibold text-slate-200 outline-none transition-colors hover:border-white/20 focus:border-slate-500"
+              className="min-w-0 flex-1 rounded-none border border-slate-300 bg-slate-100 px-3 py-1.5 text-[12.5px] font-semibold text-slate-800 outline-none transition-colors hover:border-slate-500 focus:border-slate-500"
             >
               {metricTabs.map((tab) => (
                 <option key={tab.key} value={tab.key}>
@@ -213,12 +213,12 @@ export default function CountryPanel({ country, onClose, onCompare }) {
           {chartData.length > 0 ? (
             <div className="relative">
               <MetricChart data={chartData} formatValue={activeTab.format} />
-              <div className="pointer-events-none absolute right-1 top-0 rounded-none border border-white/[0.12] bg-slate-800 px-2.5 py-1 text-xs font-bold text-white">
+              <div className="pointer-events-none absolute right-1 top-0 rounded-none border border-slate-300 bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-950">
                 {activeTab.format(latestValue)}
               </div>
             </div>
           ) : (
-            <div className="flex h-[150px] items-center justify-center text-sm text-slate-600">
+            <div className="flex h-[110px] items-center justify-center text-sm text-slate-500">
               No {activeTab.label.toLowerCase()} data available for {country.country_name}
             </div>
           )}
@@ -230,19 +230,19 @@ export default function CountryPanel({ country, onClose, onCompare }) {
       </div>
 
       {/* sticky chat footer */}
-      <div className="flex flex-none flex-col gap-2.5 border-t border-white/[0.07] bg-slate-900 px-5 pb-[18px] pt-3.5">
+      <div className="flex flex-none flex-col gap-2 border-t border-slate-200 bg-white px-5 pb-4 pt-3">
         {messages.length > 0 && (
-          <div className="flex max-h-[120px] flex-col gap-1.5 overflow-y-auto">
+          <div className="flex max-h-[220px] min-h-[120px] flex-col gap-1.5 overflow-y-auto">
             {messages.map((m, i) => {
               const isStreamingReply = isStreaming && i === messages.length - 1 && m.role === 'assistant'
               return (
                 <div
                   key={i}
                   className={
-                    'max-w-[85%] rounded-none px-2.5 py-1.5 text-[12.5px] ' +
+                    'max-w-[90%] rounded-none px-3 py-2 text-[13px] ' +
                     (m.role === 'user'
-                      ? 'self-end bg-slate-700 text-slate-100'
-                      : 'self-start bg-slate-800 text-slate-300')
+                      ? 'self-end bg-slate-200 text-slate-950'
+                      : 'self-start bg-slate-100 text-slate-700')
                   }
                 >
                   {m.text || (isStreamingReply && <span className="italic text-slate-500">Thinking…</span>)}
@@ -258,7 +258,7 @@ export default function CountryPanel({ country, onClose, onCompare }) {
               key={q}
               onClick={() => askQuestion(q)}
               disabled={isStreaming}
-              className="whitespace-nowrap rounded-none border border-white/[0.12] px-2.5 py-1.5 text-xs text-slate-400 hover:border-white/[0.2] hover:text-slate-200 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-white/[0.14]"
+              className="whitespace-nowrap rounded-none border border-slate-300 px-2 py-1 text-[11.5px] text-slate-500 hover:border-slate-500 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-slate-300"
             >
               {q}
             </button>
@@ -269,19 +269,19 @@ export default function CountryPanel({ country, onClose, onCompare }) {
             e.preventDefault()
             askQuestion(draft)
           }}
-          className="flex items-center gap-2 rounded-none border border-white/[0.1] bg-slate-800 py-1.5 pl-4 pr-1.5"
+          className="flex items-center gap-2 rounded-none border border-slate-300 bg-slate-100 py-1 pl-3 pr-1"
         >
           <input
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             disabled={isStreaming}
             placeholder={isStreaming ? 'Waiting for a response…' : `Ask about ${country.country_name}'s economy...`}
-            className="flex-1 bg-transparent text-[13.5px] text-slate-200 outline-none placeholder:text-slate-500 disabled:opacity-50"
+            className="flex-1 bg-transparent text-[13.5px] text-slate-800 outline-none placeholder:text-slate-400 disabled:opacity-50"
           />
           <button
             type="submit"
             disabled={isStreaming}
-            className="flex h-8 w-8 flex-none items-center justify-center rounded-none bg-slate-700 hover:bg-slate-600 disabled:cursor-not-allowed disabled:bg-slate-700"
+            className="flex h-7 w-7 flex-none items-center justify-center rounded-none bg-slate-200 hover:bg-slate-300 disabled:cursor-not-allowed disabled:bg-slate-200"
             aria-label="Send"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">

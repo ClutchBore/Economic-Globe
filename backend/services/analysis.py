@@ -27,12 +27,118 @@ SUPPORTED_METRICS = {
 SUPPORTED_RANKING_METRICS = SUPPORTED_METRICS
 SUPPORTED_ANOMALY_METRICS = SUPPORTED_METRICS
 
+HEALTH_COMPONENTS = {
+    "gdp": {
+        "label": "GDP",
+        "weight": 8,
+        "metric": "gdp",
+        "direction": "higher",
+        "note": "Higher total economic output scores higher within the available countries.",
+    },
+    "gdp_per_capita": {
+        "label": "GDP per capita",
+        "weight": 10,
+        "metric": "gdp_per_capita",
+        "direction": "higher",
+        "note": "Higher GDP per person scores higher within the available countries.",
+    },
+    "gdp_per_capita_ppp": {
+        "label": "GDP per capita PPP",
+        "weight": 10,
+        "metric": "gdp_per_capita_ppp",
+        "direction": "higher",
+        "note": "Higher cost-adjusted GDP per person scores higher within the available countries.",
+    },
+    "gdp_growth": {
+        "label": "GDP growth",
+        "weight": 10,
+        "metric": "gdp_growth",
+        "direction": "higher",
+        "note": "Higher latest GDP growth scores higher within the available countries.",
+    },
+    "inflation": {
+        "label": "Inflation stability",
+        "weight": 8,
+        "metric": "inflation",
+        "target": 2.0,
+        "tolerance": 10.0,
+        "note": "Scores highest near 2%; farther away scores lower.",
+    },
+    "unemployment": {
+        "label": "Unemployment",
+        "weight": 8,
+        "metric": "unemployment",
+        "direction": "lower",
+        "note": "Lower unemployment scores higher within the available countries.",
+    },
+    "population": {
+        "label": "Population",
+        "weight": 4,
+        "metric": "population",
+        "direction": "higher",
+        "note": "Larger population scores higher as a rough market-size signal.",
+    },
+    "life_expectancy": {
+        "label": "Life expectancy",
+        "weight": 8,
+        "metric": "life_expectancy",
+        "direction": "higher",
+        "note": "Higher life expectancy scores higher as a broad development signal.",
+    },
+    "govt_debt_pct_gdp": {
+        "label": "Government debt",
+        "weight": 6,
+        "metric": "govt_debt_pct_gdp",
+        "direction": "lower",
+        "note": "Lower government debt as a share of GDP scores higher.",
+    },
+    "exports_pct_gdp": {
+        "label": "Exports",
+        "weight": 6,
+        "metric": "exports_pct_gdp",
+        "direction": "higher",
+        "note": "Higher exports as a share of GDP scores higher as a trade-openness signal.",
+    },
+    "urban_population_pct": {
+        "label": "Urban population",
+        "weight": 4,
+        "metric": "urban_population_pct",
+        "direction": "higher",
+        "note": "Higher urban population share scores higher as an infrastructure and market-access signal.",
+    },
+    "internet_users_pct": {
+        "label": "Internet users",
+        "weight": 6,
+        "metric": "internet_users_pct",
+        "direction": "higher",
+        "note": "Higher internet adoption scores higher as a digital-access signal.",
+    },
+    "co2_per_capita": {
+        "label": "CO2 per capita",
+        "weight": 4,
+        "metric": "co2_per_capita",
+        "direction": "lower",
+        "note": "Lower CO2 emissions per person scores higher.",
+    },
+    "bond_yield_10y": {
+        "label": "10-year bond yield",
+        "weight": 4,
+        "metric": "bond_yield_10y",
+        "target": 3.0,
+        "tolerance": 8.0,
+        "note": "Scores highest near 3%; very high or very low yields score lower.",
+    },
+    "fx_rate": {
+        "label": "FX rate",
+        "weight": 4,
+        "metric": "fx_rate",
+        "direction": "higher",
+        "note": "Higher USD value per local currency unit scores higher within the available countries.",
+    },
+}
+
 HEALTH_COMPONENT_WEIGHTS = {
-    "gdp_per_capita": 30,
-    "gdp_growth": 25,
-    "inflation_stability": 25,
-    "fx_stability": 10,
-    "bond_yield": 10,
+    name: config["weight"] for name, config in HEALTH_COMPONENTS.items()
 }
 
 
@@ -302,88 +408,71 @@ def timeline(metric: str) -> dict[str, Any]:
     }
 
 
+def _health_metric_value(country: dict[str, Any], metric: str) -> float | None:
+    value = country.get(metric)
+    if isinstance(value, (int, float)):
+        return float(value)
+    if metric == "gdp_growth":
+        return _latest_growth_pct(country, "gdp")
+    return None
+
+
+def _health_component_score(value: float, config: dict[str, Any], ranges: dict[str, tuple[float, float]]) -> float | None:
+    if "target" in config:
+        return _target_score(value, target=config["target"], tolerance=config["tolerance"])
+
+    metric = config["metric"]
+    if metric not in ranges:
+        return None
+    worst, best = ranges[metric]
+    if config.get("direction") == "lower":
+        return _linear_score(value, best=worst, worst=best)
+    return _linear_score(value, best=best, worst=worst)
+
+
 def market_health_scores() -> dict[str, Any]:
     countries = _all_cached_countries()
     if not countries:
         raise AnalysisError("No country data available.")
 
-    gdp_per_capita_values = [
-        country.get("gdp_per_capita") for country in countries
-        if isinstance(country.get("gdp_per_capita"), (int, float))
-    ]
-    gdp_growth_values = [
-        growth for country in countries
-        if (growth := _latest_growth_pct(country, "gdp")) is not None
-    ]
-    gdp_per_capita_best = max(gdp_per_capita_values) if gdp_per_capita_values else None
-    gdp_per_capita_worst = min(gdp_per_capita_values) if gdp_per_capita_values else None
-    gdp_growth_best = max(gdp_growth_values) if gdp_growth_values else None
-    gdp_growth_worst = min(gdp_growth_values) if gdp_growth_values else None
+    metric_values: dict[str, list[float]] = {config["metric"]: [] for config in HEALTH_COMPONENTS.values()}
+    for country in countries:
+        for config in HEALTH_COMPONENTS.values():
+            metric = config["metric"]
+            value = _health_metric_value(country, metric)
+            if value is not None:
+                metric_values[metric].append(value)
+
+    ranges = {
+        metric: (min(values), max(values))
+        for metric, values in metric_values.items()
+        if values
+    }
 
     rows = []
     skipped = []
     for country in countries:
         components = []
 
-        gdp_per_capita = country.get("gdp_per_capita")
-        if (isinstance(gdp_per_capita, (int, float)) and
-                gdp_per_capita_best is not None and gdp_per_capita_worst is not None):
-            components.append({
-                "name": "gdp_per_capita",
-                "label": "GDP per capita",
-                "value": round(gdp_per_capita, 4),
-                "unit": country.get("units", {}).get("gdp_per_capita"),
-                "score": round(_linear_score(gdp_per_capita, gdp_per_capita_best, gdp_per_capita_worst), 2),
-                "weight": HEALTH_COMPONENT_WEIGHTS["gdp_per_capita"],
-                "note": "Higher GDP per person scores higher within the available countries.",
-            })
+        for name, config in HEALTH_COMPONENTS.items():
+            metric = config["metric"]
+            value = _health_metric_value(country, metric)
+            if value is None:
+                continue
 
-        gdp_growth = _latest_growth_pct(country, "gdp")
-        if gdp_growth is not None and gdp_growth_best is not None and gdp_growth_worst is not None:
-            components.append({
-                "name": "gdp_growth",
-                "label": "Latest GDP growth",
-                "value": round(gdp_growth, 4),
-                "unit": "%",
-                "score": round(_linear_score(gdp_growth, gdp_growth_best, gdp_growth_worst), 2),
-                "weight": HEALTH_COMPONENT_WEIGHTS["gdp_growth"],
-                "note": "Higher latest GDP growth scores higher within the available countries.",
-            })
+            score = _health_component_score(value, config, ranges)
+            if score is None:
+                continue
 
-        inflation = country.get("inflation")
-        if isinstance(inflation, (int, float)):
             components.append({
-                "name": "inflation_stability",
-                "label": "Inflation stability",
-                "value": round(inflation, 4),
-                "unit": country.get("units", {}).get("inflation"),
-                "score": round(_target_score(inflation, target=2.0, tolerance=10.0), 2),
-                "weight": HEALTH_COMPONENT_WEIGHTS["inflation_stability"],
-                "note": "Scores highest near 2%; farther away scores lower.",
-            })
-
-        fx_change = country.get("fx_change_pct")
-        if isinstance(fx_change, (int, float)):
-            components.append({
-                "name": "fx_stability",
-                "label": "FX stability",
-                "value": round(fx_change, 4),
-                "unit": "%",
-                "score": round(_target_score(fx_change, target=0.0, tolerance=5.0), 2),
-                "weight": HEALTH_COMPONENT_WEIGHTS["fx_stability"],
-                "note": "Smaller daily currency moves score higher.",
-            })
-
-        bond_yield = country.get("bond_yield_10y")
-        if isinstance(bond_yield, (int, float)):
-            components.append({
-                "name": "bond_yield",
-                "label": "10-year bond yield",
-                "value": round(bond_yield, 4),
-                "unit": country.get("units", {}).get("bond_yield_10y"),
-                "score": round(_target_score(bond_yield, target=3.0, tolerance=8.0), 2),
-                "weight": HEALTH_COMPONENT_WEIGHTS["bond_yield"],
-                "note": "Scores highest near 3%; very high or very low yields score lower.",
+                "name": name,
+                "label": config["label"],
+                "metric": metric,
+                "value": round(value, 4),
+                "unit": country.get("units", {}).get(metric),
+                "score": round(score, 2),
+                "weight": config["weight"],
+                "note": config["note"],
             })
 
         if not components:
@@ -399,7 +488,7 @@ def market_health_scores() -> dict[str, Any]:
             "components": components,
             "used_weight": used_weight,
             "missing_components": [
-                name for name in HEALTH_COMPONENT_WEIGHTS
+                name for name in HEALTH_COMPONENTS
                 if name not in {component["name"] for component in components}
             ],
         })
@@ -409,7 +498,7 @@ def market_health_scores() -> dict[str, Any]:
     rows.sort(key=lambda item: item["score"], reverse=True)
     ranked = [{**row, "rank": index} for index, row in enumerate(rows, start=1)]
     return {
-        "method": "weighted normalized score across available GDP per capita, GDP growth, inflation, FX movement, and bond yield components",
+        "method": "weighted normalized score across the 15 displayed country metrics",
         "score_scale": "0-100",
         "weights": HEALTH_COMPONENT_WEIGHTS,
         "rankings": ranked,

@@ -10,6 +10,7 @@ bond_yield_10y comes back null (not an error, not a stale value).
 """
 
 import datetime
+import json
 import os
 import sys
 from pathlib import Path
@@ -39,6 +40,8 @@ UNITS = {
     "bond_yield_10y": "%",
     "fx_rate": "USD per 1 unit of local currency",
 }
+
+LOCAL_CACHE_DIR = Path(__file__).resolve().parent.parent / "cache" / "countries"
 
 SOURCES = {
     **{metric: f"World Bank {code}" for metric, code in world_bank.INDICATORS.items()},
@@ -116,21 +119,35 @@ def main():
     print(f"World Bank: {len(world_bank.INDICATORS)} indicators x {len(codes)} economies")
     wb_all = world_bank.fetch_all_metrics(codes)
 
-    # Many economies share a currency — the euro alone covers 20 — so fetch each
-    # distinct ticker once rather than once per country.
+    # Many economies share a currency, so fetch each distinct ticker once rather
+    # than once per country. For local demos, SKIP_YAHOO_FX=1 avoids slow proxy
+    # failures and uses World Bank FX fallback instead.
     tickers = sorted({c["fx_ticker"] for c in countries if c["fx_ticker"]})
-    print(f"Yahoo Finance: {len(tickers)} distinct FX tickers")
-    fx_by_ticker = {ticker: market_data.fetch_fx_data(ticker) for ticker in tickers}
     no_fx = market_data.fetch_fx_data(None)
+    if os.getenv("SKIP_YAHOO_FX") == "1":
+        print("Yahoo Finance: skipped; using World Bank FX fallback")
+        fx_by_ticker = {}
+    else:
+        print(f"Yahoo Finance: {len(tickers)} distinct FX tickers")
+        fx_by_ticker = {ticker: market_data.fetch_fx_data(ticker) for ticker in tickers}
 
     ok, failed = 0, []
+    kv_available = True
     for i, country in enumerate(countries):
         code = country["code"]
         try:
             payload = build_country_payload(
                 country, wb_all[code], fx_by_ticker.get(country["fx_ticker"], no_fx)
             )
-            kv_client.set_json(kv_client.country_key(code), payload)
+            LOCAL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+            with open(LOCAL_CACHE_DIR / f"{code}.json", "w", encoding="utf-8") as f:
+                json.dump(payload, f)
+            if kv_available:
+                try:
+                    kv_client.set_json(kv_client.country_key(code), payload)
+                except Exception as e:
+                    kv_available = False
+                    print(f"  [{i + 1}/{len(countries)}] {code} saved locally; KV unavailable, skipping remaining KV writes: {e}")
             ok += 1
             if (i + 1) % 25 == 0 or i + 1 == len(countries):
                 print(f"  [{i + 1}/{len(countries)}] cached")

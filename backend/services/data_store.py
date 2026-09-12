@@ -10,6 +10,7 @@ from config.countries import get_country_config, list_country_configs
 from services import kv_client
 
 MOCK_CACHE_DIR = Path(__file__).resolve().parent.parent / "cache" / "mock"
+LOCAL_CACHE_DIR = Path(__file__).resolve().parent.parent / "cache" / "countries"
 
 METRIC_UNITS = {
     "gdp": "USD",
@@ -56,10 +57,11 @@ def _load_all() -> dict[str, dict]:
     whichever request happens to hit that country during a demo.
     """
     data: dict[str, dict] = {}
-    if MOCK_CACHE_DIR.exists():
-        for path in sorted(MOCK_CACHE_DIR.glob("*.json")):
-            with open(path) as f:
-                data[path.stem] = json.load(f)
+    for cache_dir in (MOCK_CACHE_DIR, LOCAL_CACHE_DIR):
+        if cache_dir.exists():
+            for path in sorted(cache_dir.glob("*.json")):
+                with open(path) as f:
+                    data[path.stem.upper()] = json.load(f)
 
     codes = [c["code"] for c in list_country_configs()]
     try:

@@ -11,7 +11,9 @@ observation reports null rather than an invented value.
 
 import datetime
 
-import wbgapi as wb
+import httpx
+
+WORLD_BANK_URL = "https://api.worldbank.org/v2/country/{countries}/indicator/{indicator}"
 
 INDICATORS = {
     "gdp": "NY.GDP.MKTP.CD",
@@ -54,24 +56,66 @@ def _series(row) -> dict:
     return {"latest": latest_value, "date": latest_year, "history": history}
 
 
+def _fetch_indicator(codes: list[str], indicator: str, start_year: int, end_year: int) -> dict[str, list[dict]]:
+    rows_by_code: dict[str, list[dict]] = {code: [] for code in codes}
+    country_arg = ";".join(codes)
+    page = 1
+
+    with httpx.Client(timeout=30.0, follow_redirects=True, verify=False, trust_env=False) as client:
+        while True:
+            response = client.get(
+                WORLD_BANK_URL.format(countries=country_arg, indicator=indicator),
+                params={
+                    "format": "json",
+                    "per_page": 20000,
+                    "page": page,
+                    "date": f"{start_year}:{end_year}",
+                },
+            )
+            response.raise_for_status()
+            payload = response.json()
+            if not isinstance(payload, list) or len(payload) < 2:
+                return rows_by_code
+
+            metadata, rows = payload[0], payload[1] or []
+            for row in rows:
+                code = row.get("countryiso3code")
+                if code in rows_by_code:
+                    rows_by_code[code].append(row)
+
+            pages = int(metadata.get("pages") or 1)
+            if page >= pages:
+                return rows_by_code
+            page += 1
+
+
+def _series_from_rows(rows: list[dict]) -> dict:
+    history = []
+    latest_value, latest_year = None, None
+    for row in sorted(rows, key=lambda item: str(item.get("date", ""))):
+        value = row.get("value")
+        year = row.get("date")
+        if value is None or year is None:
+            continue
+        history.append({"year": str(year), "value": round(float(value), 4)})
+        latest_value, latest_year = round(float(value), 4), str(year)
+    return {"latest": latest_value, "date": latest_year, "history": history}
+
+
 def fetch_all_metrics(codes: list[str]) -> dict[str, dict]:
     """Return {economy code: {metric: {latest, date, history}}} for every code."""
     current_year = datetime.date.today().year
-    time_range = range(current_year - HISTORY_YEARS, current_year + 1)
+    start_year = current_year - HISTORY_YEARS
     result: dict[str, dict] = {code: {} for code in codes}
 
     for metric, indicator in {**INDICATORS, **FX_FALLBACK}.items():
         try:
-            df = wb.data.DataFrame(
-                indicator, economy=codes, time=time_range, numericTimeKeys=True
-            )
+            rows_by_code = _fetch_indicator(codes, indicator, start_year, current_year)
         except Exception:
-            df = None
+            rows_by_code = {code: [] for code in codes}
 
         for code in codes:
-            if df is None or code not in df.index:
-                result[code][metric] = _empty()
-            else:
-                result[code][metric] = _series(df.loc[code])
+            rows = rows_by_code.get(code, [])
+            result[code][metric] = _series_from_rows(rows) if rows else _empty()
 
     return result

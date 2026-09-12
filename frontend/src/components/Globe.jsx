@@ -6,8 +6,6 @@ import { mockCountries } from '../data/mockCountries'
 const BY_CODE = Object.fromEntries(mockCountries.map((c) => [c.country_code, c]))
 const UNCOVERED_COLOR = '#1e293b'
 
-const SEQ_LOW = [158, 197, 244] // #9ec5f4
-const SEQ_HIGH = [16, 66, 129] // #104281
 const DIV_NEGATIVE = [208, 59, 59] // #d03b3b
 const DIV_NEUTRAL = [71, 85, 105] // slate-600
 const DIV_POSITIVE = [57, 135, 229] // #3987e5
@@ -17,6 +15,7 @@ const METRICS = [
     key: 'gdp',
     label: 'GDP',
     scale: 'sequential',
+    ramp: [[158, 197, 244], [16, 66, 129]], // blue: #9ec5f4 -> #104281
     getValue: (c) => Math.log10(c.gdp),
     format: (c) => `$${(c.gdp / 1e12).toFixed(2)}T`,
   },
@@ -24,6 +23,7 @@ const METRICS = [
     key: 'inflation',
     label: 'Inflation',
     scale: 'sequential',
+    ramp: [[233, 213, 255], [107, 33, 168]], // purple: #e9d5ff -> #6b21a8
     getValue: (c) => c.inflation,
     format: (c) => `${c.inflation.toFixed(1)}%`,
   },
@@ -31,6 +31,7 @@ const METRICS = [
     key: 'bond_yield_10y',
     label: 'Bond yield',
     scale: 'sequential',
+    ramp: [[253, 230, 138], [146, 64, 14]], // amber: #fde68a -> #92400e
     getValue: (c) => c.bond_yield_10y,
     format: (c) => `${c.bond_yield_10y.toFixed(2)}%`,
   },
@@ -70,7 +71,8 @@ function colorForMetric(metric, country) {
   }
   const { min, max } = range
   const t = max === min ? 0.5 : colorForMetric.clamp((metric.getValue(country) - min) / (max - min), 0, 1)
-  return mix(SEQ_LOW, SEQ_HIGH, t)
+  const [low, high] = metric.ramp
+  return mix(low, high, t)
 }
 colorForMetric.clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v))
 
@@ -192,7 +194,7 @@ export default function Globe({ onSelectCountry, spinning }) {
             background:
               activeMetric.scale === 'diverging'
                 ? `linear-gradient(to right, rgb(${DIV_NEGATIVE.join(',')}), rgb(${DIV_NEUTRAL.join(',')}), rgb(${DIV_POSITIVE.join(',')}))`
-                : `linear-gradient(to right, rgb(${SEQ_LOW.join(',')}), rgb(${SEQ_HIGH.join(',')}))`,
+                : `linear-gradient(to right, rgb(${activeMetric.ramp[0].join(',')}), rgb(${activeMetric.ramp[1].join(',')}))`,
           }}
         />
         <div className="flex justify-between text-[11px] text-slate-600">

@@ -15,7 +15,8 @@ const METRICS = [
     key: 'gdp',
     label: 'GDP',
     scale: 'sequential',
-    ramp: [[158, 197, 244], [16, 66, 129]], // blue: #9ec5f4 -> #104281
+    ramp: [[153, 246, 228], [17, 94, 89]], // teal: #99f6e4 -> #115e59
+    accent: [45, 212, 191], // teal-400
     getValue: (c) => Math.log10(c.gdp),
     format: (c) => `$${(c.gdp / 1e12).toFixed(2)}T`,
   },
@@ -24,6 +25,7 @@ const METRICS = [
     label: 'Inflation',
     scale: 'sequential',
     ramp: [[233, 213, 255], [107, 33, 168]], // purple: #e9d5ff -> #6b21a8
+    accent: [192, 132, 252], // purple-400
     getValue: (c) => c.inflation,
     format: (c) => `${c.inflation.toFixed(1)}%`,
   },
@@ -32,6 +34,7 @@ const METRICS = [
     label: 'Bond yield',
     scale: 'sequential',
     ramp: [[253, 230, 138], [146, 64, 14]], // amber: #fde68a -> #92400e
+    accent: [251, 191, 36], // amber-400
     getValue: (c) => c.bond_yield_10y,
     format: (c) => `${c.bond_yield_10y.toFixed(2)}%`,
   },
@@ -39,6 +42,7 @@ const METRICS = [
     key: 'fx_rate',
     label: 'Currency',
     scale: 'diverging',
+    accent: DIV_POSITIVE,
     getValue: (c) => c.fx_change_pct,
     format: (c) => `${c.fx_change_pct > 0 ? '+' : ''}${c.fx_change_pct.toFixed(1)}% today`,
   },
@@ -167,23 +171,35 @@ export default function Globe({ onSelectCountry, spinning }) {
       )}
 
       <div className="pointer-events-none absolute left-1/2 top-7 flex -translate-x-1/2 gap-1.5">
-        {METRICS.map((metric) => (
-          <button
-            key={metric.key}
-            onClick={(e) => {
-              e.stopPropagation()
-              setActiveMetricKey(metric.key)
-            }}
-            className={
-              'pointer-events-auto whitespace-nowrap rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ' +
-              (metric.key === activeMetricKey
-                ? 'border border-[#3987e5]/45 bg-[#3987e5]/[0.16] text-[#7db3f2]'
-                : 'border border-white/10 text-slate-400 hover:bg-white/[0.06]')
-            }
-          >
-            {metric.label}
-          </button>
-        ))}
+        {METRICS.map((metric) => {
+          const isActive = metric.key === activeMetricKey
+          const [r, g, b] = metric.accent
+          const textColor = mix(metric.accent, [255, 255, 255], 0.35)
+          return (
+            <button
+              key={metric.key}
+              onClick={(e) => {
+                e.stopPropagation()
+                setActiveMetricKey(metric.key)
+              }}
+              className={
+                'pointer-events-auto whitespace-nowrap rounded-full border px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ' +
+                (isActive ? '' : 'border-white/10 text-slate-400 hover:bg-white/[0.06]')
+              }
+              style={
+                isActive
+                  ? {
+                      borderColor: `rgba(${r}, ${g}, ${b}, 0.45)`,
+                      backgroundColor: `rgba(${r}, ${g}, ${b}, 0.16)`,
+                      color: textColor,
+                    }
+                  : undefined
+              }
+            >
+              {metric.label}
+            </button>
+          )
+        })}
       </div>
 
       <div className="pointer-events-none absolute bottom-7 left-8 flex flex-col gap-1.5">

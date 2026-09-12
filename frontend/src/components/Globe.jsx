@@ -80,7 +80,16 @@ function colorForMetric(metric, country) {
 }
 colorForMetric.clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v))
 
-export default function Globe({ onSelectCountry, spinning }) {
+function angularDistanceDeg(a, b) {
+  const toRad = (d) => (d * Math.PI) / 180
+  const lat1 = toRad(a.lat)
+  const lat2 = toRad(b.lat)
+  const dLng = toRad(b.lng - a.lng)
+  const cosD = Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1) * Math.cos(lat2) * Math.cos(dLng)
+  return (Math.acos(Math.max(-1, Math.min(1, cosD))) * 180) / Math.PI
+}
+
+export default function Globe({ onSelectCountry, spinning, rightInset = 0, arcCountries = null }) {
   const globeRef = useRef()
   // react-globe.gl's own onPolygonClick can silently miss the first click on a given polygon
   // (the raycasted click and its internal hover cache can land a frame apart). onPolygonHover
@@ -88,9 +97,16 @@ export default function Globe({ onSelectCountry, spinning }) {
   // a plain native click instead of trusting the built-in click handler.
   const hoveredCountryRef = useRef(null)
   const [countries, setCountries] = useState([])
-  const [size, setSize] = useState({ width: window.innerWidth, height: window.innerHeight })
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight })
   const [activeMetricKey, setActiveMetricKey] = useState('gdp')
   const activeMetric = METRICS.find((m) => m.key === activeMetricKey)
+
+  // Shrink the globe's render width to the space left of an open panel, rather than always
+  // filling the screen — otherwise a selected country can end up hidden behind its own panel.
+  const size = {
+    width: Math.max(320, windowSize.width - rightInset),
+    height: windowSize.height,
+  }
 
   useEffect(() => {
     fetch('/data/countries-110m.geojson')
@@ -102,7 +118,7 @@ export default function Globe({ onSelectCountry, spinning }) {
 
   useEffect(() => {
     function handleResize() {
-      setSize({ width: window.innerWidth, height: window.innerHeight })
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight })
     }
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
@@ -113,6 +129,23 @@ export default function Globe({ onSelectCountry, spinning }) {
     if (controls) controls.autoRotate = spinning
   }, [spinning])
 
+  // Frame both compared countries so the connecting arc is actually visible, rather than
+  // leaving it undiscoverable behind whatever rotation the globe happened to stop at.
+  useEffect(() => {
+    const globe = globeRef.current
+    if (!globe || !arcCountries) return
+    const [a, b] = arcCountries
+    const angularDeg = angularDistanceDeg(a, b)
+    globe.pointOfView(
+      {
+        lat: (a.lat + b.lat) / 2,
+        lng: (a.lng + b.lng) / 2,
+        altitude: Math.min(3.2, 1.2 + angularDeg / 60),
+      },
+      1000
+    )
+  }, [arcCountries])
+
   useEffect(() => {
     const globe = globeRef.current
     if (!globe) return
@@ -121,6 +154,12 @@ export default function Globe({ onSelectCountry, spinning }) {
   }, [])
 
   const globeMaterial = useMemo(() => new THREE.MeshPhongMaterial({ color: '#0f172a' }), [])
+
+  const arcsData = useMemo(() => {
+    if (!arcCountries) return []
+    const [a, b] = arcCountries
+    return [{ startLat: a.lat, startLng: a.lng, endLat: b.lat, endLng: b.lng }]
+  }, [arcCountries])
 
   function handleClick() {
     const country = hoveredCountryRef.current
@@ -141,6 +180,13 @@ export default function Globe({ onSelectCountry, spinning }) {
         atmosphereColor="#3987e5"
         atmosphereAltitude={0.2}
         showGraticules
+        arcsData={arcsData}
+        arcColor={() => ['#3987e5', '#eb6834']}
+        arcAltitudeAutoScale={0.35}
+        arcStroke={0.6}
+        arcDashLength={0.4}
+        arcDashGap={0.2}
+        arcDashAnimateTime={1500}
         polygonsData={countries}
         polygonCapColor={(feature) => {
           const country = BY_CODE[feature.properties.ISO_A3]
@@ -170,7 +216,10 @@ export default function Globe({ onSelectCountry, spinning }) {
         </div>
       )}
 
-      <div className="pointer-events-none absolute left-1/2 top-7 flex -translate-x-1/2 gap-1.5">
+      <div
+        className="pointer-events-none absolute top-7 flex gap-1.5"
+        style={{ left: size.width / 2, transform: 'translateX(-50%)' }}
+      >
         {METRICS.map((metric) => {
           const isActive = metric.key === activeMetricKey
           const [r, g, b] = metric.accent

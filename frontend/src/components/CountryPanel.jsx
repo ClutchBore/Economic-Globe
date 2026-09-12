@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import HealthScoreGauge from './HealthScoreGauge'
 import MetricChart from './MetricChart'
+import CountryPickerList from './CountryPickerList'
 import { metricTabs } from '../data/mockCountries'
 
 function StatTile({ label, value }) {
@@ -25,6 +26,7 @@ export default function CountryPanel({ country, onClose, onCompare }) {
   const [activeMetric, setActiveMetric] = useState(metricTabs[0].key)
   const [messages, setMessages] = useState([])
   const [draft, setDraft] = useState('')
+  const [showComparePicker, setShowComparePicker] = useState(false)
 
   const activeTab = metricTabs.find((t) => t.key === activeMetric)
   const chartData = country.history[activeMetric]
@@ -96,18 +98,35 @@ export default function CountryPanel({ country, onClose, onCompare }) {
           </div>
         </div>
 
-        <button
-          onClick={onCompare}
-          className="flex items-center justify-between rounded-[10px] border border-white/[0.14] px-3.5 py-[11px] hover:bg-white/[0.05] hover:border-white/[0.22]"
-        >
-          <div className="flex items-center gap-2.5">
-            <CompareIcon />
-            <span className="text-[13.5px] font-semibold text-slate-200">Compare to another country</span>
-          </div>
-          <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-            <path d="M2 4l3.5 3.5L9 4" stroke="#64748b" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={() => setShowComparePicker((s) => !s)}
+            className="flex items-center justify-between rounded-[10px] border border-white/[0.14] px-3.5 py-[11px] hover:bg-white/[0.05] hover:border-white/[0.22]"
+          >
+            <div className="flex items-center gap-2.5">
+              <CompareIcon />
+              <span className="text-[13.5px] font-semibold text-slate-200">Compare to another country</span>
+            </div>
+            <svg
+              width="11"
+              height="11"
+              viewBox="0 0 11 11"
+              fill="none"
+              style={{ transform: showComparePicker ? 'rotate(180deg)' : undefined }}
+            >
+              <path d="M2 4l3.5 3.5L9 4" stroke="#64748b" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          {showComparePicker && (
+            <CountryPickerList
+              excludeCodes={[country.country_code]}
+              onSelect={(c) => {
+                onCompare(c)
+                setShowComparePicker(false)
+              }}
+            />
+          )}
+        </div>
 
         <div className="flex flex-col gap-3">
           <div className="flex gap-1.5">

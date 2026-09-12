@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react'
 import CountryPanel from './components/CountryPanel'
+import ComparisonPanel from './components/ComparisonPanel'
 import Globe from './components/Globe'
+
+// Space to reserve to the right of the globe so an open panel never covers a selected country —
+// matches each panel's own width (452px / 820px) plus its right-4 offset and a little breathing room.
+const SINGLE_PANEL_INSET = 508
+const COMPARISON_PANEL_INSET = 876
 
 function App() {
   const [status, setStatus] = useState('checking...')
   const [selectedCountry, setSelectedCountry] = useState(null)
+  const [compareCountry, setCompareCountry] = useState(null)
 
   useEffect(() => {
     fetch('http://localhost:8000/api/health')
@@ -13,9 +20,21 @@ function App() {
       .catch(() => setStatus('backend not reachable'))
   }, [])
 
+  function selectCountry(country) {
+    setSelectedCountry(country)
+    setCompareCountry(null)
+  }
+
+  const rightInset = compareCountry ? COMPARISON_PANEL_INSET : selectedCountry ? SINGLE_PANEL_INSET : 0
+
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-slate-950 text-white">
-      <Globe onSelectCountry={setSelectedCountry} spinning={!selectedCountry} />
+      <Globe
+        onSelectCountry={selectCountry}
+        spinning={!selectedCountry}
+        rightInset={rightInset}
+        arcCountries={compareCountry ? [selectedCountry, compareCountry] : null}
+      />
 
       <div className="pointer-events-none absolute left-8 top-7 flex flex-col gap-1">
         <span className="text-[15px] font-semibold tracking-wide text-slate-100">Economic Globe</span>
@@ -24,11 +43,20 @@ function App() {
 
       {selectedCountry && (
         <div className="absolute inset-y-4 right-4">
-          <CountryPanel
-            country={selectedCountry}
-            onClose={() => setSelectedCountry(null)}
-            onCompare={() => console.log('open compare flow')}
-          />
+          {compareCountry ? (
+            <ComparisonPanel
+              countryA={selectedCountry}
+              countryB={compareCountry}
+              onClose={() => setCompareCountry(null)}
+              onChangeCountryB={setCompareCountry}
+            />
+          ) : (
+            <CountryPanel
+              country={selectedCountry}
+              onClose={() => setSelectedCountry(null)}
+              onCompare={setCompareCountry}
+            />
+          )}
         </div>
       )}
     </div>

@@ -107,11 +107,14 @@ function parseSseFrame(frame) {
 // same `.detail` shape) with no trailing `done`. Pass an AbortController's `signal` so the
 // caller can cancel mid-stream (switching countries, sending a new question) — the reader
 // rejects with a DOMException named 'AbortError', which callers should treat as silent.
-export async function streamChat(code, message, history, { onMeta, onDelta, signal } = {}) {
+export async function streamChat(code, message, history, { onMeta, onDelta, signal, selectedMetric, comparisonCountryCode } = {}) {
+  const body = { message, history }
+  if (selectedMetric) body.selected_metric = selectedMetric
+  if (comparisonCountryCode) body.comparison_country_code = comparisonCountryCode
   const res = await fetch(`${API_BASE}/api/chat/${code}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message, history }),
+    body: JSON.stringify(body),
     signal,
   })
 

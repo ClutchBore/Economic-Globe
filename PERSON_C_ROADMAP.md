@@ -3,14 +3,14 @@
 **Person:** Shrav
 **Branch:** `shrav-branch` — keep using this branch.
 **Role:** The AI half of the original Person A job initially. Once core AI works, move to basic analysis. This is a three-person plan: A handles data/backend, B handles frontend, and you handle AI then analysis.
-**Scope:** Build the OpenRouter connection, country summaries, comparisons, and chat first. Then build basic rankings and anomaly detection/explanations.
+**Scope:** Build the IFM connection, country summaries, comparisons, and chat first. Then build basic rankings and anomaly detection/explanations.
 **Team:** A collects/serves data; B builds the website; you own AI and later analysis.
 
 ## File ownership — avoid overlapping edits
 
 You own these planned files and areas:
 
-- `backend/services/ai.py`: reusable OpenRouter client and summary/comparison/chat functions.
+- `backend/services/ai.py`: reusable IFM client and summary/comparison/chat functions.
 - `backend/routes/ai.py`: AI endpoint handlers.
 - `backend/services/analysis.py`: ranking/anomaly calculations and explanation logic.
 - `backend/routes/analysis.py`: analysis endpoint handlers.
@@ -20,38 +20,41 @@ A owns `main.py`, shared dependencies/configuration, data fetchers, the data rea
 
 ## Progress note
 
-Summary, comparison, and streaming chat are implemented with fictional fixtures and verified by 19 offline tests. Checked implementation tasks do not imply live-model or frontend verification. A/B agreement, router registration, real data, API settings, and cached fallbacks remain pending. See [AI_HANDOFF.md](backend/AI_HANDOFF.md) for provisional contracts and examples.
+Summary, comparison, and streaming chat are implemented, connected to A's cached country reader, and verified by 30 offline tests. The AI router is registered locally in `backend/main.py` on this branch. Live IFM summary, comparison, and streaming chat requests succeeded using `IFM/K2-Horizon-375B-A23B`, including cache-backed summary, comparison, and chat requests. Summary fallback caching is implemented; generating demo cache files, A/B contract confirmation, and frontend validation remain pending. See [AI_HANDOFF.md](backend/AI_HANDOFF.md) for provisional contracts and examples.
 
 ## Before Hour 0
 
 - [ ] Agree with A on `get_country(code)` and `list_countries()`, return shapes, history, and missing-data behavior.
-- [ ] Agree with B on summary/comparison/chat payloads, streaming events, and errors.
-- [ ] Choose an OpenRouter model and spending budget; store the key in an ignored backend environment file, never frontend code or Git.
-- [ ] Begin AI module stubs while A prepares sample data.
+- [x] Document summary/comparison/chat payloads, streaming events, and errors for B in `backend/AI_HANDOFF.md`.
+- [x] Choose an IFM model and spending budget; store the key in an ignored backend environment file, never frontend code or Git.
+- [x] Begin AI module stubs while A prepares sample data.
 
 ## Start here: Your first milestone
 
 Generate one country summary grounded in supplied sample data.
 
 - [ ] Ask A for an example of the country data returned by `get_country(code)`, including values, units, dates, and missing-data behavior.
-- [ ] Agree with B on summary/comparison response shapes and streamed chat events/errors.
+- [x] Document B's summary/comparison response shapes and streamed chat events/errors.
 - [x] Set up the backend Python environment and dependencies.
-- [ ] Select an OpenRouter model and budget. Store the key in an ignored backend environment file, never frontend code or Git.
+- [x] Select an IFM model and budget. Store the key in an ignored backend environment file, never frontend code or Git.
 - [x] Create AI service and route modules.
 - [x] Create clearly labeled fictional country fixtures to work independently of A's data.
 
 ## Hours 0–4: AI foundation
 
-- [ ] Use A's sample-backed reader; do not wait for real fetchers.
-- [x] Build one reusable OpenRouter client with timeouts, bounded output, and error handling.
+- [x] Use A's sample-backed reader; do not wait for real fetchers.
+- [x] Build one reusable IFM client with timeouts, bounded output, and error handling.
 - [x] Implement `summarize_country`; pass supplied values, units, and dates into the prompt.
 - [x] Add prompt instructions to acknowledge missing information and avoid invented numbers or causes; live-model compliance still needs verification.
-- [x] Implement `compare_countries` using the shared OpenRouter client.
+- [x] Implement `compare_countries` using the shared IFM client.
 - [x] Build the summary handler in the AI router.
 - [x] Prepare router registration instructions for A in `backend/AI_HANDOFF.md`.
-- [ ] Share the handoff with A and confirm router registration in `backend/main.py`.
+- [x] Register the AI router in `backend/main.py` on this branch for local integration testing.
+- [x] Verify the registered AI routes through the real FastAPI app with offline tests.
+- [ ] Share the handoff with A and confirm this `backend/main.py` registration is okay to keep.
 - [x] Prepare hand-written summary/comparison response examples and streaming event documentation for B.
-- [ ] Share the examples with B and confirm the provisional API contracts.
+- [x] Add quick-copy summary, comparison, and chat integration instructions for B.
+- [ ] Confirm with B that the provisional API contracts work in the frontend.
 
 ## Hours 4–8: Finish core AI
 
@@ -60,10 +63,14 @@ Generate one country summary grounded in supplied sample data.
 - [x] Implement `POST /api/chat/{country_code}` with provisional streaming events; tested offline.
 - [x] Support bounded user/assistant conversation history and reject invalid chat inputs.
 - [x] Handle streaming completion, provider errors, malformed/truncated streams, and upstream cleanup.
-- [x] Pass 19 offline tests covering summaries, comparisons, and streaming chat without paid requests.
-- [ ] Test live summaries, comparisons, and chat after configuring the OpenRouter key/model.
+- [x] Pass offline tests covering summaries, comparisons, streaming chat, cached country lookup, summary fallbacks, and main app registration without paid requests.
+- [x] Test one live summary sample after configuring the IFM key/model.
+- [x] Test live comparisons and chat after configuring the IFM key/model.
+- [x] Test cache-backed live summary and comparison routes using country codes.
+- [x] Test cache-backed live chat route using a country code, message, and history only.
 - [ ] Confirm the streaming format with B and verify it in the frontend.
-- [ ] Use A's real cache through the same reader interface.
+- [x] Use A's real cache through the same reader interface.
+- [x] Implement cached summary fallback in your AI cache folder.
 - [ ] Generate cached summaries for demo countries in your AI cache folder.
 - [ ] Check the UI with B, including missing information, AI failures, and timeouts.
 - [ ] Monitor spending and identify fallback responses clearly.
@@ -88,7 +95,7 @@ If AI takes longer, finish core AI first and reduce analysis scope. The original
 
 ## Hours 14–18: Anomaly explanations
 
-- [ ] Build `POST /api/anomaly/explain` using your existing OpenRouter client and calculated anomaly results.
+- [ ] Build `POST /api/anomaly/explain` using your existing IFM client and calculated anomaly results.
 - [ ] Explain the observed deviation and rule without asserting unsupported real-world causes.
 - [ ] Provide a template explanation if AI fails.
 - [ ] Give A the analysis router to register and verify detect → explain → API → B's panel.

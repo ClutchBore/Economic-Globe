@@ -19,6 +19,8 @@ REQUIRED_KEYS = {
     "country_code", "country_name", "region", "data_as_of",
     "gdp", "gdp_per_capita", "gdp_per_capita_ppp", "gdp_growth",
     "inflation", "unemployment", "population", "life_expectancy",
+    "govt_debt_pct_gdp", "exports_pct_gdp", "urban_population_pct",
+    "internet_users_pct", "co2_per_capita",
     "bond_yield_10y", "fx_rate", "fx_pair", "fx_change_pct",
     "units", "sources", "dates", "history",
 }
@@ -26,7 +28,8 @@ REQUIRED_KEYS = {
 METRICS = [
     "gdp", "gdp_per_capita", "gdp_per_capita_ppp", "gdp_growth",
     "inflation", "unemployment", "population", "life_expectancy",
-    "bond_yield_10y", "fx_rate",
+    "govt_debt_pct_gdp", "exports_pct_gdp", "urban_population_pct",
+    "internet_users_pct", "co2_per_capita", "bond_yield_10y", "fx_rate",
 ]
 
 passed = 0

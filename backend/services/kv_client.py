@@ -44,15 +44,23 @@ def get_json(key: str) -> dict | None:
     return json.loads(raw) if raw is not None else None
 
 
+_MGET_CHUNK = 50
+
+
 def mget_json(keys: list[str]) -> list[dict | None]:
-    """Fetch many keys in one round trip, aligned with `keys`. Keeps the
-    import-time load in data_store to a single request instead of one per country.
+    """Fetch many keys, returning values aligned with `keys`.
+
+    Chunked rather than one request: a single MGET across every economy would
+    pull roughly a megabyte in one response. Still far fewer round trips than
+    one GET per country.
     """
-    if not keys:
-        return []
-    return [
-        json.loads(raw) if raw is not None else None for raw in _command("MGET", *keys)
-    ]
+    out: list[dict | None] = []
+    for start in range(0, len(keys), _MGET_CHUNK):
+        out.extend(
+            json.loads(raw) if raw is not None else None
+            for raw in _command("MGET", *keys[start : start + _MGET_CHUNK])
+        )
+    return out
 
 
 def set_json(key: str, value: dict) -> None:

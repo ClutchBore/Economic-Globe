@@ -1,9 +1,15 @@
 """Fetch and normalize the World Bank indicators behind each country payload.
 
-Every indicator here is populated for all 31 configured countries. Check
-coverage before adding more — a half-populated indicator leaves holes on the
-map (central government debt, GC.DOD.TOTL.GD.ZS, covers only 16 of 31).
+One request per indicator covering every economy at once, rather than one request
+per economy — at 217 economies that is the difference between ~9 requests and
+~2,000, and it runs in seconds.
+
+Coverage varies by indicator. Population and life expectancy are near-universal;
+central government debt is published for well under half of economies. A missing
+observation reports null rather than an invented value.
 """
+
+import datetime
 
 import wbgapi as wb
 
@@ -16,42 +22,51 @@ INDICATORS = {
     "unemployment": "SL.UEM.TOTL.ZS",
     "population": "SP.POP.TOTL",
     "life_expectancy": "SP.DYN.LE00.IN",
+    "govt_debt_pct_gdp": "GC.DOD.TOTL.GD.ZS",
+    "exports_pct_gdp": "NE.EXP.GNFS.ZS",
+    "urban_population_pct": "SP.URB.TOTL.IN.ZS",
+    "internet_users_pct": "IT.NET.USER.ZS",
+    "co2_per_capita": "EN.GHG.CO2.PC.CE.AR5",
 }
 
 HISTORY_YEARS = 10
 
 
-def fetch_world_bank_metrics(wb_code: str) -> dict:
-    """Return latest value + date and yearly history for each indicator.
+def _empty() -> dict:
+    return {"latest": None, "date": None, "history": []}
 
-    Missing observations (a common World Bank gap) come back as None/omitted
-    from the history list rather than invented values.
-    """
-    result = {}
-    current_year = __import__("datetime").date.today().year
+
+def _series(row) -> dict:
+    """Collapse one economy's yearly row into latest value, its year, and history."""
+    history = []
+    latest_value, latest_year = None, None
+    for year in sorted(row.index):
+        value = row[year]
+        if value is None or value != value:  # NaN
+            continue
+        history.append({"year": str(year), "value": round(float(value), 4)})
+        latest_value, latest_year = round(float(value), 4), str(year)
+    return {"latest": latest_value, "date": latest_year, "history": history}
+
+
+def fetch_all_metrics(codes: list[str]) -> dict[str, dict]:
+    """Return {economy code: {metric: {latest, date, history}}} for every code."""
+    current_year = datetime.date.today().year
     time_range = range(current_year - HISTORY_YEARS, current_year + 1)
+    result: dict[str, dict] = {code: {} for code in codes}
 
     for metric, indicator in INDICATORS.items():
         try:
-            df = wb.data.DataFrame(indicator, economy=wb_code, time=time_range, numericTimeKeys=True)
+            df = wb.data.DataFrame(
+                indicator, economy=codes, time=time_range, numericTimeKeys=True
+            )
         except Exception:
-            result[metric] = {"latest": None, "date": None, "history": []}
-            continue
+            df = None
 
-        if df.empty:
-            result[metric] = {"latest": None, "date": None, "history": []}
-            continue
-
-        row = df.loc[wb_code] if wb_code in df.index else df.iloc[0]
-        history = []
-        latest_value, latest_year = None, None
-        for year in sorted(row.index):
-            value = row[year]
-            if value is None or (isinstance(value, float) and value != value):  # NaN check
-                continue
-            history.append({"year": str(year), "value": round(float(value), 4)})
-            latest_value, latest_year = round(float(value), 4), str(year)
-
-        result[metric] = {"latest": latest_value, "date": latest_year, "history": history}
+        for code in codes:
+            if df is None or code not in df.index:
+                result[code][metric] = _empty()
+            else:
+                result[code][metric] = _series(df.loc[code])
 
     return result

@@ -45,7 +45,7 @@ export default function AnomalyCallout({ metric, metricLabel, countryCode }) {
 
   if (state.status === 'skipped') {
     return (
-      <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5 text-xs text-slate-600">
+      <div className="rounded-none border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5 text-xs text-slate-600">
         Anomaly analysis unavailable for {metricLabel} — not enough history for {countryCode}.
       </div>
     )
@@ -53,7 +53,7 @@ export default function AnomalyCallout({ metric, metricLabel, countryCode }) {
 
   const { anomaly } = state
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-amber-500/25 bg-amber-500/[0.06] px-3.5 py-3">
+    <div className="flex flex-col gap-2 rounded-none border border-amber-500/25 bg-amber-500/[0.06] px-3.5 py-3">
       <div className="flex items-center gap-2">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <path d="M7 1L13 12H1L7 1Z" stroke="#fab219" strokeWidth="1.3" strokeLinejoin="round" />

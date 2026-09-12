@@ -3,7 +3,7 @@ import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts'
 function ChartTooltip({ active, payload, label, formatValue }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-md border border-white/10 bg-slate-800 px-2.5 py-1.5 text-xs">
+    <div className="rounded-none border border-white/10 bg-slate-800 px-2.5 py-1.5 text-xs">
       <div className="text-slate-500">{label}</div>
       <div className="font-semibold text-white">{formatValue(payload[0].value)}</div>
     </div>

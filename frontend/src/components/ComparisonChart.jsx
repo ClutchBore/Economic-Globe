@@ -5,7 +5,7 @@ function ChartTooltip({ active, payload, label, formatValue, nameA, nameB }) {
   const a = payload.find((p) => p.dataKey === 'a')
   const b = payload.find((p) => p.dataKey === 'b')
   return (
-    <div className="rounded-md border border-white/10 bg-slate-800 px-2.5 py-1.5 text-xs">
+    <div className="rounded-none border border-white/10 bg-slate-800 px-2.5 py-1.5 text-xs">
       <div className="mb-1 text-slate-500">{label}</div>
       {a && (
         <div className="font-semibold text-[#7db3f2]">
@@ -26,11 +26,11 @@ export default function ComparisonChart({ data, formatValue, nameA, nameB }) {
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-[#3987e5]" />
+          <span className="h-2 w-2 rounded-none bg-[#3987e5]" />
           <span className="text-xs text-slate-400">{nameA}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-[#eb6834]" />
+          <span className="h-2 w-2 rounded-none bg-[#eb6834]" />
           <span className="text-xs text-slate-400">{nameB}</span>
         </div>
       </div>

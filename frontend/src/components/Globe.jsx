@@ -70,7 +70,7 @@ function angularDistanceDeg(a, b) {
   return (Math.acos(Math.max(-1, Math.min(1, cosD))) * 180) / Math.PI
 }
 
-export default function Globe({ countries, geojsonFeatures, onSelectCountry, spinning, rightInset = 0, arcCountries = null }) {
+export default function Globe({ countries, geojsonFeatures, onSelectCountry, rightInset = 0, arcCountries = null }) {
   const globeRef = useRef()
   const containerRef = useRef()
   const hoveredCountryRef = useRef(null)
@@ -122,15 +122,9 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, spi
   }, [])
 
   useEffect(() => {
-    const controls = globeRef.current?.controls()
-    if (controls) controls.autoRotate = spinning
-  }, [spinning])
-
-  useEffect(() => {
     const globe = globeRef.current
     if (!globe) return
     globe.pointOfView({ lat: 25, lng: 15, altitude: 2.1 }, 0)
-    globe.controls().autoRotateSpeed = 0.35
   }, [])
 
   // Frame both compared countries so the connecting arc is actually visible, rather than
@@ -150,7 +144,7 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, spi
     )
   }, [arcCountries])
 
-  const globeMaterial = useMemo(() => new THREE.MeshPhongMaterial({ color: '#0f172a' }), [])
+  const globeMaterial = useMemo(() => new THREE.MeshPhongMaterial({ color: '#000000' }), [])
 
   const arcsData = useMemo(() => {
     if (!arcCountries) return []
@@ -160,7 +154,6 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, spi
 
   function selectCountry(country) {
     if (!country) return
-    globeRef.current.controls().autoRotate = false
     onSelectCountry(country)
   }
 
@@ -180,9 +173,7 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, spi
         height={size.height}
         backgroundColor="rgba(0,0,0,0)"
         globeMaterial={globeMaterial}
-        showAtmosphere
-        atmosphereColor="#3987e5"
-        atmosphereAltitude={0.2}
+        showAtmosphere={false}
         showGraticules
         arcsData={arcsData}
         arcColor={() => ['#3987e5', '#eb6834']}
@@ -194,7 +185,7 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, spi
         polygonsData={geojsonFeatures}
         polygonCapColor={(feature) => colorForMetric(activeMetric, ranges, byCode[geoCountryCode(feature.properties)])}
         polygonSideColor={() => 'rgba(15,23,42,0.6)'}
-        polygonStrokeColor={() => 'rgba(255,255,255,0.15)'}
+        polygonStrokeColor={() => 'rgba(0,0,0,0.85)'}
         polygonAltitude={(feature) => (byCode[geoCountryCode(feature.properties)] ? 0.02 : 0.006)}
         polygonLabel={(feature) => {
           const country = byCode[geoCountryCode(feature.properties)]
@@ -214,11 +205,11 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, spi
         onPolygonClick={(feature) => selectCountry(byCode[geoCountryCode(feature.properties)])}
       />
 
-      <div className="pointer-events-none absolute right-4 top-24 max-h-[46vh] w-[210px] overflow-hidden rounded-md border border-white/10 bg-slate-950/75 p-2 shadow-lg backdrop-blur sm:right-7 sm:top-7">
-        <div className="px-2 pb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+      <div className="pointer-events-none absolute right-4 top-1/2 max-h-[56vh] w-[210px] -translate-y-1/2 overflow-hidden rounded-none border border-slate-400 bg-black/80 p-2 shadow-lg backdrop-blur sm:right-7">
+        <div className="px-2 pb-2 text-[12px] font-bold uppercase tracking-wide text-slate-200">
           Globe metric
         </div>
-        <div className="pointer-events-auto flex max-h-[calc(46vh-34px)] flex-col gap-1 overflow-y-auto pr-1">
+        <div className="metric-scrollbar pointer-events-auto flex max-h-[calc(56vh-34px)] flex-col gap-1 overflow-y-auto pr-1">
           {METRICS.map((metric) => {
             const isActive = metric.key === activeMetricKey
             const [r, g, b] = metric.accent
@@ -231,8 +222,8 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, spi
                   setActiveMetricKey(metric.key)
                 }}
                 className={
-                  'w-full rounded-md border px-3 py-2 text-left text-[12.5px] font-semibold transition-colors ' +
-                  (isActive ? '' : 'border-transparent text-slate-400 hover:bg-white/[0.06] hover:text-slate-200')
+                  'w-full rounded-none border px-3 py-2 text-left text-[13px] font-bold transition-colors ' +
+                  (isActive ? '' : 'border-transparent text-slate-300 hover:bg-white/[0.08] hover:text-white')
                 }
                 style={
                   isActive
@@ -251,10 +242,10 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, spi
         </div>
       </div>
 
-      <div className="pointer-events-none absolute bottom-7 left-8 flex flex-col gap-1.5">
-        <span className="text-xs text-slate-500">{activeMetric.label}</span>
+      <div className="pointer-events-none absolute bottom-7 left-8 flex flex-col gap-1.5 border border-slate-400 bg-black/80 p-3">
+        <span className="text-[13px] font-semibold text-slate-200">{activeMetric.label}</span>
         <div
-          className="h-1.5 w-40 rounded-sm"
+          className="h-1.5 w-40 rounded-none"
           style={{
             background:
               activeMetric.scale === 'diverging'
@@ -262,7 +253,7 @@ export default function Globe({ countries, geojsonFeatures, onSelectCountry, spi
                 : `linear-gradient(to right, rgb(${activeMetric.ramp[0].join(',')}), rgb(${activeMetric.ramp[1].join(',')}))`,
           }}
         />
-        <div className="flex justify-between text-[11px] text-slate-600">
+        <div className="flex justify-between text-[12px] font-semibold text-slate-300">
           {activeMetric.scale === 'diverging' ? (
             <>
               <span>-{ranges[activeMetric.key].maxAbs.toFixed(1)}%</span>

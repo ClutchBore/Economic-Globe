@@ -72,14 +72,14 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
   return (
     <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
       <div
-        className="flex h-full max-h-[640px] w-full max-w-[480px] flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900 shadow-2xl"
+        className="flex h-full max-h-[640px] w-full max-w-[480px] flex-col overflow-hidden rounded-none border border-white/[0.08] bg-slate-900 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-none items-center justify-between border-b border-white/[0.07] px-5 py-[18px]">
           <span className="text-[17px] font-bold text-white">Rankings</span>
           <button
             onClick={onClose}
-            className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-slate-400 hover:bg-white/[0.08]"
+            className="flex h-[30px] w-[30px] items-center justify-center rounded-none text-slate-400 hover:bg-white/[0.08]"
             aria-label="Close rankings"
           >
             <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
@@ -94,7 +94,7 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
               key={m.key}
               onClick={() => setMode(m.key)}
               className={
-                'rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-colors ' +
+                'rounded-none px-2.5 py-1.5 text-[12px] font-semibold transition-colors ' +
                 (m.key === mode
                   ? 'bg-slate-700 text-slate-100'
                   : 'text-slate-500 hover:bg-white/[0.06] hover:text-slate-300')
@@ -114,7 +114,7 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
               id="rankings-metric"
               value={activeMetric}
               onChange={(e) => setActiveMetric(e.target.value)}
-              className="min-w-0 flex-1 rounded-md border border-white/10 bg-slate-800 px-3 py-2 text-[13px] font-semibold text-slate-200 outline-none transition-colors hover:border-white/20 focus:border-slate-500"
+              className="min-w-0 flex-1 rounded-none border border-white/10 bg-slate-800 px-3 py-2 text-[13px] font-semibold text-slate-200 outline-none transition-colors hover:border-white/20 focus:border-slate-500"
             >
               {metricTabs.map((tab) => (
                 <option key={tab.key} value={tab.key}>
@@ -135,7 +135,7 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
                 key={String(opt.key)}
                 onClick={() => setTrendWindow(opt.key)}
                 className={
-                  'rounded-md px-2.5 py-1 text-[11.5px] font-semibold transition-colors ' +
+                  'rounded-none px-2.5 py-1 text-[11.5px] font-semibold transition-colors ' +
                   (trendWindow === opt.key
                     ? 'bg-white/[0.1] text-slate-200'
                     : 'text-slate-500 hover:text-slate-300')
@@ -152,7 +152,7 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
             <select
               value={metricX}
               onChange={(e) => setMetricX(e.target.value)}
-              className="rounded-lg border border-white/10 bg-slate-800 px-2 py-1.5 text-xs text-slate-200 outline-none"
+              className="rounded-none border border-white/10 bg-slate-800 px-2 py-1.5 text-xs text-slate-200 outline-none"
             >
               {metricTabs.map((t) => (
                 <option key={t.key} value={t.key}>
@@ -164,7 +164,7 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
             <select
               value={metricY}
               onChange={(e) => setMetricY(e.target.value)}
-              className="rounded-lg border border-white/10 bg-slate-800 px-2 py-1.5 text-xs text-slate-200 outline-none"
+              className="rounded-none border border-white/10 bg-slate-800 px-2 py-1.5 text-xs text-slate-200 outline-none"
             >
               {metricTabs.map((t) => (
                 <option key={t.key} value={t.key}>
@@ -185,7 +185,7 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
                 <button
                   key={row.country_code}
                   onClick={() => onSelectCountry(row.country_code)}
-                  className="flex items-center gap-3 rounded-lg px-2 py-2 text-left hover:bg-white/[0.05]"
+                  className="flex items-center gap-3 rounded-none px-2 py-2 text-left hover:bg-white/[0.05]"
                 >
                   <span className="w-6 flex-none text-right text-[12.5px] font-semibold text-slate-500">
                     {row.rank}
@@ -205,7 +205,7 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
                 <button
                   key={row.country_code}
                   onClick={() => onSelectCountry(row.country_code)}
-                  className="flex items-center gap-3 rounded-lg px-2 py-2 text-left hover:bg-white/[0.05]"
+                  className="flex items-center gap-3 rounded-none px-2 py-2 text-left hover:bg-white/[0.05]"
                 >
                   <span className="w-6 flex-none text-right text-[12.5px] font-semibold text-slate-500">
                     {row.rank}
@@ -232,7 +232,7 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
                 <button
                   key={row.country_code}
                   onClick={() => onSelectCountry(row.country_code)}
-                  className="flex items-center gap-3 rounded-lg px-2 py-2 text-left hover:bg-white/[0.05]"
+                  className="flex items-center gap-3 rounded-none px-2 py-2 text-left hover:bg-white/[0.05]"
                 >
                   <span className="w-6 flex-none text-right text-[12.5px] font-semibold text-slate-500">
                     {i + 1}
@@ -265,7 +265,7 @@ export default function RankingsPanel({ onClose, onSelectCountry }) {
                   { label: 'Strength', value: state.data.strength },
                   { label: 'Direction', value: state.data.direction },
                 ].map((s) => (
-                  <div key={s.label} className="flex flex-col gap-0.5 rounded-lg bg-slate-800 px-3 py-2">
+                  <div key={s.label} className="flex flex-col gap-0.5 rounded-none bg-slate-800 px-3 py-2">
                     <span className="text-[10.5px] text-slate-500">{s.label}</span>
                     <span className="text-[13.5px] font-semibold capitalize text-white">{s.value}</span>
                   </div>

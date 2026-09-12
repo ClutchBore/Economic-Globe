@@ -61,7 +61,7 @@ def _fetch_indicator(codes: list[str], indicator: str, start_year: int, end_year
     country_arg = ";".join(codes)
     page = 1
 
-    with httpx.Client(timeout=30.0, follow_redirects=True, verify=False, trust_env=False) as client:
+    with httpx.Client(timeout=30.0, follow_redirects=True, trust_env=False) as client:
         while True:
             response = client.get(
                 WORLD_BANK_URL.format(countries=country_arg, indicator=indicator),

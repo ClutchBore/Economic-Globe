@@ -12,7 +12,7 @@ import os
 
 import httpx
 
-_http = httpx.Client(timeout=10.0, verify=False, trust_env=False)
+_http = httpx.Client(timeout=10.0, trust_env=False)
 
 
 def country_key(code: str) -> str:

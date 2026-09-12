@@ -1,0 +1,6 @@
+{
+  "country_a": {"country_code": "IND", "country_name": "India", "is_mock": true},
+  "country_b": {"country_code": "USA", "country_name": "United States", "is_mock": true},
+  "comparison": "Using fictional test values for 2024, India has inflation of 5.0 percent and GDP growth of 6.0 percent, compared with 3.0 percent inflation and 2.0 percent GDP growth for the United States. Bond yields are unavailable for both countries, so that metric cannot be compared.",
+  "is_mock": true
+}

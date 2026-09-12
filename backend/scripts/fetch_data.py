@@ -1,20 +1,27 @@
-"""Refresh backend/cache/countries/*.json from World Bank + Yahoo Finance.
+"""Refresh backend/cache/countries/*.json from World Bank, Yahoo Finance, and FRED.
 
 Run from backend/: `python -m scripts.fetch_data` (or `python scripts/fetch_data.py`
 with backend/ on PYTHONPATH). Safe to re-run; a country whose fetch raises is
 skipped and its last-known-good cache file is left untouched.
+
+Requires FRED_API_KEY in the environment for bond yields — without it, every
+country's bond_yield_10y comes back null (not an error, not a stale value).
 """
 
 import datetime
 import json
+import os
 import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from dotenv import load_dotenv
 
-from config.countries import BOND_YIELD_TICKERS, list_country_configs
-from services import market_data, world_bank
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
+from config.countries import FRED_BOND_SERIES, list_country_configs
+from services import fred, market_data, world_bank
 
 CACHE_DIR = Path(__file__).resolve().parent.parent / "cache" / "countries"
 
@@ -30,7 +37,7 @@ SOURCES = {
     "gdp": "World Bank NY.GDP.MKTP.CD",
     "gdp_per_capita": "World Bank NY.GDP.PCAP.CD",
     "inflation": "World Bank FP.CPI.TOTL.ZG",
-    "bond_yield_10y": "Yahoo Finance",
+    "bond_yield_10y": "FRED (OECD IRLTLT01)",
     "fx_rate": "Yahoo Finance",
 }
 
@@ -39,7 +46,7 @@ def build_country_payload(country: dict) -> dict:
     wb_data = world_bank.fetch_world_bank_metrics(country["wb_code"])
     fx = market_data.fetch_fx_data(country["fx_ticker"])
 
-    bond = market_data.fetch_bond_yield(BOND_YIELD_TICKERS.get(country["code"]))
+    bond = fred.fetch_bond_yield(FRED_BOND_SERIES.get(country["code"]))
 
     today = str(datetime.date.today())
 

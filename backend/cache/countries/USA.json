@@ -2,11 +2,11 @@
   "country_code": "USA",
   "country_name": "United States",
   "region": "North America",
-  "data_as_of": "2026-09-11",
+  "data_as_of": "2026-09-12",
   "gdp": 30769700000000.0,
   "gdp_per_capita": 90026.5163,
   "inflation": 2.9495,
-  "bond_yield_10y": 4.975,
+  "bond_yield_10y": 4.47,
   "fx_rate": null,
   "fx_pair": null,
   "fx_change_pct": null,
@@ -21,14 +21,14 @@
     "gdp": "World Bank NY.GDP.MKTP.CD",
     "gdp_per_capita": "World Bank NY.GDP.PCAP.CD",
     "inflation": "World Bank FP.CPI.TOTL.ZG",
-    "bond_yield_10y": "Yahoo Finance",
+    "bond_yield_10y": "FRED (OECD IRLTLT01)",
     "fx_rate": "Yahoo Finance"
   },
   "dates": {
     "gdp": "2025",
     "gdp_per_capita": "2025",
     "inflation": "2024",
-    "bond_yield_10y": "2026-09-11",
+    "bond_yield_10y": "2026-06-01",
     "fx_rate": null
   },
   "history": {
@@ -156,32 +156,48 @@
     ],
     "bond_yield_10y": [
       {
+        "year": "2016",
+        "value": 1.8417
+      },
+      {
+        "year": "2017",
+        "value": 2.33
+      },
+      {
+        "year": "2018",
+        "value": 2.91
+      },
+      {
+        "year": "2019",
+        "value": 2.1442
+      },
+      {
         "year": "2020",
-        "value": 0.8238
+        "value": 0.8942
       },
       {
         "year": "2021",
-        "value": 1.4405
+        "value": 1.4425
       },
       {
         "year": "2022",
-        "value": 2.9568
+        "value": 2.9517
       },
       {
         "year": "2023",
-        "value": 3.965
+        "value": 3.9575
       },
       {
         "year": "2024",
-        "value": 4.2071
+        "value": 4.2083
       },
       {
         "year": "2025",
-        "value": 4.2863
+        "value": 4.2917
       },
       {
         "year": "2026",
-        "value": 4.4131
+        "value": 4.31
       }
     ],
     "fx_rate": []

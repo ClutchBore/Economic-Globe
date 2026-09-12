@@ -2,14 +2,14 @@
   "country_code": "CAN",
   "country_name": "Canada",
   "region": "North America",
-  "data_as_of": "2026-09-11",
+  "data_as_of": "2026-09-12",
   "gdp": 2319899772425.92,
   "gdp_per_capita": 55697.664,
   "inflation": 2.0723,
-  "bond_yield_10y": null,
+  "bond_yield_10y": 3.42,
   "fx_rate": 0.721033,
   "fx_pair": "CAD / USD",
-  "fx_change_pct": -0.463,
+  "fx_change_pct": -0.243,
   "units": {
     "gdp": "USD",
     "gdp_per_capita": "USD",
@@ -21,15 +21,15 @@
     "gdp": "World Bank NY.GDP.MKTP.CD",
     "gdp_per_capita": "World Bank NY.GDP.PCAP.CD",
     "inflation": "World Bank FP.CPI.TOTL.ZG",
-    "bond_yield_10y": "Yahoo Finance",
+    "bond_yield_10y": "FRED (OECD IRLTLT01)",
     "fx_rate": "Yahoo Finance"
   },
   "dates": {
     "gdp": "2025",
     "gdp_per_capita": "2025",
     "inflation": "2025",
-    "bond_yield_10y": null,
-    "fx_rate": "2026-09-11"
+    "bond_yield_10y": "2026-06-01",
+    "fx_rate": "2026-09-12"
   },
   "history": {
     "gdp": [
@@ -158,7 +158,52 @@
         "value": 2.0723
       }
     ],
-    "bond_yield_10y": [],
+    "bond_yield_10y": [
+      {
+        "year": "2016",
+        "value": 1.2518
+      },
+      {
+        "year": "2017",
+        "value": 1.7837
+      },
+      {
+        "year": "2018",
+        "value": 2.2779
+      },
+      {
+        "year": "2019",
+        "value": 1.5889
+      },
+      {
+        "year": "2020",
+        "value": 0.7531
+      },
+      {
+        "year": "2021",
+        "value": 1.3588
+      },
+      {
+        "year": "2022",
+        "value": 2.7706
+      },
+      {
+        "year": "2023",
+        "value": 3.3612
+      },
+      {
+        "year": "2024",
+        "value": 3.3395
+      },
+      {
+        "year": "2025",
+        "value": 3.2347
+      },
+      {
+        "year": "2026",
+        "value": 3.4353
+      }
+    ],
     "fx_rate": [
       {
         "year": "2020",

@@ -2,7 +2,7 @@
   "country_code": "EGY",
   "country_name": "Egypt",
   "region": "Africa",
-  "data_as_of": "2026-09-11",
+  "data_as_of": "2026-09-12",
   "gdp": 365254630179.737,
   "gdp_per_capita": 3085.8071,
   "inflation": 14.0735,
@@ -21,7 +21,7 @@
     "gdp": "World Bank NY.GDP.MKTP.CD",
     "gdp_per_capita": "World Bank NY.GDP.PCAP.CD",
     "inflation": "World Bank FP.CPI.TOTL.ZG",
-    "bond_yield_10y": "Yahoo Finance",
+    "bond_yield_10y": "FRED (OECD IRLTLT01)",
     "fx_rate": "Yahoo Finance"
   },
   "dates": {
@@ -29,7 +29,7 @@
     "gdp_per_capita": "2025",
     "inflation": "2025",
     "bond_yield_10y": null,
-    "fx_rate": "2026-09-11"
+    "fx_rate": "2026-09-12"
   },
   "history": {
     "gdp": [

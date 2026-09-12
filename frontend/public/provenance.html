@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Where the data on Economic Globe comes from: who publishes each measure, how current it is, and where the gaps are.">
+<meta property="og:title" content="Where this data comes from">
+<meta property="og:description" content="Who publishes each measure on Economic Globe, how current it is, and where the gaps are.">
+<meta property="og:type" content="article">
+<title>Economic Globe Provenance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+  :root {
+    --ground: #f6f8fa;
+    --surface: #ffffff;
+    --surface-2: #eef1f6;
+    --ink: #141922;
+    --muted: #5b6472;
+    --faint: #858d9b;
+    --line: #dde2ea;
+    --line-strong: #c3cbd8;
+    --accent: #1b4d8f;
+    --accent-soft: #e4ecf7;
+    --good: #2f7d5c;
+    --sparse: #a8641b;
+    --shadow: 0 1px 2px rgba(20, 25, 34, .05);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0d1117;
+      --surface: #151b24;
+      --surface-2: #1c2430;
+      --ink: #e7ebf2;
+      --muted: #9aa4b4;
+      --faint: #6f7a8b;
+      --line: #242d3a;
+      --line-strong: #354052;
+      --accent: #7aafe8;
+      --accent-soft: #1a2838;
+      --good: #5cba8f;
+      --sparse: #d69a4e;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .3);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #0d1117;
+    --surface: #151b24;
+    --surface-2: #1c2430;
+    --ink: #e7ebf2;
+    --muted: #9aa4b4;
+    --faint: #6f7a8b;
+    --line: #242d3a;
+    --line-strong: #354052;
+    --accent: #7aafe8;
+    --accent-soft: #1a2838;
+    --good: #5cba8f;
+    --sparse: #d69a4e;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 56px 80px;
+  }
+
+  h1, h2, h3 { font-family: Newsreader, Georgia, serif; font-weight: 500; text-wrap: balance; margin: 0; }
+  h1 { font-size: clamp(2rem, 5vw, 2.9rem); line-height: 1.12; letter-spacing: -.015em; }
+  h2 { font-size: 1.5rem; line-height: 1.2; }
+  h3 { font-size: 1.08rem; font-weight: 600; }
+  p { margin: 0; }
+  a { color: var(--accent); }
+
+  .eyebrow {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: .72rem;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  header { display: flex; flex-direction: column; gap: 14px; }
+  .lede { font-size: 1.12rem; color: var(--muted); max-width: 62ch; }
+
+  /* ---- summary strip ---- */
+  .figures {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1px;
+    margin-top: 40px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .fig { background: var(--surface); padding: 16px 18px; display: flex; flex-direction: column; gap: 2px; }
+  .fig b {
+    font-family: Newsreader, Georgia, serif;
+    font-size: 1.85rem;
+    font-weight: 500;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .fig span { font-size: .82rem; color: var(--muted); }
+
+  section { margin-top: 60px; display: flex; flex-direction: column; gap: 18px; }
+  .section-head { display: flex; flex-direction: column; gap: 6px; }
+  .section-head p { color: var(--muted); max-width: 66ch; }
+
+  /* ---- provenance table ---- */
+  .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 720px; }
+  caption { text-align: left; padding: 0 0 10px; font-size: .88rem; color: var(--faint); }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  thead th {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: .68rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--faint);
+    font-weight: 500;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line-strong);
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  .metric { font-weight: 600; white-space: nowrap; }
+  .unit { color: var(--muted); font-size: .88rem; }
+  code {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: .8rem;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 1px 5px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .src { font-size: .82rem; color: var(--muted); display: block; margin-top: 3px; }
+  .years { font-variant-numeric: tabular-nums; font-size: .88rem; color: var(--muted); white-space: nowrap; }
+
+  .cov { display: flex; align-items: center; gap: 9px; min-width: 128px; }
+  .bar { flex: 1; height: 5px; background: var(--surface-2); border-radius: 3px; overflow: hidden; min-width: 52px; }
+  .bar i { display: block; height: 100%; background: var(--good); border-radius: 3px; }
+  .bar.is-sparse i { background: var(--sparse); }
+  .cov b { font-variant-numeric: tabular-nums; font-weight: 600; font-size: .86rem; min-width: 54px; text-align: right; }
+  .cov.is-sparse b { color: var(--sparse); }
+
+  /* ---- notes ---- */
+  /* Two columns, so the four notes land 2x2 rather than 3 + 1 orphan. */
+  .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 30px 34px; }
+  .notes > .note:only-child { max-width: 58ch; }
+  .note { border-left: 2px solid var(--line-strong); padding-left: 16px; display: flex; flex-direction: column; gap: 7px; }
+  .note.flag { border-left-color: var(--sparse); }
+  .note p { font-size: .93rem; color: var(--muted); }
+  .note strong { color: var(--ink); font-weight: 600; }
+
+  /* ---- split rows ---- */
+  .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 3px; overflow: hidden; }
+  .split > div { background: var(--surface); padding: 15px 17px; display: flex; flex-direction: column; gap: 3px; }
+  .split b { font-family: Newsreader, Georgia, serif; font-size: 1.5rem; font-weight: 500; line-height: 1; font-variant-numeric: tabular-nums; }
+  .split span { font-size: .85rem; color: var(--muted); }
+  .split em { font-style: normal; font-size: .78rem; color: var(--faint); }
+
+  ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: .93rem; display: flex; flex-direction: column; gap: 5px; }
+  li::marker { color: var(--faint); }
+
+  /* ---- source share ---- */
+  .share { display: flex; height: 34px; border-radius: 3px; overflow: hidden; border: 1px solid var(--line); }
+  .share div { display: flex; align-items: center; justify-content: center; font-size: .74rem; font-weight: 600; color: #fff; letter-spacing: .02em; white-space: nowrap; }
+  .share .s-wb { background: var(--accent); flex: 95.5; }
+  .share .s-yh { background: var(--sparse); flex: 3.2; }
+  .share .s-fr { background: var(--good); flex: 1.3; }
+
+  .sources { display: flex; flex-direction: column; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 3px; overflow: hidden; }
+  .source { background: var(--surface); padding: 15px 17px; display: grid; grid-template-columns: 9px 1fr auto; gap: 14px; align-items: start; }
+  .source .key { width: 9px; height: 9px; border-radius: 2px; margin-top: 7px; }
+  .key.wb { background: var(--accent); }
+  .key.yh { background: var(--sparse); }
+  .key.fr { background: var(--good); }
+  .source h3 { margin-bottom: 2px; }
+  .source p { font-size: .89rem; color: var(--muted); }
+  .source .count { text-align: right; font-variant-numeric: tabular-nums; }
+  .source .count b { font-family: Newsreader, Georgia, serif; font-size: 1.4rem; font-weight: 500; display: block; line-height: 1.1; }
+  .source .count span { font-size: .76rem; color: var(--faint); }
+  .badge { display: inline-block; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: .66rem; letter-spacing: .07em; text-transform: uppercase; padding: 2px 6px; border-radius: 2px; border: 1px solid var(--line-strong); color: var(--muted); margin-left: 7px; vertical-align: 2px; }
+  .badge.ok { color: var(--good); border-color: var(--good); }
+  .badge.warn { color: var(--sparse); border-color: var(--sparse); }
+
+  @media (max-width: 560px) {
+    .source { grid-template-columns: 9px 1fr; }
+    .source .count { grid-column: 2; text-align: left; }
+  }
+
+  .pipeline { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: .9rem; }
+  .step { background: var(--surface); border: 1px solid var(--line); border-radius: 3px; padding: 8px 13px; display: flex; flex-direction: column; gap: 1px; box-shadow: var(--shadow); }
+  .step b { font-size: .9rem; font-weight: 600; }
+  .step span { font-size: .78rem; color: var(--faint); font-family: "JetBrains Mono", ui-monospace, monospace; }
+  .arrow { color: var(--line-strong); font-size: 1.1rem; }
+
+  footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--faint); font-size: .84rem; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+
+  @media (max-width: 560px) {
+    .wrap { padding-block: 36px 56px; }
+    .pipeline .arrow { display: none; }
+    .step { width: 100%; }
+  }
+
+  /* Standalone document reset — supplied by the Artifact host in the hosted copy. */
+  html { color-scheme: light dark; }
+  body { margin: 0; }
+  img { max-width: 100%; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Economic Globe</span>
+    <h1>Where this data comes from</h1>
+    <p class="lede">
+      Every figure on the globe is published by an outside institution — none of it is estimated,
+      modelled or filled in here. This page says who publishes what, how current it is, and where
+      the gaps are.
+    </p>
+  </header>
+
+  <div class="figures">
+    <div class="fig"><b>217</b><span>economies</span></div>
+    <div class="fig"><b>15</b><span>measures</span></div>
+    <div class="fig"><b>3</b><span>publishers</span></div>
+    <div class="fig"><b>Daily</b><span>refresh</span></div>
+  </div>
+
+  <section>
+    <div class="section-head">
+      <h2>Who publishes it</h2>
+      <p>Almost all of it is World Bank data. The other two fill narrow gaps.</p>
+    </div>
+
+    <div class="share" role="img" aria-label="World Bank 95 percent, Yahoo Finance 3 percent, OECD 1 percent">
+      <div class="s-wb">World Bank 95%</div>
+      <div class="s-yh"></div>
+      <div class="s-fr"></div>
+    </div>
+
+    <div class="sources">
+      <div class="source">
+        <span class="key wb"></span>
+        <div>
+          <h3>World Bank Open Data<span class="badge ok">Official statistics</span></h3>
+          <p>
+            The development statistics arm of the World Bank, compiled from national statistical
+            agencies. Supplies 13 of the 15 measures, plus exchange rates for most countries.
+          </p>
+        </div>
+        <div class="count"><b>95%</b><span>of all figures</span></div>
+      </div>
+      <div class="source">
+        <span class="key yh"></span>
+        <div>
+          <h3>Yahoo Finance<span class="badge warn">Market data</span></h3>
+          <p>
+            Live currency markets. Used for 45 widely-traded currencies, where it gives today's rate
+            and the day's movement instead of a yearly average.
+          </p>
+        </div>
+        <div class="count"><b>3%</b><span>of all figures</span></div>
+      </div>
+      <div class="source">
+        <span class="key fr"></span>
+        <div>
+          <h3>OECD<span class="badge ok">Official statistics</span></h3>
+          <p>
+            Government bond yields, reaching this site through the US Federal Reserve's public data
+            service. Covers 37 economies — essentially the OECD membership.
+          </p>
+        </div>
+        <div class="count"><b>1%</b><span>of all figures</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Measure by measure</h2>
+      <p>
+        How many of the 217 economies report each measure, and the years those readings come from.
+        Where a country reports nothing, the site shows a blank rather than a guess.
+      </p>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <caption>Checked 12 September 2026.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Measure</th>
+            <th scope="col">Published by</th>
+            <th scope="col">Countries reporting</th>
+            <th scope="col">Data from</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="metric">Population</td><td class="unit">World Bank</td>
+            <td><div class="cov"><div class="bar"><i style="width:100%"></i></div><b>217</b></div></td><td class="years">2025</td></tr>
+          <tr><td class="metric">Urban population</td><td class="unit">World Bank</td>
+            <td><div class="cov"><div class="bar"><i style="width:100%"></i></div><b>217</b></div></td><td class="years">2025</td></tr>
+          <tr><td class="metric">Life expectancy</td><td class="unit">World Bank</td>
+            <td><div class="cov"><div class="bar"><i style="width:100%"></i></div><b>217</b></div></td><td class="years">2024</td></tr>
+          <tr><td class="metric">Economic output (GDP)</td><td class="unit">World Bank</td>
+            <td><div class="cov"><div class="bar"><i style="width:97.7%"></i></div><b>212</b></div></td><td class="years">2018–2025</td></tr>
+          <tr><td class="metric">GDP per person</td><td class="unit">World Bank</td>
+            <td><div class="cov"><div class="bar"><i style="width:97.7%"></i></div><b>212</b></div></td><td class="years">2018–2025</td></tr>
+          <tr><td class="metric">Economic growth</td><td class="unit">World Bank</td>
+            <td><div class="cov"><div class="bar"><i style="width:97.2%"></i></div><b>211</b></div></td><td class="years">2018–2025</td></tr>
+          <tr><td class="metric">Internet use</td><td class="unit">World Bank</td>
+            <td><div class="cov"><div class="bar"><i style="width:95.4%"></i></div><b>207</b></div></td><td class="years">2016–2025</td></tr>
+          <tr><td class="metric">CO₂ per person</td><td class="unit">World Bank</td>
+            <td><div class="cov"><div class="bar"><i style="width:93.5%"></i></div><b>203</b></div></td><td class="years">2024</td></tr>
+          <tr><td class="metric">GDP per person, cost-adjusted</td><td class="unit">World Bank</td>
+            <td><div class="cov"><div class="bar"><i style="width:91.7%"></i></div><b>199</b></div></td><td class="years">2022–2025</td></tr>
+          <tr><td class="metric">Exchange rate</td><td class="unit">World Bank &amp; Yahoo Finance</td>
+            <td><div class="cov"><div class="bar"><i style="width:90.3%"></i></div><b>196</b></div></td><td class="years">2017–today</td></tr>
+          <tr><td class="metric">Inflation</td><td class="unit">World Bank</td>
+            <td><div class="cov"><div class="bar"><i style="width:87.6%"></i></div><b>190</b></div></td><td class="years">2016–2025</td></tr>
+          <tr><td class="metric">Unemployment</td><td class="unit">World Bank <span class="src">modelled by the ILO</span></td>
+            <td><div class="cov"><div class="bar"><i style="width:86.2%"></i></div><b>187</b></div></td><td class="years">2021–2025</td></tr>
+          <tr><td class="metric">Exports</td><td class="unit">World Bank</td>
+            <td><div class="cov"><div class="bar"><i style="width:86.2%"></i></div><b>187</b></div></td><td class="years">2016–2025</td></tr>
+          <tr><td class="metric">Government debt</td><td class="unit">World Bank <span class="src">originally IMF</span></td>
+            <td><div class="cov is-sparse"><div class="bar is-sparse"><i style="width:29%"></i></div><b>63</b></div></td><td class="years">2016–2024</td></tr>
+          <tr><td class="metric">10-year bond yield</td><td class="unit">OECD</td>
+            <td><div class="cov is-sparse"><div class="bar is-sparse"><i style="width:17%"></i></div><b>37</b></div></td><td class="years">June 2026</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Reading it honestly</h2>
+      <p>Four things worth knowing before drawing conclusions from a comparison.</p>
+    </div>
+    <div class="notes">
+      <div class="note">
+        <h3>“Latest” is not the same year everywhere</h3>
+        <p>
+          Inflation, exports and internet use span <strong>2016 to 2025</strong>. One country's newest
+          reading can be nine years older than its neighbour's, and both appear as current. Each
+          country's panel shows the actual year.
+        </p>
+      </div>
+      <div class="note">
+        <h3>Exchange rates mix two clocks</h3>
+        <p>
+          45 widely-traded currencies carry today's market rate and the day's movement. The rest
+          carry a yearly average, and show no daily change. The US dollar and currencies fixed to it
+          show nothing at all — against itself, the rate is always 1.
+        </p>
+      </div>
+      <div class="note flag">
+        <h3>Government debt is not comparable</h3>
+        <p>
+          Germany, France, Italy, Japan and most of the euro area are blank — not for want of
+          statistics, but because they report debt on a broader basis than this measure covers. Among
+          the 63 that do report, each counts it differently. Read single countries, not the ranking.
+        </p>
+      </div>
+      <div class="note flag">
+        <h3>Most countries have no bond yield</h3>
+        <p>
+          A yield only exists where a country issues and trades 10-year debt in its own currency.
+          That is roughly the OECD and few others, so the blanks here reflect the world's bond
+          markets rather than missing records.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Which countries are included</h2>
+      <p>
+        The list follows the World Bank, which counts <em>economies</em> rather than countries —
+        territories that keep their own statistics are counted separately.
+      </p>
+    </div>
+    <div class="split">
+      <div><b>217</b><span>economies listed</span><em>the World Bank's full set</em></div>
+      <div><b>193</b><span>UN member states</span><em>the rest are territories</em></div>
+      <div><b>~172</b><span>drawn on the globe</span><em>small states have no outline</em></div>
+    </div>
+    <ul>
+      <li>Hong Kong, Puerto Rico, Greenland and about twenty similar territories appear separately because they publish their own economic statistics.</li>
+      <li>Taiwan is absent entirely — the World Bank publishes no data for it, despite its size.</li>
+      <li>Some small states carry full data but are too small to draw at the map's resolution, so they appear in lists and search rather than on the globe.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>How current it stays</h2>
+      <p>
+        Everything is re-fetched from its publisher once a day, so the site follows each institution's
+        own release schedule rather than a snapshot taken at build time.
+      </p>
+    </div>
+    <div class="split">
+      <div><b>Daily</b><span>currency rates</span><em>from live markets</em></div>
+      <div><b>Monthly</b><span>bond yields</span><em>OECD publishes in arrears</em></div>
+      <div><b>Yearly</b><span>most measures</span><em>as national agencies revise them</em></div>
+    </div>
+    <div class="notes">
+      <div class="note">
+        <h3>Nothing is invented to fill a gap</h3>
+        <p>
+          Where a publisher reports no figure, the site shows a blank. Values are never carried
+          forward from an earlier year, estimated from neighbours, or interpolated. A missing number
+          means the number is genuinely missing.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Economic Globe</span>
+    <span>Checked 12 September 2026</span>
+    <span>Sources: World Bank Open Data · OECD via FRED · Yahoo Finance</span>
+  </footer>
+</div>
+</body>
+</html>

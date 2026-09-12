@@ -1,4 +1,4 @@
-z"""Fetch and normalize GDP, GDP per capita, and inflation from the World Bank API."""
+"""Fetch and normalize GDP, GDP per capita, and inflation from the World Bank API."""
 
 import wbgapi as wb
 
